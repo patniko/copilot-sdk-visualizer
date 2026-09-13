@@ -1,0 +1,48 @@
+{
+    "name": "copilot-sdk-visualizer",
+    "version": "0.0.0",
+    "private": true,
+    "description": "A local-first, source-backed harness builder for the GitHub Copilot runtime and SDK.",
+    "license": "UNLICENSED",
+    "type": "module",
+    "scripts": {
+        "dev": "vite --host 127.0.0.1",
+        "build": "tsc -b && vite build",
+        "lint": "oxlint --deny-warnings",
+        "format": "oxfmt .",
+        "format:check": "oxfmt --check .",
+        "test": "vitest run --project unit",
+        "test:browser": "vitest run --project browser",
+        "preview": "vite preview --host 127.0.0.1"
+    },
+    "dependencies": {
+        "@radix-ui/react-dialog": "^1.1.23",
+        "@radix-ui/react-tabs": "^1.1.21",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "lucide-react": "^1.45.0",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+        "tailwind-merge": "^3.7.0",
+        "zod": "^4.6.3"
+    },
+    "devDependencies": {
+        "@types/node": "^24.13.3",
+        "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.4",
+        "@vitejs/plugin-react": "^6.1.0",
+        "autoprefixer": "^10.6.0",
+        "oxfmt": "^0.67.0",
+        "oxlint": "^1.79.0",
+        "playwright": "^1.63.0",
+        "postcss": "^8.5.28",
+        "tailwindcss": "3.4.1",
+        "typescript": "~6.0.2",
+        "vite": "^8.2.2",
+        "vitest": "^5.0.0"
+    },
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "packageManager": "pnpm@11.19.0"
+}

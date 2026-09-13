@@ -1,0 +1,1075 @@
+{
+    "$comment": "Copyright (c) Microsoft Corporation. All rights reserved. Generated research snapshot; no runtime or SDK source dependency.",
+    "asOf": "2026-09-13",
+    "revisions": {
+        "runtime": "efebfd34dfa68830b11f49302fd88d12950df2e4",
+        "sdk": "f45c46fd1812f8bed5b4cbc250f47177c83068f0"
+    },
+    "sources": {
+        "author-direction": {
+            "label": "Author's architecture direction",
+            "scope": "Architecture direction recorded September 13, 2026; proposed compositions, not independently verified release commitments."
+        },
+        "manual": {
+            "label": "SDK field manual, chapters 01, 05, 12, and 13",
+            "scope": "SDK field manual, chapters 01, 05, 12, and 13; narrative context only. Current source wins where claims differ."
+        },
+        "runtime-core": {
+            "label": "Runtime core and native host boundary",
+            "scope": "copilot-agent-runtime \u00b7 src/runtime/src/lib.rs:20\u201331 \u00b7 implementation",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/lib.rs#L20-L31"
+        },
+        "runtime-leaves": {
+            "label": "Runtime feature-registration seam",
+            "scope": "copilot-agent-runtime \u00b7 feature_hooks.rs:5\u201360 \u00b7 internal architecture, not a public SDK plugin API",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/feature_hooks.rs#L5-L60"
+        },
+        "native-host": {
+            "label": "Thin TypeScript native-runtime loader",
+            "scope": "copilot-agent-runtime \u00b7 src/core/sharedApi/nativeRuntime.ts:73\u201396 \u00b7 CLI/host integration",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/core/sharedApi/nativeRuntime.ts#L73-L96"
+        },
+        "runtime-contract": {
+            "label": "sdk-contract is the wire source of truth",
+            "scope": "copilot-agent-runtime \u00b7 src/native/sdk-contract/src/lib.rs:5\u201319 \u00b7 schema ownership",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/native/sdk-contract/src/lib.rs#L5-L19"
+        },
+        "runtime-dispatch": {
+            "label": "One native dispatcher across transports",
+            "scope": "copilot-agent-runtime \u00b7 protocol/jsonrpc/native_registry.rs:5\u201334 \u00b7 transport-neutral dispatch",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/protocol/jsonrpc/native_registry.rs#L5-L34"
+        },
+        "runtime-loop": {
+            "label": "Four native interaction seams",
+            "scope": "copilot-agent-runtime \u00b7 model/interaction/seams.rs:5\u201330 \u00b7 internal Rust traits",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/model/interaction/seams.rs#L5-L30"
+        },
+        "runtime-tools": {
+            "label": "Session-scoped native, host, and MCP tool dispatch",
+            "scope": "copilot-agent-runtime \u00b7 tools/session_tool_invoker.rs:5\u201364 \u00b7 execution ownership",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L5-L64"
+        },
+        "runtime-mode": {
+            "label": "Runtime SessionMode is a separate concept",
+            "scope": "copilot-agent-runtime \u00b7 session_base/mode.rs:8\u201324 \u00b7 interactive, plan, autopilot",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session_base/mode.rs#L8-L24"
+        },
+        "runtime-skills": {
+            "label": "Implemented reverse skill-provider transport",
+            "scope": "copilot-agent-runtime \u00b7 skills/provider_transport.rs:5\u201321 \u00b7 skillProvider.list/read",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/skills/provider_transport.rs#L5-L21"
+        },
+        "runtime-skill-contract": {
+            "label": "Catalog metadata and lazy skill content contract",
+            "scope": "copilot-agent-runtime \u00b7 sdk-contract/api/rpc.rs:6067\u20136120 \u00b7 text-only SKILL.md, not related assets",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/native/sdk-contract/src/api/rpc.rs#L6067-L6120"
+        },
+        "runtime-output": {
+            "label": "Per-turn responseFormat contract and limits",
+            "scope": "copilot-agent-runtime \u00b7 sdk-contract/api/rpc.rs:14946\u201314974 \u00b7 provider-native, returned as text, unsupported schemas/models error",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/native/sdk-contract/src/api/rpc.rs#L14946-L14974"
+        },
+        "runtime-storage": {
+            "label": "Client-provided session filesystem registration",
+            "scope": "copilot-agent-runtime \u00b7 sdk-contract/api/rpc.rs:15525\u201315558 \u00b7 filesystem-shaped interface",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/native/sdk-contract/src/api/rpc.rs#L15525-L15558"
+        },
+        "sdk-overview": {
+            "label": "SDK engine framing and six languages",
+            "scope": "copilot-sdk \u00b7 README.md:14\u201340 \u00b7 availability does not establish uniform feature parity",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/README.md#L14-L40"
+        },
+        "sdk-modes": {
+            "label": "SDK client modes: empty and copilot-cli",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:302\u2013365 \u00b7 client configuration, not runtime SessionMode",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L302-L365"
+        },
+        "sdk-default": {
+            "label": "Current default and empty-mode persistence requirements",
+            "scope": "copilot-sdk \u00b7 nodejs/src/client.ts:717\u2013746 \u00b7 defaults to copilot-cli",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/client.ts#L717-L746"
+        },
+        "sdk-empty": {
+            "label": "How empty mode lowers to explicit runtime settings",
+            "scope": "copilot-sdk \u00b7 nodejs/src/client.ts:1364\u20131522 \u00b7 not zero prompt or zero persistence",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/client.ts#L1364-L1522"
+        },
+        "sdk-transports": {
+            "label": "Process, connection, and experimental in-process options",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:148\u2013286 \u00b7 transport choices",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L148-L286"
+        },
+        "sdk-codegen": {
+            "label": "SDK generation consumes the pinned runtime schemas",
+            "scope": "copilot-sdk \u00b7 scripts/codegen/utils.ts:50\u201366 \u00b7 generated language projections",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/scripts/codegen/utils.ts#L50-L66"
+        },
+        "sdk-protocol": {
+            "label": "Inspected SDK protocol version bounds",
+            "scope": "copilot-sdk \u00b7 nodejs/src/sdkProtocolVersion.ts:5\u201318 \u00b7 minimum and maximum are both 3",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/sdkProtocolVersion.ts#L5-L18"
+        },
+        "sdk-skill-schema": {
+            "label": "Skill-provider DTOs in generated Node contracts",
+            "scope": "copilot-sdk \u00b7 nodejs/src/generated/rpc.ts:21260\u201321335 \u00b7 schema presence is not a high-level provider callback",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/generated/rpc.ts#L21260-L21335"
+        },
+        "sdk-callbacks": {
+            "label": "Inspected Node client-session callback groups",
+            "scope": "copilot-sdk \u00b7 nodejs/src/generated/rpc.ts:27734\u201327741 \u00b7 no skill-provider callback group in this projection",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/generated/rpc.ts#L27734-L27741"
+        },
+        "sdk-tools": {
+            "label": "Typed tools and host handlers",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:678\u2013784 \u00b7 defineTool and ToolHandler",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L678-L784"
+        },
+        "sdk-isolated-tools": {
+            "label": "Curated isolated tool set",
+            "scope": "copilot-sdk \u00b7 nodejs/src/toolSet.ts:113\u2013140 \u00b7 BuiltInTools.Isolated is not a minimal mode",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/toolSet.ts#L113-L140"
+        },
+        "sdk-prompts": {
+            "label": "Append, replace, and customize system messages",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:1069\u20131207 \u00b7 prompt control",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1069-L1207"
+        },
+        "sdk-attachments": {
+            "label": "Message and attachment input",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:3326\u20133396 \u00b7 prompt, source, file/directory/selection/blob attachments",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L3326-L3396"
+        },
+        "sdk-hooks": {
+            "label": "SessionHooks callback surface",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:1737\u20131798 \u00b7 lifecycle and tool interception",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1737-L1798"
+        },
+        "sdk-permissions": {
+            "label": "Permissions and explicit pending-request resolution",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2609\u20132644 \u00b7 omission does not approve or automatically deny every request",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2609-L2644"
+        },
+        "sdk-mcp": {
+            "label": "MCP server configuration",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:1804\u20131861 \u00b7 local/stdio and remote HTTP/SSE",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1804-L1861"
+        },
+        "sdk-agents": {
+            "label": "Custom agent configuration and selection",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:1867\u20131936 \u00b7 prompts, tools, MCP, skills, model",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1867-L1936"
+        },
+        "sdk-providers": {
+            "label": "Provider endpoints and credential callbacks",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:3050\u20133184 \u00b7 bearerTokenProvider and additive provider/model surfaces are experimental",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L3050-L3184"
+        },
+        "sdk-auth": {
+            "label": "Per-session GitHub credential options",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2824\u20132844 \u00b7 gitHubToken / gitHubTokenProvider",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2824-L2844"
+        },
+        "sdk-storage": {
+            "label": "Host-owned SessionFsProvider",
+            "scope": "copilot-sdk \u00b7 nodejs/src/sessionFsProvider.ts:104\u2013144 \u00b7 optional SQLite capabilities are distinct",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/sessionFsProvider.ts#L104-L144"
+        },
+        "sdk-events": {
+            "label": "Send, wait, and event-driven completion",
+            "scope": "copilot-sdk \u00b7 nodejs/src/session.ts:696\u2013815 \u00b7 wait timeout does not abort execution",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/session.ts#L696-L815"
+        },
+        "sdk-lifecycle": {
+            "label": "Disconnect versus delete",
+            "scope": "copilot-sdk \u00b7 nodejs/src/session.ts:2039\u20132089 \u00b7 durable state and connection lifetime differ",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/session.ts#L2039-L2089"
+        },
+        "sdk-model-policy": {
+            "label": "Runtime-authoritative model allowlisting RPC",
+            "scope": "copilot-sdk \u00b7 nodejs/src/generated/rpc.ts:25481\u201325534 \u00b7 experimental session model policy",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/generated/rpc.ts#L25481-L25534"
+        },
+        "plugin-defaults": {
+            "label": "Default marketplace registry",
+            "scope": "copilot-agent-runtime \u00b7 plugins_pure/marketplace_registry.rs:23\u201349 \u00b7 copilot-plugins and awesome-copilot sources",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/plugins_pure/marketplace_registry.rs#L23-L49"
+        },
+        "plugin-cli": {
+            "label": "CLI installation calls shared plugin management",
+            "scope": "copilot-agent-runtime \u00b7 src/cli/commands/pluginSubcommand.ts:521\u2013550 \u00b7 verified CLI consumer",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/cli/commands/pluginSubcommand.ts#L521-L550"
+        },
+        "plugin-api": {
+            "label": "Shared marketplace API facade",
+            "scope": "copilot-agent-runtime \u00b7 src/core/sharedApi/pluginsApi.ts:130\u2013153 \u00b7 plugins.marketplaces.*",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/core/sharedApi/pluginsApi.ts#L130-L153"
+        },
+        "plugin-catalog": {
+            "label": "Marketplace entry is a name and package source",
+            "scope": "copilot-agent-runtime \u00b7 plugins_pure/plugin_types.rs:314\u2013343 \u00b7 catalog is not the executable package",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/plugins_pure/plugin_types.rs#L314-L343"
+        },
+        "plugin-management": {
+            "label": "Installation and loading are separate features",
+            "scope": "copilot-agent-runtime \u00b7 plugin_management/mod.rs:5\u201314 \u00b7 core can load existing plugins without management",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/plugin_management/mod.rs#L5-L14"
+        },
+        "plugin-active": {
+            "label": "Effective plugin snapshot separates active set and inventory",
+            "scope": "copilot-agent-runtime \u00b7 config/effective_plugins_workspace.rs:211\u2013248 \u00b7 active plugins, decisions, context, fingerprint",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/config/effective_plugins_workspace.rs#L211-L248"
+        },
+        "plugin-policy": {
+            "label": "Plugin activation policy precedence",
+            "scope": "copilot-agent-runtime \u00b7 config/effective_plugins.rs:289\u2013304 \u00b7 user/global, repository, then managed policy",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/config/effective_plugins.rs#L289-L304"
+        },
+        "plugin-live": {
+            "label": "Live local plugin records do not require cached installation",
+            "scope": "copilot-agent-runtime \u00b7 extensions/live_marketplace.rs:219\u2013250 \u00b7 directories plus explicit enablement",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/extensions/live_marketplace.rs#L219-L250"
+        },
+        "plugin-directories": {
+            "label": "Explicit runtime plugin directories",
+            "scope": "copilot-agent-runtime \u00b7 sdk-contract/runtime_contracts.rs:1879\u20131888 \u00b7 load-side session inputs",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/native/sdk-contract/src/runtime_contracts.rs#L1879-L1888"
+        },
+        "plugin-builtins": {
+            "label": "Host-only built-in plugin registration",
+            "scope": "copilot-agent-runtime \u00b7 shared_api/server.rs:291\u2013352 \u00b7 absolute directories registered before sessions",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/shared_api/server.rs#L291-L352"
+        },
+        "plugin-formats": {
+            "label": "Manifest precedence and exact Agent Plugins schema",
+            "scope": "copilot-agent-runtime \u00b7 plugins_pure/plugins_utils.rs:19\u201331 \u00b7 schema selects semantics, not marketplace origin",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/plugins_pure/plugins_utils.rs#L19-L31"
+        },
+        "plugin-components": {
+            "label": "Portable components versus Copilot-specific additions",
+            "scope": "copilot-agent-runtime \u00b7 plugins_pure/plugins_utils.rs:76\u2013145 \u00b7 skills/MCP plus com.github.copilot namespace",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/plugins_pure/plugins_utils.rs#L76-L145"
+        },
+        "plugin-validation": {
+            "label": "Schema-gated discovery and non-fatal manifest warnings",
+            "scope": "copilot-agent-runtime \u00b7 plugins_pure/component_discovery.rs:222\u2013262 \u00b7 not strict conformance certification",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/plugins_pure/component_discovery.rs#L222-L262"
+        },
+        "plugin-extension-discovery": {
+            "label": "Executable extension directories are a separate concept",
+            "scope": "copilot-agent-runtime \u00b7 plugins_pure/component_discovery.rs:690\u2013766 \u00b7 Copilot-specific executable extensions",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/plugins_pure/component_discovery.rs#L690-L766"
+        },
+        "plugin-host-enable": {
+            "label": "Extensions require host enablement",
+            "scope": "copilot-agent-runtime \u00b7 session/sdk_session_factory.rs:1799\u20131811 \u00b7 requestExtensions or gated discovery; explicit false wins",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/sdk_session_factory.rs#L1799-L1811"
+        },
+        "override-planning": {
+            "label": "Explicit tool collision and override planning",
+            "scope": "copilot-agent-runtime \u00b7 session/session_serializers.rs:4449\u20134517 \u00b7 opt-in required; catalog_search reserved",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/session_serializers.rs#L4449-L4517"
+        },
+        "override-schema": {
+            "label": "The host definition supplies model-facing tool metadata",
+            "scope": "copilot-agent-runtime \u00b7 session/session_serializers.rs:4539\u20134576 \u00b7 description, schema, and external source",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/session_serializers.rs#L4539-L4576"
+        },
+        "override-dispatch": {
+            "label": "An explicit external override is dispatched before the native implementation",
+            "scope": "copilot-agent-runtime \u00b7 tools/session_tool_invoker.rs:3444\u20133461 \u00b7 replacement, not a post-processing hook",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L3444-L3461"
+        },
+        "override-permissions": {
+            "label": "External overrides use custom-tool permission requests",
+            "scope": "copilot-agent-runtime \u00b7 tools/session_tool_invoker.rs:2988\u20133080 \u00b7 authority is not inherited from the old implementation",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2988-L3080"
+        },
+        "override-advertised": {
+            "label": "Override lookup uses the valid advertised definition",
+            "scope": "copilot-agent-runtime \u00b7 tools/session_tool_invoker.rs:2834\u20132908 \u00b7 scoped definition selection",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2908"
+        },
+        "plugin-reload-boundary": {
+            "label": "Declared plugin reload fan-out",
+            "scope": "copilot-agent-runtime \u00b7 shared_api/plugins.rs:68\u201386 \u00b7 skills, MCP, agents, hooks, and configured extensions; not a universal reload",
+            "url": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/shared_api/plugins.rs#L68-L86"
+        },
+        "sdk-mutable-options": {
+            "label": "The live options patch is a narrower mutable subset",
+            "scope": "copilot-sdk \u00b7 nodejs/src/generated/rpc.ts:20825\u201321047 \u00b7 not SessionConfig wholesale",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/generated/rpc.ts#L20825-L21047"
+        },
+        "sdk-live-tools": {
+            "label": "Live tool declaration replacement does not replace the local handler map",
+            "scope": "copilot-sdk \u00b7 nodejs/src/generated/rpc.ts:26399\u201326407 \u00b7 connection-owned external declarations",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/generated/rpc.ts#L26399-L26407"
+        },
+        "sdk-filter-names": {
+            "label": "Bare names and source-qualified tool filters",
+            "scope": "copilot-sdk \u00b7 nodejs/src/toolSet.ts:32\u201399 \u00b7 builtin/custom/MCP classification and selector construction",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/toolSet.ts#L32-L99"
+        },
+        "sdk-filter-rules": {
+            "label": "Filter validation and exclusion precedence",
+            "scope": "copilot-sdk \u00b7 nodejs/src/client.ts:1365\u20131402 \u00b7 bare * rejected; exclusions win",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/client.ts#L1365-L1402"
+        },
+        "sdk-tool-search": {
+            "label": "Tool search configuration and override metadata",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:787\u2013812 \u00b7 toolSearch and available-tool catalog metadata",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L787-L812"
+        },
+        "sdk-result-envelope": {
+            "label": "Explicit external-tool result envelope",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:537\u2013559 \u00b7 textResultForLlm and resultType",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L537-L559"
+        },
+        "sdk-override-example": {
+            "label": "SDK integration example replaces built-in grep",
+            "scope": "copilot-sdk \u00b7 nodejs/test/e2e/tools.e2e.test.ts:280\u2013293 \u00b7 same-name explicit override",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/test/e2e/tools.e2e.test.ts#L280-L293"
+        },
+        "sdk-discovery-option": {
+            "label": "Configuration discovery is an explicit option",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2374\u20132380 \u00b7 documented default false",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2374-L2380"
+        },
+        "sdk-pack-inputs": {
+            "label": "SDK skill/plugin directories and MCP-disable lifetime",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2775\u20132810 \u00b7 explicit directories and resident-resume limitation",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2775-L2810"
+        },
+        "sdk-managed-lifetime": {
+            "label": "Managed settings are startup policy, not persisted mutable state",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2854\u20132877 \u00b7 must be supplied again",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2854-L2877"
+        },
+        "sdk-resume-bindings": {
+            "label": "Resume re-registers application-owned handlers",
+            "scope": "copilot-sdk \u00b7 nodejs/src/client.ts:1842\u20131900 \u00b7 tools, hooks, credentials, observers, and storage callbacks",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/client.ts#L1842-L1900"
+        },
+        "sdk-startup-options": {
+            "label": "Client startup and base-directory options",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:353\u2013379 \u00b7 startup settings, not live session patches",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L353-L379"
+        },
+        "sdk-idle-option": {
+            "label": "Server-wide idle-session cleanup",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:499\u2013506 \u00b7 not a model turn timeout",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L499-L506"
+        },
+        "sdk-storage-binding": {
+            "label": "Client session filesystem requires a real provider binding",
+            "scope": "copilot-sdk \u00b7 nodejs/src/client.ts:800\u2013832 \u00b7 provider setup contract",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/client.ts#L800-L832"
+        },
+        "sdk-storage-capabilities": {
+            "label": "Session filesystem and optional SQLite capability",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:3436\u20133468 \u00b7 virtual storage is not a no-op provider",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L3436-L3468"
+        },
+        "sdk-infinite-options": {
+            "label": "Infinite-session and compaction settings",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:1938\u20131962 \u00b7 enabled by default",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1938-L1962"
+        },
+        "sdk-large-output": {
+            "label": "Large-output handling can spill to temporary files",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:1977\u20131999 \u00b7 default enabled, configurable at session setup",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1977-L1999"
+        },
+        "sdk-stream-options": {
+            "label": "Session streaming and event options",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2714\u20132732 \u00b7 streaming defaults false; live patch is named enableStreaming",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2714-L2732"
+        },
+        "sdk-session-config": {
+            "label": "High-level session configuration surface",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2320\u20132980 \u00b7 create/resume fields and callback options",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2320-L2980"
+        },
+        "sdk-model-change": {
+            "label": "Public model changes versus live wire options",
+            "scope": "copilot-sdk \u00b7 nodejs/src/session.ts:2123\u20132165 \u00b7 setModel",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/session.ts#L2123-L2165"
+        }
+    },
+    "controls": [
+        {
+            "name": "systemMessage",
+            "axis": "cfg-prompt",
+            "description": "Append, replace, or customize prompt sections. Not part of the general live options patch.",
+            "scopes": ["session"],
+            "when": "Create / resume",
+            "stability": "High-level SDK",
+            "source": "sdk-prompts"
+        },
+        {
+            "name": "skipCustomInstructions",
+            "axis": "cfg-prompt",
+            "description": "Control custom-instruction inclusion independently of prompt replacement.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "availableTools",
+            "axis": "cfg-inventory",
+            "description": "Include bare names or source-qualified tool selectors. Live patches use arrays, not ToolSet builders.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-filter-rules"
+        },
+        {
+            "name": "excludedTools",
+            "axis": "cfg-inventory",
+            "description": "Remove selected tools from exposure; exclusions win over inclusions.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-filter-rules"
+        },
+        {
+            "name": "toolSearch",
+            "axis": "cfg-inventory",
+            "description": "Configure tool-search enablement and defer threshold without replacing its implementation.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-tool-search"
+        },
+        {
+            "name": "tools",
+            "axis": "cfg-handler",
+            "description": "Declare custom tools, schemas, optional handlers, and explicit replacements.",
+            "scopes": ["session"],
+            "when": "Create / resume; handler registration",
+            "stability": "High-level SDK",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "overridesBuiltInTool",
+            "axis": "cfg-handler",
+            "description": "Opt into same-name built-in replacement. Use the bare tool name, not a source-qualified filter.",
+            "scopes": ["tool"],
+            "when": "Tool declaration",
+            "stability": "High-level SDK; bounded by runtime reservations",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "handler",
+            "axis": "cfg-handler",
+            "description": "Application execution callback. Handlerless declarations require explicit pending-request resolution.",
+            "scopes": ["tool"],
+            "when": "Host callback binding",
+            "stability": "High-level SDK; not persisted JSON",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "parameters",
+            "axis": "cfg-handler",
+            "description": "Raw JSON Schema, Zod-like schema, or omitted parameters. defineTool itself is not an argument-validation wrapper.",
+            "scopes": ["tool"],
+            "when": "Tool declaration",
+            "stability": "High-level SDK; host validates semantics",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "defer",
+            "axis": "cfg-inventory",
+            "description": "Choose auto or never for a tool's deferred exposure behavior.",
+            "scopes": ["tool"],
+            "when": "Tool declaration",
+            "stability": "High-level SDK",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "isTerminal",
+            "axis": "cfg-handler",
+            "description": "Declare that a successful tool should end the agent turn.",
+            "scopes": ["tool"],
+            "when": "Tool declaration",
+            "stability": "High-level SDK; success-dependent behavior",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "mcpServers",
+            "axis": "cfg-handler",
+            "description": "Supply approved local or remote MCP integrations and their tool scopes.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-mcp"
+        },
+        {
+            "name": "rpc.tools.set",
+            "axis": "cfg-handler",
+            "description": "Replace this connection's external wire declarations, not its local SDK handler map.",
+            "scopes": ["live"],
+            "when": "Live connection-scoped RPC",
+            "stability": "Experimental",
+            "source": "sdk-live-tools"
+        },
+        {
+            "name": "workingDirectory",
+            "axis": "cfg-context",
+            "description": "Choose a client or session working directory. A live session directory change uses the options patch.",
+            "scopes": ["client", "session", "live"],
+            "when": "Client / create / resume; live patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "attachments",
+            "axis": "cfg-context",
+            "description": "Supply file, directory, selection, or blob context with a sent message.",
+            "scopes": ["live"],
+            "when": "Per turn: send",
+            "stability": "High-level SDK",
+            "source": "sdk-attachments"
+        },
+        {
+            "name": "largeOutput",
+            "axis": "cfg-context",
+            "description": "Control oversized-result handling; enabled defaults can spill to temporary files.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-large-output"
+        },
+        {
+            "name": "enableConfigDiscovery",
+            "axis": "cfg-packs",
+            "description": "Explicitly opt into configuration discovery. The documented default is false, even with the coding client mode.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-discovery-option"
+        },
+        {
+            "name": "enableSkills",
+            "axis": "cfg-packs",
+            "description": "Enable or disable skill behavior independently of an allowed skill tool name.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "skillDirectories",
+            "axis": "cfg-packs",
+            "description": "Supply reviewed skill directories; this is distinct from a lazy service-backed skill provider.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-pack-inputs"
+        },
+        {
+            "name": "pluginDirectories",
+            "axis": "cfg-packs",
+            "description": "Supply explicit plugin directories even when ambient discovery is disabled.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-pack-inputs"
+        },
+        {
+            "name": "disabledMcpServers",
+            "axis": "cfg-packs",
+            "description": "Suppress configured servers; a resident resume cannot use this field to stop already-running servers.",
+            "scopes": ["session"],
+            "when": "Create / resume; lifecycle-sensitive",
+            "stability": "High-level SDK; not a shutdown operation",
+            "source": "sdk-pack-inputs"
+        },
+        {
+            "name": "session.plugins.reload",
+            "axis": "cfg-packs",
+            "description": "Refresh the runtime's declared component subset, not every capability or host callback atomically.",
+            "scopes": ["runtime"],
+            "when": "Runtime session operation",
+            "stability": "Projection and component scope vary",
+            "source": "plugin-reload-boundary"
+        },
+        {
+            "name": "customAgents",
+            "axis": "cfg-agents",
+            "description": "Declare specialist prompts, tools, models, skills, and MCP configuration.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-agents"
+        },
+        {
+            "name": "agent",
+            "axis": "cfg-agents",
+            "description": "Choose the initial custom agent; separate select/deselect RPCs can change selection.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; specialized RPCs",
+            "stability": "Live agent RPCs are experimental",
+            "source": "sdk-agents"
+        },
+        {
+            "name": "defaultAgent",
+            "axis": "cfg-agents",
+            "description": "Configure root-agent behavior; excludedTools hides from the primary agent without excluding the tool from children.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK; scope matters",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "customAgents[].model",
+            "axis": "cfg-agents",
+            "description": "Choose a specialist model preference. Unavailability can fall back to the parent model rather than hard-fail.",
+            "scopes": ["session"],
+            "when": "Agent declaration",
+            "stability": "High-level SDK; not a strict no-fallback policy",
+            "source": "sdk-agents"
+        },
+        {
+            "name": "model",
+            "axis": "cfg-models",
+            "description": "Select the session model; prefer the public session.setModel method for live changes.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; setModel",
+            "stability": "High-level SDK",
+            "source": "sdk-model-change"
+        },
+        {
+            "name": "reasoningEffort",
+            "axis": "cfg-models",
+            "description": "Select supported reasoning effort for the model.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch experimental; model-dependent",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "contextTier",
+            "axis": "cfg-models",
+            "description": "Select a supported model context tier.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch experimental; model-dependent",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "provider",
+            "axis": "cfg-models",
+            "description": "Configure the provider endpoint and credentials. Updating wire configuration does not register new host token callbacks.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch experimental; callback binding is separate",
+            "source": "sdk-providers"
+        },
+        {
+            "name": "rpc.model.setAllowedModels",
+            "axis": "cfg-models",
+            "description": "Apply session-level model allowlisting; CAPI identifiers intersect repository policy.",
+            "scopes": ["live"],
+            "when": "Live session RPC",
+            "stability": "Experimental; not a per-agent fallback switch",
+            "source": "sdk-model-policy"
+        },
+        {
+            "name": "gitHubToken",
+            "axis": "cfg-identity",
+            "description": "Supply a client or session GitHub identity. Session scope differs from process identity.",
+            "scopes": ["client", "session"],
+            "when": "Client / create / resume; not live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-auth"
+        },
+        {
+            "name": "gitHubTokenProvider",
+            "axis": "cfg-identity",
+            "description": "Provide refreshable session credentials; mutually exclusive with a static session token.",
+            "scopes": ["session"],
+            "when": "Create / resume callback registration",
+            "stability": "Host callback; not persisted JSON",
+            "source": "sdk-auth"
+        },
+        {
+            "name": "useLoggedInUser",
+            "axis": "cfg-identity",
+            "description": "Decide whether client authentication may use the logged-in user's credentials.",
+            "scopes": ["client"],
+            "when": "Client construction",
+            "stability": "High-level SDK; empty mode does not disable it automatically",
+            "source": "sdk-default"
+        },
+        {
+            "name": "bearerTokenProvider",
+            "axis": "cfg-identity",
+            "description": "Supply provider bearer tokens on demand; this is separate from the GitHub session token provider.",
+            "scopes": ["session"],
+            "when": "Provider callback registration",
+            "stability": "Experimental",
+            "source": "sdk-providers"
+        },
+        {
+            "name": "onPermissionRequest",
+            "axis": "cfg-policy",
+            "description": "Bind the application's permission policy. Omission can leave requests pending for explicit resolution.",
+            "scopes": ["session"],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; authorization still host-owned",
+            "source": "sdk-permissions"
+        },
+        {
+            "name": "hooks",
+            "axis": "cfg-policy",
+            "description": "Intercept supported lifecycle, prompt, and tool stages with application callbacks.",
+            "scopes": ["session"],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; not an inner-loop replacement",
+            "source": "sdk-hooks"
+        },
+        {
+            "name": "managedSettings",
+            "axis": "cfg-policy",
+            "description": "Supply startup policy; it is not persisted and must be supplied again rather than treated as an ordinary live option.",
+            "scopes": ["session"],
+            "when": "Create / resume startup policy",
+            "stability": "Not a general mutable configuration field",
+            "source": "sdk-managed-lifetime"
+        },
+        {
+            "name": "onUserInputRequest",
+            "axis": "cfg-policy",
+            "description": "Handle user interaction, including the ask_user surface when available.",
+            "scopes": ["session"],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; requires a real host handler",
+            "source": "sdk-permissions"
+        },
+        {
+            "name": "onElicitationRequest",
+            "axis": "cfg-policy",
+            "description": "Handle structured host elicitation requests.",
+            "scopes": ["session"],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; host interface",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "sessionId",
+            "axis": "cfg-storage",
+            "description": "Choose a session identity at creation or identify the session to resume.",
+            "scopes": ["session"],
+            "when": "Create field / resume argument",
+            "stability": "Identity, not a live rename field",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "infiniteSessions",
+            "axis": "cfg-storage",
+            "description": "Configure persistence and compaction behavior; enabled by default, including in empty mode.",
+            "scopes": ["session"],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-infinite-options"
+        },
+        {
+            "name": "sessionFs",
+            "axis": "cfg-storage",
+            "description": "Configure client-side session filesystem conventions and capabilities.",
+            "scopes": ["client"],
+            "when": "Client construction",
+            "stability": "Experimental filesystem-shaped provider surface",
+            "source": "sdk-storage-capabilities"
+        },
+        {
+            "name": "createSessionFsProvider",
+            "axis": "cfg-storage",
+            "description": "Bind an actual host storage provider for each session when sessionFs is configured.",
+            "scopes": ["session"],
+            "when": "Create / resume provider registration",
+            "stability": "Experimental; not a no-op storage substitute",
+            "source": "sdk-storage-binding"
+        },
+        {
+            "name": "mode",
+            "axis": "cfg-storage",
+            "description": "Choose the empty or copilot-cli client baseline; this is separate from runtime interaction mode.",
+            "scopes": ["client"],
+            "when": "Client construction, not a live profile switch",
+            "stability": "High-level SDK",
+            "source": "sdk-modes"
+        },
+        {
+            "name": "baseDirectory",
+            "axis": "cfg-storage",
+            "description": "Choose an explicit local state base for a client-owned runtime.",
+            "scopes": ["client"],
+            "when": "Client construction",
+            "stability": "High-level SDK; persistence choice",
+            "source": "sdk-startup-options"
+        },
+        {
+            "name": "sessionIdleTimeoutSeconds",
+            "axis": "cfg-storage",
+            "description": "Configure server-wide idle-session cleanup, not the timeout of a model turn.",
+            "scopes": ["client"],
+            "when": "Client / runtime startup",
+            "stability": "Startup-only; default cleanup disabled",
+            "source": "sdk-idle-option"
+        },
+        {
+            "name": "streaming",
+            "axis": "cfg-events",
+            "description": "Enable delta delivery at session setup. The live options patch uses the different name enableStreaming.",
+            "scopes": ["session", "live"],
+            "when": "Create / resume; enableStreaming live patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-stream-options"
+        },
+        {
+            "name": "onEvent",
+            "axis": "cfg-events",
+            "description": "Attach a creation/resume-time host observer.",
+            "scopes": ["session"],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "session.on",
+            "axis": "cfg-events",
+            "description": "Subscribe to typed session events and unsubscribe locally as the host UI or workflow changes.",
+            "scopes": ["live"],
+            "when": "Live host subscription",
+            "stability": "High-level SDK",
+            "source": "sdk-events"
+        },
+        {
+            "name": "responseFormat",
+            "axis": "cfg-events",
+            "description": "Newer provider-native per-turn format contract, not present in this Node SDK projection; output remains text.",
+            "scopes": ["runtime"],
+            "when": "Runtime turn request",
+            "stability": "Runtime contract; provider and schema limitations",
+            "source": "runtime-output"
+        },
+        {
+            "name": "Harness methods and evals",
+            "axis": "cfg-quality",
+            "description": "Choose domain methods, evaluation data, thresholds, and release policy outside a turnkey SDK field.",
+            "scopes": ["host"],
+            "when": "Host design and release lifecycle",
+            "stability": "Host-owned responsibility, not an API property",
+            "source": "author-direction"
+        }
+    ],
+    "axes": [
+        {
+            "id": "cfg-prompt",
+            "label": "System prompt",
+            "title": "System prompt policy",
+            "summary": "Decide the agent's identity, operating instructions, and domain methods independently of its tools.",
+            "interfaces": ["systemMessage", "append", "replace", "customize"],
+            "sources": ["sdk-prompts", "sdk-empty"]
+        },
+        {
+            "id": "cfg-inventory",
+            "label": "Tool inventory",
+            "title": "Tool availability",
+            "summary": "Choose what can be advertised to the model, separately from how each tool executes.",
+            "interfaces": ["availableTools", "excludedTools", "tools", "mcpServers"],
+            "sources": ["sdk-tools", "sdk-filter-names", "sdk-isolated-tools"]
+        },
+        {
+            "id": "cfg-handler",
+            "label": "Tool implementation",
+            "title": "Tool implementation and replacement",
+            "summary": "The same advertised tool can execute a different host-owned implementation when deliberately overridden.",
+            "interfaces": ["defineTool", "overridesBuiltInTool", "parameters", "handler"],
+            "sources": [
+                "override-planning",
+                "override-schema",
+                "override-dispatch",
+                "override-permissions",
+                "sdk-live-tools"
+            ]
+        },
+        {
+            "id": "cfg-context",
+            "label": "Context sources",
+            "title": "Context and instruction sources",
+            "summary": "Decide what enters the model context: messages, attachments, discovered instructions, and domain guidance.",
+            "interfaces": ["prompt", "attachments", "organizationCustomInstructions", "systemMessage"],
+            "sources": ["sdk-attachments", "sdk-prompts", "sdk-empty", "sdk-large-output"]
+        },
+        {
+            "id": "cfg-packs",
+            "label": "Skills + plugins",
+            "title": "Reusable capability packs",
+            "summary": "Choose reusable instructions and bundled capabilities independently of the base harness profile.",
+            "interfaces": [
+                "enableConfigDiscovery",
+                "enableSkills",
+                "skillDirectories",
+                "pluginDirectories",
+                "plugins.builtin.set [runtime]"
+            ],
+            "sources": [
+                "sdk-empty",
+                "sdk-pack-inputs",
+                "sdk-discovery-option",
+                "plugin-builtins",
+                "plugin-components"
+            ]
+        },
+        {
+            "id": "cfg-agents",
+            "label": "Agents + delegation",
+            "title": "Agents and delegation",
+            "summary": "Decide whether and how specialist agents participate in a workflow.",
+            "interfaces": ["customAgents", "agent", "defaultAgent", "model", "skills", "mcpServers"],
+            "sources": ["sdk-agents", "sdk-empty"]
+        },
+        {
+            "id": "cfg-models",
+            "label": "Models + providers",
+            "title": "Model and provider configuration",
+            "summary": "Harness opinion does not constrain an integrator to one supported model family or endpoint.",
+            "interfaces": [
+                "model",
+                "provider",
+                "reasoningEffort",
+                "contextTier",
+                "rpc.model.setAllowedModels"
+            ],
+            "sources": ["sdk-providers", "sdk-model-policy", "runtime-loop"]
+        },
+        {
+            "id": "cfg-policy",
+            "label": "Hooks + permissions",
+            "title": "Hooks, permissions, and approvals",
+            "summary": "Put domain decisions at defined execution boundaries rather than trying to encode all authority in the prompt.",
+            "interfaces": ["hooks", "onPermissionRequest", "onUserInputRequest", "onElicitationRequest"],
+            "sources": ["sdk-hooks", "sdk-permissions", "runtime-loop"]
+        },
+        {
+            "id": "cfg-identity",
+            "label": "Identity + credentials",
+            "title": "Identity and credential ownership",
+            "summary": "Bind runtime calls to the intended host or user identity rather than inheriting unrelated ambient credentials.",
+            "interfaces": ["gitHubToken", "gitHubTokenProvider", "provider", "bearerTokenProvider"],
+            "sources": ["sdk-auth", "sdk-providers"]
+        },
+        {
+            "id": "cfg-storage",
+            "label": "Session state",
+            "title": "Session state, storage, and lifecycle",
+            "summary": "Choose session identity, lifetime, compaction, and persistence without confusing session state with a code checkout.",
+            "interfaces": [
+                "sessionId",
+                "baseDirectory",
+                "sessionFs",
+                "createSessionFsProvider",
+                "infiniteSessions"
+            ],
+            "sources": ["sdk-default", "sdk-storage", "runtime-storage", "sdk-lifecycle"]
+        },
+        {
+            "id": "cfg-events",
+            "label": "Events + outputs",
+            "title": "Events, telemetry, and output contracts",
+            "summary": "Choose how the host observes behavior and turns model outputs into product state.",
+            "interfaces": ["streaming", "onEvent", "session.on", "responseFormat [runtime]"],
+            "sources": ["sdk-events", "sdk-attachments", "runtime-output"]
+        },
+        {
+            "id": "cfg-quality",
+            "label": "Methods + evaluation",
+            "title": "Methods and evaluation ownership",
+            "summary": "Choosing a harness means owning a behavior configuration and an evidence-based quality bar, not only setting API fields.",
+            "interfaces": [
+                "systemMessage",
+                "customAgents",
+                "host workflows",
+                "session events",
+                "domain evals (host-owned)"
+            ],
+            "sources": ["author-direction", "sdk-prompts", "sdk-agents", "runtime-loop", "sdk-events"]
+        }
+    ],
+    "gaps": [
+        {
+            "id": "gap-skills",
+            "title": "Serve skills directly from a CMS",
+            "status": "SDK projection gap",
+            "summary": "A host wants to fetch tenant-specific skills from its service when needed, instead of shipping folders.",
+            "runtime": "Directory inputs and implemented native skillProvider.list/read. The inspected Node SDK projects DTOs, but no high-level option or callback group was found.",
+            "boundary": "Do not call this purely a missing runtime implementation. The gap spans ergonomic host bindings and a content contract currently limited to text-only SKILL.md, not related assets.",
+            "opportunity": "Expose supported per-session provider callbacks in each SDK and define asset, ownership, and lifecycle semantics. Until then, a host can materialize reviewed files through the existing directory seam.",
+            "sources": ["runtime-skills", "runtime-skill-contract", "sdk-skill-schema", "sdk-callbacks"]
+        },
+        {
+            "id": "gap-storage",
+            "title": "Store sessions in a product database",
+            "status": "Filesystem-shaped abstraction",
+            "summary": "A product wants session state in its existing encrypted database, under its own retention and data-governance rules.",
+            "runtime": "The host-provided filesystem-shaped session interface, including its path conventions and optional SQLite operations.",
+            "boundary": "This is not 'no pluggable storage exists.' The limitation is the abstraction level and adapter work required. Removing project tools does not remove session-state requirements.",
+            "opportunity": "Define a narrower session-store contract with explicit durability and concurrency semantics, if real workloads justify it. Keep the current filesystem adapter path documented and supportable.",
+            "sources": ["sdk-storage", "runtime-storage", "sdk-default"]
+        },
+        {
+            "id": "gap-live-plugins",
+            "title": "Swap tool implementations and packs live",
+            "status": "Lifecycle and binding boundary",
+            "summary": "A long-running host wants to replace every resource in a pack while sessions continue, with one consistent effective version.",
+            "runtime": "Live external declaration updates, explicit inputs, resume-time callback binding, and a declared plugin reload path for installed state/skills, MCP, agents, hooks, and configured extensions.",
+            "boundary": "tools.set does not replace the SDK handler map. Plugin reload's declared fan-out omits rules/LSP. Built-in registration is startup-scoped. disabledMcpServers on resident resume does not stop running servers.",
+            "opportunity": "Define per-session versioned resource snapshots, mutability rules, and atomic replacement/restart behavior across component types rather than promising a universal reload.",
+            "sources": [
+                "sdk-live-tools",
+                "sdk-resume-bindings",
+                "plugin-reload-boundary",
+                "plugin-builtins",
+                "sdk-pack-inputs"
+            ]
+        },
+        {
+            "id": "gap-portability",
+            "title": "Reuse an arbitrary foreign plugin unchanged",
+            "status": "Component-specific compatibility",
+            "summary": "A team wants a package from another agent ecosystem to behave identically in its own product without repackaging or semantic changes.",
+            "runtime": "Defined manifest precedence, exact-schema selection, portable skills/MCP, and Copilot-specific component discovery under its namespace.",
+            "boundary": "Spec-mode warnings are not strict conformance certification. The manifest's extensions data map is distinct from executable JS extension directories.",
+            "opportunity": "Co-develop portable component contracts and explicit adapters, backed by behavior fixtures. State exactly which semantics are preserved and which are host-specific.",
+            "sources": [
+                "plugin-formats",
+                "plugin-components",
+                "plugin-validation",
+                "plugin-extension-discovery"
+            ]
+        },
+        {
+            "id": "gap-output",
+            "title": "Consume validated typed output everywhere",
+            "status": "Projection and provider boundary",
+            "summary": "A business workflow needs a typed final result with predictable failure behavior across supported providers and language clients.",
+            "runtime": "The newer provider-native format contract. The host can separately parse and validate output where its chosen runtime/SDK path exposes the required behavior.",
+            "boundary": "No universal fallback is promised. Factory-subagent schema support is a different surface from a general final-response contract.",
+            "opportunity": "Complete language projections and define a portable typed-result/error contract. Keep provider limitations and host validation explicit rather than silently returning success-shaped fallbacks.",
+            "sources": ["runtime-output", "sdk-attachments", "sdk-events"]
+        },
+        {
+            "id": "gap-loop",
+            "title": "Replace the inner execution algorithm",
+            "status": "Internal seam, not a public replacement API",
+            "summary": "An integrator wants to replace the inner scheduling, retry, or request-processing algorithm rather than configure the behavior running inside it.",
+            "runtime": "Public prompt/tool/agent/hook configuration and host-owned outer orchestration. Internal Rust traits compose native model dispatch, tool invocation, processors, and event sinks.",
+            "boundary": "An internal trait is not evidence of a supported SDK override. This does not prevent an application from scheduling its own sessions or workflows outside the inner loop.",
+            "opportunity": "Identify a narrow policy or scheduling seam justified by concrete workloads, or deliberately keep the outer control plane with the host. Avoid exposing the entire internal loop as an unstable callback framework.",
+            "sources": ["runtime-loop", "sdk-hooks", "sdk-agents", "runtime-contract"]
+        }
+    ]
+}

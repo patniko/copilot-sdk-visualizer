@@ -1,0 +1,6 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <style>:root{--cp-accent:#b11f4b;--cp-accent-fg:#ffffff}</style>
+  <rect width="48" height="48" rx="12" fill="var(--cp-accent)"/>
+  <path d="M13 12v24m22-24v24M13 24h22" fill="none" stroke="var(--cp-accent-fg)" stroke-width="4"/>
+</svg>
