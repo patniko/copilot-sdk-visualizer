@@ -11,7 +11,7 @@ For the motivation, original design feedback, architectural intent, and a contin
 ## What the builder does
 
 - Start from empty, minimal, or coding-oriented presets, then change actual configuration decisions.
-- Keep, replace, or remove primary built-in tools; declare custom tools and explicit HTTP MCP integrations.
+- Browse the complete built-in catalog, keep or remove selections, and replace verified tool implementations; declare custom tools and explicit HTTP MCP integrations.
 - Compose prompt sections, context sources, custom agents, provider choices, policy hooks, session storage, and evaluation criteria.
 - See the resulting execution ownership, required host bindings, and scenario-specific limitations.
 - Save one draft in browser storage, undo/redo edits, and import/export the versioned planner format.
