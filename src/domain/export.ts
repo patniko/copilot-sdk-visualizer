@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { BUILTIN_NAMES, HarnessPlanSchema } from "./plan";
+import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema } from "./plan";
 import type { HarnessPlan } from "./plan";
 import { reference } from "../content/reference";
+import { runtimeEndpoint } from "./target";
 
 function json(value: unknown): string {
     if (Array.isArray(value)) return `[${value.map(json).join(", ")}]`;
@@ -34,6 +35,12 @@ export function downloadName(plan: HarnessPlan, extension: string): string {
 export function generateSdkCode(input: HarnessPlan): string {
     const plan = HarnessPlanSchema.parse(input);
     const overridden = BUILTIN_NAMES.filter((name) => plan.tools[name].action === "override");
+    const unsupported = overridden.filter((name) => !BUILTIN_SPECS[name].overrideable);
+    if (unsupported.length) {
+        throw new Error(
+            `Review unverified/reserved built-in overrides before generating SDK code: ${unsupported.join(", ")}. Your planner JSON can still be exported.`,
+        );
+    }
     const handlers = [
         ...overridden.map((name) => ({
             name,
@@ -65,13 +72,24 @@ export function generateSdkCode(input: HarnessPlan): string {
         .join("\n");
     const client = [
         `        mode: ${json(plan.clientMode)},`,
-        `        useLoggedInUser: ${plan.model.provider === "copilot" && plan.identity === "developer"},`,
-        `        sessionIdleTimeoutSeconds: ${plan.session.idleTimeoutSeconds},`,
-        ...(plan.session.storage === "local"
-            ? [`        baseDirectory: resolve(${json(plan.session.baseDirectory)}),`]
+        plan.target.runtime === "inprocess"
+            ? "        connection: RuntimeConnection.forInProcess(),"
+            : plan.target.runtime === "external"
+              ? `        connection: RuntimeConnection.forUri(${json(runtimeEndpoint(plan.target).address)}, { connectionToken: process.env.COPILOT_CONNECTION_TOKEN }),`
+              : `        connection: RuntimeConnection.forStdio(${plan.target.cliPath.trim() ? `{ path: resolve(${json(plan.target.cliPath)}) }` : ""}),`,
+        ...(plan.target.runtime === "external"
+            ? []
             : [
-                  '        sessionFs: { initialCwd: "/virtual", sessionStatePath: "/session-state", conventions: "posix", capabilities: { sqlite: false } },',
+                  `        useLoggedInUser: ${plan.model.provider === "copilot" && plan.identity === "developer"},`,
+                  `        sessionIdleTimeoutSeconds: ${plan.session.idleTimeoutSeconds},`,
               ]),
+        ...(plan.session.storage === "local" && plan.target.runtime !== "external"
+            ? [`        baseDirectory: resolve(${json(plan.session.baseDirectory)}),`]
+            : plan.session.storage === "virtual"
+              ? [
+                    '        sessionFs: { initialCwd: "/virtual", sessionStatePath: "/session-state", conventions: "posix", capabilities: { sqlite: false } },',
+                ]
+              : []),
     ];
     const prompt =
         plan.prompt.mode === "customize"
@@ -197,7 +215,7 @@ export function generateSdkCode(input: HarnessPlan): string {
         `// Source snapshot: SDK ${reference.revisions.sdk}; runtime ${reference.revisions.runtime}.`,
         "// Client modes configure new sessions. This is not a live configuration patch.",
         'import { resolve } from "node:path";',
-        'import { CopilotClient, defineTool, type SessionConfig, type Tool, type ProviderConfig } from "@github/copilot-sdk";',
+        'import { CopilotClient, RuntimeConnection, defineTool, type SessionConfig, type Tool, type ProviderConfig } from "@github/copilot-sdk";',
         "",
         "export interface HostBindings {",
         '    callbacks: Pick<SessionConfig, "onPermissionRequest" | "onUserInputRequest" | "gitHubTokenProvider" | "createSessionFsProvider" | "onEvent" | "hooks">;',

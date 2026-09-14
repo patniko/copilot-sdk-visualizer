@@ -3,6 +3,7 @@ import { HarnessPlanSchema, parsePlan } from "./plan";
 import type { HarnessPlan } from "./plan";
 import { createPreset } from "./presets";
 
+// Keep the storage location stable; parsePlan migrates the versioned payload.
 export const STORAGE_KEY = "copilot-sdk-visualizer:plan:v1";
 export interface DraftStorage {
     getItem(key: string): string | null;

@@ -1,0 +1,63 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. */
+.hb-runtime-inputs,
+.hb-runtime-input-catalog {
+    margin-top: 20px;
+    padding: 18px;
+    border: 1px solid var(--cp-border);
+    border-radius: 12px;
+    background: var(--cp-bg-elevated);
+}
+.hb-runtime-inputs h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+}
+.hb-runtime-input-catalog > summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 650;
+}
+.hb-runtime-input-catalog[open] > summary {
+    margin-bottom: 16px;
+}
+.hb-runtime-input {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--cp-surface);
+    border: 1px solid var(--cp-border);
+    border-radius: 10px;
+}
+.hb-runtime-input summary {
+    cursor: pointer;
+    color: var(--cp-accent);
+    font-size: 13px;
+    font-weight: 650;
+}
+.hb-runtime-input > p {
+    margin: 12px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+}
+.hb-runtime-input dl {
+    margin: 12px 0;
+    font-size: 12px;
+}
+.hb-runtime-input dl > div {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--cp-border);
+}
+.hb-runtime-input dt {
+    color: var(--cp-text-muted);
+}
+.hb-runtime-input dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+@media (max-width: 650px) {
+    .hb-runtime-input dl > div {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+    }
+}

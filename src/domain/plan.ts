@@ -1,18 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { z } from "zod";
+import { BootstrapTargetSchema, defaultTarget } from "./target";
+import { BUILTIN_NAMES, BUILTIN_SPECS, TOOL_CATALOG_REVISION } from "../content/builtin-tools";
+export { BUILTIN_NAMES, BUILTIN_SPECS } from "../content/builtin-tools";
+export type { BuiltinName, BuiltinSpec } from "../content/builtin-tools";
+import type { BuiltinName } from "../content/builtin-tools";
 
 export const PRESET_IDS = ["empty", "minimal", "copilot"] as const;
-export const BUILTIN_NAMES = [
-    "view",
-    "apply_patch",
-    "grep",
-    "glob",
-    "bash",
-    "ask_user",
-    "task_complete",
-    "task",
-    "skill",
-] as const;
 export const SECTION_NAMES = [
     "preamble",
     "identity",
@@ -28,16 +22,7 @@ export const SECTION_NAMES = [
     "last_instructions",
 ] as const;
 export type PresetId = (typeof PRESET_IDS)[number];
-export type BuiltinName = (typeof BUILTIN_NAMES)[number];
 export type SectionName = (typeof SECTION_NAMES)[number];
-
-export interface BuiltinSpec {
-    label: string;
-    description: string;
-    group: "Workspace" | "Session";
-    workspace: boolean;
-    parameters: string;
-}
 
 const objectSchema = (property: string) =>
     JSON.stringify(
@@ -49,72 +34,6 @@ const objectSchema = (property: string) =>
         null,
         2,
     );
-
-export const BUILTIN_SPECS: Record<BuiltinName, BuiltinSpec> = {
-    view: {
-        label: "Read files",
-        description: "Read a file through the runtime's native view tool.",
-        group: "Workspace",
-        workspace: true,
-        parameters: objectSchema("path"),
-    },
-    apply_patch: {
-        label: "Edit files",
-        description: "Apply changes to files.",
-        group: "Workspace",
-        workspace: true,
-        parameters: objectSchema("patch"),
-    },
-    grep: {
-        label: "Search content",
-        description: "Search for relevant content.",
-        group: "Workspace",
-        workspace: true,
-        parameters: objectSchema("query"),
-    },
-    glob: {
-        label: "Find files",
-        description: "Find paths matching a pattern.",
-        group: "Workspace",
-        workspace: true,
-        parameters: objectSchema("pattern"),
-    },
-    bash: {
-        label: "Run commands",
-        description: "Execute a command in the host environment.",
-        group: "Workspace",
-        workspace: true,
-        parameters: objectSchema("command"),
-    },
-    ask_user: {
-        label: "Ask the user",
-        description: "Request user input through the host.",
-        group: "Session",
-        workspace: false,
-        parameters: objectSchema("question"),
-    },
-    task_complete: {
-        label: "Complete a task",
-        description: "Report completion when supported by the active runtime mode.",
-        group: "Session",
-        workspace: false,
-        parameters: objectSchema("summary"),
-    },
-    task: {
-        label: "Delegate work",
-        description: "Delegate a bounded task to another agent.",
-        group: "Session",
-        workspace: false,
-        parameters: objectSchema("prompt"),
-    },
-    skill: {
-        label: "Load a skill",
-        description: "Load a configured skill into context.",
-        group: "Session",
-        workspace: false,
-        parameters: objectSchema("skill"),
-    },
-};
 
 const identifier = z
     .string()
@@ -135,6 +54,13 @@ export const ToolSettingsSchema = z
 export type ToolAction = z.infer<typeof ToolActionSchema>;
 export type ToolSettings = z.infer<typeof ToolSettingsSchema>;
 export const ToolMapSchema = z.record(z.enum(BUILTIN_NAMES), ToolSettingsSchema);
+export function defaultToolSettings(name: BuiltinName, action: ToolAction): ToolSettings {
+    return {
+        action,
+        description: `Host-controlled implementation of ${name}. Validate inputs and resource authority.`,
+        parameters: BUILTIN_SPECS[name].parameters,
+    };
+}
 
 export const CustomToolSchema = z
     .object({
@@ -167,7 +93,7 @@ export const AgentSchema = z
         description: z.string().max(600),
         prompt: z.string().min(1).max(8000),
         model: z.string().max(120),
-        tools: z.array(identifier).max(50),
+        tools: z.array(identifier).max(512),
     })
     .strict();
 export type Agent = z.infer<typeof AgentSchema>;
@@ -231,7 +157,9 @@ function endpointError(value: string): string | undefined {
 
 export const HarnessPlanSchema = z
     .object({
-        schemaVersion: z.literal(1),
+        schemaVersion: z.literal(2),
+        toolCatalogRevision: z.string().min(1),
+        target: BootstrapTargetSchema,
         name: z
             .string()
             .trim()
@@ -263,7 +191,7 @@ export const HarnessPlanSchema = z
         mcpServers: z.array(McpServerSchema).max(10),
         agents: z.array(AgentSchema).max(12),
         selectedAgent: z.string().max(64),
-        rootExcludedTools: z.array(identifier).max(50),
+        rootExcludedTools: z.array(identifier).max(512),
         context: z
             .object({
                 workspace: z.string().max(1000),
@@ -414,7 +342,38 @@ export function parsePlan(text: string): HarnessPlan {
     if (new TextEncoder().encode(text).byteLength > MAX_PLAN_BYTES)
         throw new Error("Plan files must be smaller than 1 MB.");
     const parsed: unknown = JSON.parse(text);
-    const result = HarnessPlanSchema.safeParse(parsed);
+    let migrated = parsed;
+    if (
+        typeof parsed === "object" &&
+        parsed !== null &&
+        !Array.isArray(parsed) &&
+        "schemaVersion" in parsed &&
+        parsed.schemaVersion === 1
+    ) {
+        if ("target" in parsed) throw new Error("A version 1 plan cannot contain version 2 target settings.");
+        migrated = { ...parsed, schemaVersion: 2, target: defaultTarget() };
+    }
+    if (
+        typeof migrated === "object" &&
+        migrated !== null &&
+        !Array.isArray(migrated) &&
+        !("toolCatalogRevision" in migrated) &&
+        "tools" in migrated &&
+        typeof migrated.tools === "object" &&
+        migrated.tools !== null &&
+        !Array.isArray(migrated.tools)
+    ) {
+        const inherited = "inventory" in migrated && migrated.inventory === "coding-defaults";
+        const defaults = Object.fromEntries(
+            BUILTIN_NAMES.map((name) => [name, defaultToolSettings(name, inherited ? "keep" : "remove")]),
+        );
+        migrated = {
+            ...migrated,
+            toolCatalogRevision: TOOL_CATALOG_REVISION,
+            tools: { ...defaults, ...migrated.tools },
+        };
+    }
+    const result = HarnessPlanSchema.safeParse(migrated);
     if (!result.success) {
         throw new Error(
             result.error.issues

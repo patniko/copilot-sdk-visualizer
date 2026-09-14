@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema, ToolMapSchema } from "./plan";
+import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema, ToolMapSchema, defaultToolSettings } from "./plan";
 import type { HarnessPlan, PresetId } from "./plan";
+import { defaultTarget } from "./target";
+import { TOOL_CATALOG_REVISION } from "../content/builtin-tools";
 
 export const PRESETS = [
     {
@@ -30,19 +32,17 @@ export function createPreset(preset: PresetId): HarnessPlan {
         Object.fromEntries(
             BUILTIN_NAMES.map((name) => [
                 name,
-                {
-                    action:
-                        coding || (minimal && ["ask_user", "task_complete"].includes(name))
-                            ? "keep"
-                            : "remove",
-                    description: `Host-controlled ${name}: ${BUILTIN_SPECS[name].description}`,
-                    parameters: BUILTIN_SPECS[name].parameters,
-                },
+                defaultToolSettings(
+                    name,
+                    coding || (minimal && ["ask_user", "task_complete"].includes(name)) ? "keep" : "remove",
+                ),
             ]),
         ),
     );
     return HarnessPlanSchema.parse({
-        schemaVersion: 1,
+        schemaVersion: 2,
+        toolCatalogRevision: TOOL_CATALOG_REVISION,
+        target: defaultTarget(),
         name: minimal ? "My minimal harness" : coding ? "My coding harness" : "My custom harness",
         preset,
         clientMode: coding ? "copilot-cli" : "empty",
@@ -161,6 +161,7 @@ export function applyScenario(plan: HarnessPlan, scenario: ScenarioId): HarnessP
 export function changedAxes(plan: HarnessPlan): string[] {
     const base = createPreset(plan.preset);
     const groups: [string, unknown, unknown][] = [
+        ["Runtime & language", plan.target, base.target],
         ["Client baseline", [plan.clientMode, plan.inventory], [base.clientMode, base.inventory]],
         ["Prompt", plan.prompt, base.prompt],
         ["Built-in tools", plan.tools, base.tools],

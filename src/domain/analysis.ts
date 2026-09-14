@@ -46,6 +46,31 @@ export function hostContracts(plan: HarnessPlan): string[] {
 export function analyzePlan(plan: HarnessPlan): Decision[] {
     const summary = toolSummary(plan);
     const decisions: Decision[] = [];
+    const unverifiedOverrides = summary.overridden.filter((name) => !BUILTIN_SPECS[name].overrideable);
+    if (unverifiedOverrides.length)
+        decisions.push({
+            id: "unverified-overrides",
+            kind: "gap",
+            title: "Some selected override paths need review",
+            detail: `${unverifiedOverrides.join(", ")} have no verified external override route in this catalog (catalog_search is explicitly reserved). The selection is retained, but SDK/project generation will not silently route it to a native implementation.`,
+            sources: ["override-advertised", "runtime-tools"],
+        });
+    if (plan.target.runtime === "inprocess")
+        decisions.push({
+            id: "inprocess-runtime",
+            kind: "review",
+            title: "The runtime shares your application's process",
+            detail: "Use a matching native bundle and the language's experimental opt-in. Clients share process state and one loaded native library version; stopping a client is not a guarantee that the library unloads.",
+            sources: ["sdk-inprocess-guide"],
+        });
+    if (plan.target.runtime === "external")
+        decisions.push({
+            id: "external-runtime",
+            kind: "host",
+            title: "Operate and secure the existing runtime service",
+            detail: "The bootstrap connects to your TCP endpoint. Your host owns server startup, lifetime, network access, and service authorization; an SDK connection is not server deployment or tenant isolation.",
+            sources: ["sdk-existing-runtime"],
+        });
     if (summary.overridden.length)
         decisions.push({
             id: "override",
@@ -67,8 +92,8 @@ export function analyzePlan(plan: HarnessPlan): Decision[] {
         decisions.push({
             id: "inherited-inventory",
             kind: "review",
-            title: "Additional coding tools remain inherited",
-            detail: "The builder shows primary built-ins, not the full runtime catalog. In coding-default inventory mode, unlisted tools can remain available. Choose an explicit inventory for a fully reviewable set.",
+            title: "Runtime default selection remains authoritative",
+            detail: "The complete compiled catalog includes conditional, platform-specific, and internal tools. In inherited mode, keeping a tool leaves model/platform/capability/experiment selection intact; it does not force every catalog member on.",
             sources: ["sdk-modes", "sdk-filter-rules"],
         });
     if (plan.context.discovery || plan.context.fileHooks || plan.context.hostGit)

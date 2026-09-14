@@ -84,7 +84,7 @@ describe("harness plan and presets", () => {
         expect(HarnessPlanSchema.safeParse(plan).success).toBe(false);
         plan.model.endpoint = "https://example.com?API_KEY=example-only";
         expect(HarnessPlanSchema.safeParse(plan).success).toBe(false);
-        expect(() => parsePlan(JSON.stringify({ ...createPreset("minimal"), schemaVersion: 2 }))).toThrow();
+        expect(() => parsePlan(JSON.stringify({ ...createPreset("minimal"), schemaVersion: 99 }))).toThrow();
         const injected = {
             ...createPreset("minimal"),
             model: { ...createPreset("minimal").model, apiKey: "not-allowed" },
@@ -142,7 +142,7 @@ describe("scenario decisions", () => {
             expect(decision.sources.length).toBeGreaterThan(0);
             for (const source of decision.sources) expect(reference.sources[source], source).toBeDefined();
         }
-        expect(reference.controls).toHaveLength(52);
+        expect(reference.controls).toHaveLength(53);
         expect(reference.gaps).toHaveLength(6);
     });
 });
