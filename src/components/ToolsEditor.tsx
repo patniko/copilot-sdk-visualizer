@@ -7,6 +7,8 @@ import { toolSummary } from "../domain/analysis";
 import { issueFor, uniqueName } from "./editor";
 import type { EditorProps } from "./editor";
 import { McpEditor } from "./McpEditor";
+import { SettingHelp } from "./SettingHelp";
+import { toggleHelp, valueHelp } from "../content/setting-help";
 import { ToolCatalogBrowser } from "./ToolCatalogBrowser";
 import { Button, ChoiceField, EmptyState, Panel, TextAreaField, TextField, ToggleField } from "./ui";
 import "../tool-catalog.css";
@@ -22,6 +24,7 @@ export function ToolsEditor(props: EditorProps) {
             >
                 <ChoiceField
                     label="Tool inventory"
+                    help={<SettingHelp help={valueHelp.inventory} value={plan.inventory} />}
                     value={plan.inventory}
                     options={[
                         {
@@ -174,6 +177,7 @@ function CustomToolRow({ tool, index, edit, issues }: EditorProps & { tool: Cust
             />
             <TextAreaField
                 label="Custom tool parameters (JSON)"
+                help={<SettingHelp help={valueHelp.toolSchema} />}
                 monospace
                 spellCheck={false}
                 rows={7}
@@ -191,6 +195,7 @@ function CustomToolRow({ tool, index, edit, issues }: EditorProps & { tool: Cust
             />
             <ToggleField
                 label="Terminal tool"
+                help={<SettingHelp help={toggleHelp.terminal} enabled={tool.terminal} />}
                 description="Mark successful execution as terminal. This is not a cancellation or failure-handling policy."
                 checked={tool.terminal}
                 onCheckedChange={(checked) =>

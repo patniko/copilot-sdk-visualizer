@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { Plus, Trash2, Users } from "lucide-react";
 import { createAgent } from "../domain/plan";
+import { SettingHelp } from "./SettingHelp";
+import { valueHelp } from "../content/setting-help";
 import type { Agent } from "../domain/plan";
 import { issueFor, uniqueName } from "./editor";
 import type { EditorProps } from "./editor";
@@ -64,6 +66,12 @@ export function AgentsEditor(props: EditorProps) {
             >
                 <SelectField
                     label="Selected root agent"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.selectedAgent}
+                            value={plan.selectedAgent || "Default agent"}
+                        />
+                    }
                     value={plan.selectedAgent}
                     options={[
                         { id: "default", value: "", label: "Default agent" },
@@ -83,6 +91,12 @@ export function AgentsEditor(props: EditorProps) {
                 />
                 <LineListField
                     label="Root-only excluded tools"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.rootExclusions}
+                            value={`${plan.rootExcludedTools.length} exclusions`}
+                        />
+                    }
                     values={plan.rootExcludedTools}
                     onValuesChange={(values) =>
                         edit((draft) => {
@@ -151,6 +165,12 @@ function AgentRow({ agent, index, edit, issues }: EditorProps & { agent: Agent; 
                 />
                 <TextField
                     label="Agent model preference"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.agentModel}
+                            value={agent.model || "Use session selection"}
+                        />
+                    }
                     value={agent.model}
                     maxLength={120}
                     placeholder="Optional; use session selection"
@@ -189,6 +209,7 @@ function AgentRow({ agent, index, edit, issues }: EditorProps & { agent: Agent; 
             />
             <LineListField
                 label="Agent allowed tool names"
+                help={<SettingHelp help={valueHelp.agentTools} value={`${agent.tools.length} names`} />}
                 values={agent.tools}
                 onValuesChange={(values) =>
                     editAgent((target) => {

@@ -1,16 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { reference } from "./reference";
+import type { ToggleHelp } from "./help-types";
 
 export const CONTEXT_TOGGLE_KEYS = ["discovery", "skills", "fileHooks", "hostGit"] as const;
 export type ContextToggleKey = (typeof CONTEXT_TOGGLE_KEYS)[number];
-export interface ContextToggleHelp {
-    title: string;
+export interface ContextToggleHelp extends ToggleHelp {
     option: "enableConfigDiscovery" | "enableSkills" | "enableFileHooks" | "enableHostGitOperations";
-    summary: string;
-    enabled: string;
-    disabled: string;
-    example: string;
-    boundary: string;
     sources: { label: string; url: string }[];
 }
 

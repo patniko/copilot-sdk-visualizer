@@ -9,6 +9,8 @@ import { referenceBaselineNames } from "./tool-catalog-ui";
 import { HarnessPrimer } from "./HarnessPrimer";
 import type { EditorProps, ViewId } from "./editor";
 import { Badge, Button, ChoiceField, Panel } from "./ui";
+import { SettingHelp } from "./SettingHelp";
+import { valueHelp } from "../content/setting-help";
 import "../tool-catalog.css";
 
 const profileDetails = {
@@ -181,6 +183,7 @@ export function OverviewEditor({
             >
                 <ChoiceField
                     label="SDK client baseline"
+                    help={<SettingHelp help={valueHelp.clientMode} value={plan.clientMode} />}
                     value={plan.clientMode}
                     options={[
                         { value: "empty", label: "Empty", description: "Explicit host-owned composition" },

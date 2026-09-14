@@ -6,6 +6,8 @@ import { BuiltinPromptPanel } from "./BuiltinPromptPanel";
 import { issueFor, useEditorRowIds } from "./editor";
 import type { EditorProps } from "./editor";
 import { Badge, Button, ChoiceField, EmptyState, Notice, Panel, SelectField, TextAreaField } from "./ui";
+import { SettingHelp } from "./SettingHelp";
+import { valueHelp } from "../content/setting-help";
 
 export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
     const rows = useEditorRowIds(plan.prompt.sections.length);
@@ -40,6 +42,7 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
             >
                 <ChoiceField
                     label="System message mode"
+                    help={<SettingHelp help={valueHelp.promptMode} value={plan.prompt.mode} />}
                     value={plan.prompt.mode}
                     options={[
                         { value: "append", label: "Append", description: "Extend the foundation" },
@@ -136,6 +139,12 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                                     <div className="hb-field-grid">
                                         <SelectField
                                             label="Section name"
+                                            help={
+                                                <SettingHelp
+                                                    help={valueHelp.sectionName}
+                                                    value={section.name}
+                                                />
+                                            }
                                             value={section.name}
                                             options={SECTION_NAMES.map((name) => ({
                                                 value: name,
@@ -154,6 +163,12 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                                         />
                                         <SelectField
                                             label="Section action"
+                                            help={
+                                                <SettingHelp
+                                                    help={valueHelp.sectionAction}
+                                                    value={section.action}
+                                                />
+                                            }
                                             value={section.action}
                                             options={[
                                                 { value: "replace", label: "Replace" },

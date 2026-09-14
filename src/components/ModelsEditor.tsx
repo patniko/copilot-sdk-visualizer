@@ -3,6 +3,8 @@ import { KeyRound, SlidersHorizontal } from "lucide-react";
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
 import { Badge, Button, ChoiceField, Notice, Panel, SelectField, TextField } from "./ui";
+import { SettingHelp } from "./SettingHelp";
+import { valueHelp } from "../content/setting-help";
 
 const endpointExamples = {
     openai: "https://api.openai.com/v1",
@@ -23,6 +25,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                 <div className="hb-field-grid">
                     <SelectField
                         label="Model provider"
+                        help={<SettingHelp help={valueHelp.modelProvider} value={plan.model.provider} />}
                         value={plan.model.provider}
                         options={[
                             { value: "copilot", label: "GitHub Copilot" },
@@ -38,6 +41,12 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     />
                     <TextField
                         label="Model ID"
+                        help={
+                            <SettingHelp
+                                help={valueHelp.modelId}
+                                value={plan.model.id.trim() || "Host supplied"}
+                            />
+                        }
                         value={plan.model.id}
                         maxLength={120}
                         placeholder="Supplied by your host"
@@ -54,6 +63,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     <div className="hb-editor-stack hb-tight-stack">
                         <TextField
                             label="Provider endpoint"
+                            help={<SettingHelp help={valueHelp.providerEndpoint} />}
                             type="url"
                             value={plan.model.endpoint}
                             maxLength={1500}
@@ -84,6 +94,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                         {(plan.model.provider === "openai" || plan.model.provider === "azure") && (
                             <ChoiceField
                                 label="Provider wire API"
+                                help={<SettingHelp help={valueHelp.wireApi} value={plan.model.wireApi} />}
                                 value={plan.model.wireApi}
                                 options={[
                                     { value: "responses", label: "Responses" },
@@ -102,6 +113,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                 {!byok && issueFor(issues, "model.endpoint") && (
                     <TextField
                         label="Retained provider endpoint"
+                        help={<SettingHelp help={valueHelp.providerEndpoint} />}
                         value={plan.model.endpoint}
                         maxLength={1500}
                         onValueChange={(value) =>
@@ -116,6 +128,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                 <div className="hb-field-grid">
                     <SelectField
                         label="Reasoning effort"
+                        help={<SettingHelp help={valueHelp.reasoning} value={plan.model.reasoningEffort} />}
                         value={plan.model.reasoningEffort}
                         options={[
                             { value: "default", label: "Model default" },
@@ -132,6 +145,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     />
                     <SelectField
                         label="Context tier"
+                        help={<SettingHelp help={valueHelp.contextTier} value={plan.model.contextTier} />}
                         value={plan.model.contextTier}
                         options={[
                             { value: "default", label: "Model default" },
@@ -157,6 +171,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                 >
                     <ChoiceField
                         label="Provider credential source"
+                        help={<SettingHelp help={valueHelp.credentials} value={plan.model.credential} />}
                         value={plan.model.credential}
                         options={[
                             {
@@ -179,6 +194,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     {plan.model.credential === "api-key" ? (
                         <TextField
                             label="API-key environment variable name"
+                            help={<SettingHelp help={valueHelp.credentialEnv} />}
                             value={plan.model.credentialEnv}
                             placeholder="MODEL_API_KEY"
                             autoComplete="off"
@@ -208,6 +224,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     >
                         <TextField
                             label="Retained API-key environment variable name"
+                            help={<SettingHelp help={valueHelp.credentialEnv} />}
                             value={plan.model.credentialEnv}
                             autoComplete="off"
                             spellCheck={false}
@@ -228,6 +245,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
             >
                 <ChoiceField
                     label="GitHub credential ownership"
+                    help={<SettingHelp help={valueHelp.identity} value={plan.identity} />}
                     value={plan.identity}
                     options={[
                         {

@@ -3,6 +3,8 @@ import { Activity, Database, ShieldCheck } from "lucide-react";
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
 import { Badge, ChoiceField, Notice, Panel, TextAreaField, TextField, ToggleField } from "./ui";
+import { SettingHelp } from "./SettingHelp";
+import { toggleHelp, valueHelp } from "../content/setting-help";
 
 export function PolicyEditor({ plan, edit, issues }: EditorProps) {
     return (
@@ -20,6 +22,7 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 <div className="hb-toggle-list">
                     <ToggleField
                         label="Pre-tool policy hook"
+                        help={<SettingHelp help={toggleHelp.preToolHook} enabled={plan.policy.preToolHook} />}
                         description="Require a host callback before tool execution for workload-specific policy decisions."
                         checked={plan.policy.preToolHook}
                         onCheckedChange={(checked) =>
@@ -30,6 +33,9 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                     />
                     <ToggleField
                         label="Post-tool result hook"
+                        help={
+                            <SettingHelp help={toggleHelp.postToolHook} enabled={plan.policy.postToolHook} />
+                        }
                         description="Require a host callback to inspect or process tool results at the supported boundary."
                         checked={plan.policy.postToolHook}
                         onCheckedChange={(checked) =>
@@ -51,6 +57,7 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
             >
                 <ChoiceField
                     label="Session storage"
+                    help={<SettingHelp help={valueHelp.storage} value={plan.session.storage} />}
                     value={plan.session.storage}
                     options={[
                         {
@@ -73,6 +80,7 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 {plan.session.storage === "local" ? (
                     <TextField
                         label="Session state directory"
+                        help={<SettingHelp help={valueHelp.stateDirectory} />}
                         value={plan.session.baseDirectory}
                         maxLength={1000}
                         monospace
@@ -94,6 +102,16 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 )}
                 <TextField
                     label="Idle cleanup timeout (seconds)"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.idle}
+                            value={
+                                Number.isFinite(plan.session.idleTimeoutSeconds)
+                                    ? plan.session.idleTimeoutSeconds
+                                    : "Not set"
+                            }
+                        />
+                    }
                     type="number"
                     min={0}
                     max={Number.MAX_SAFE_INTEGER}
@@ -114,6 +132,7 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 <div className="hb-toggle-list">
                     <ToggleField
                         label="Infinite sessions"
+                        help={<SettingHelp help={toggleHelp.infinite} enabled={plan.session.infinite} />}
                         description="Enable runtime context management for longer sessions. State and retention still need an explicit policy."
                         checked={plan.session.infinite}
                         onCheckedChange={(checked) =>
@@ -124,6 +143,9 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                     />
                     <ToggleField
                         label="Large-output handling"
+                        help={
+                            <SettingHelp help={toggleHelp.largeOutput} enabled={plan.session.largeOutput} />
+                        }
                         description="Allow large-result handling that can spill to temporary files independently of session storage."
                         checked={plan.session.largeOutput}
                         onCheckedChange={(checked) =>
@@ -147,6 +169,7 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 <div className="hb-toggle-list">
                     <ToggleField
                         label="Streaming"
+                        help={<SettingHelp help={toggleHelp.streaming} enabled={plan.events.streaming} />}
                         description="Request incremental output from the configured runtime session."
                         checked={plan.events.streaming}
                         onCheckedChange={(checked) =>
@@ -157,6 +180,7 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                     />
                     <ToggleField
                         label="Event observer"
+                        help={<SettingHelp help={toggleHelp.observer} enabled={plan.events.observer} />}
                         description="Require host.callbacks.onEvent for host-owned observation and product state."
                         checked={plan.events.observer}
                         onCheckedChange={(checked) =>
@@ -168,6 +192,7 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 </div>
                 <TextAreaField
                     label="Workload evaluation criteria"
+                    help={<SettingHelp help={valueHelp.evaluation} />}
                     value={plan.evaluation}
                     rows={7}
                     maxLength={12000}

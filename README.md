@@ -49,6 +49,7 @@ Vite binds to `127.0.0.1` only. Open the **Overview** tab and read the "Start he
 - Start from empty, minimal, or coding-oriented presets, then change actual configuration decisions.
 - Keep, replace, or remove primary built-in tools; declare custom tools and explicit HTTP MCP integrations.
 - Compose prompt sections, context sources, custom agents, provider choices, policy hooks, session storage, and evaluation criteria.
+- Open consistent educational help on configuration switches and key choices/inputs, including Policy & state.
 - See the resulting execution ownership, required host bindings, and scenario-specific limitations.
 - Save one draft in browser storage, undo/redo edits, and import/export the versioned planner format.
 - Choose an SDK-managed child process, an existing TCP runtime service, or experimental in-process hosting.
@@ -57,6 +58,14 @@ Vite binds to `127.0.0.1` only. Open the **Overview** tab and read the "Start he
 - Explore a materialized SDK control catalog, six scenario gaps, built-in prompt references, and commit-pinned evidence.
 
 The reference catalog documents additional SDK controls that are not all editable in the builder.
+
+## Educational setting help
+
+Use the question-mark button next to a setting to see its behavior, scope, example, limits, and source references. Switches explain both on and off; choices explain the alternatives. Help works with a mouse, keyboard, or touch, without changing the setting. Escape closes it and returns focus to the help button.
+
+Help distinguishes actual SDK options from planner notes and required host code. For example, enabling a pre-tool hook requires a callback implementation; it does not emit `onPreToolUse: true` or implement authorization. Capability claims link to the pinned source snapshot, while planner-owned concepts are labeled as such.
+
+The shared components and content definitions are described in [Project context and intent](docs/project-context.md#educational-help-is-part-of-a-setting). Simple names, descriptions, and search filters stay uncluttered; behavior-changing configuration deserves an explanation.
 
 ## Map to the GitHub Copilot SDK docs
 

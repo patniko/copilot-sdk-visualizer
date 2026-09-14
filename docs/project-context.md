@@ -63,7 +63,7 @@ The following requests are important context for future iterations:
 - **Give a useful finish.** A TypeScript fragment left the user asking “what now?” The primary finish is a language-specific project with manifests, entrypoint, host code, configuration, environment-name reference, preflight, and run instructions.
 - **Show the built-in prompt reference while editing.** Users should know what they are replacing or extending. References must distinguish literal defaults, source fragments, assembly outlines, and dynamic content.
 - **Explain runtime-filled regions.** Opaque labels such as `{{sandbox_or_host_environment_limitations}}` looked like an undocumented macro language. The UI now uses readable labels and an explanation catalog. Reference labels are not SDK interpolation APIs.
-- **Explain boolean controls at the point of use.** A label such as “Host Git operations” is not enough. Help should state the on/off behavior, a concrete example, the emitted SDK option, and what the switch does not control. Opening help must not toggle the setting.
+- **Make educational help consistent across the editors.** A label such as “Host Git operations” is not enough. The user first requested help for Context switches, then called out its absence in Policy & state. Explain on/off behavior or choice alternatives, lifecycle scope, examples, and limits at the point of use. Distinguish SDK options from required host callbacks. Opening help must not change the setting.
 - **Do not hide the tool surface behind a curated sample.** The user explicitly asked for every built-in and its default conditions. The source snapshot contains 59 descriptors and 33 selection aliases; “compiled,” “default in the reference profile,” “conditional,” and “currently selected” must not be conflated.
 - **Keep this work in its own repository and commit milestones.** Normal use must not require the runtime or SDK checkout. Local hosting is the current scope; no remote repository or deployment was requested.
 
@@ -89,6 +89,14 @@ Generated projects leave those requirements explicit. Missing selected integrati
 
 Default-deny is not a substitute for validating resource access inside the effectful service.
 
+### Educational help is part of a setting
+
+Use the shared [`SettingHelp`](../src/components/SettingHelp.tsx) popover through the field's `help` prop. Every configuration `ToggleField` requires that prop; add it to other fields when the choice has runtime, host, or deployment consequences. Keep help buttons outside input labels so opening an explanation cannot change the value. Simple metadata and search/filter fields do not need decorative icons.
+
+Define explanations in [`setting-help.ts`](../src/content/setting-help.ts), with the existing Context switch entries in [`context-help.ts`](../src/content/context-help.ts). [`help-types.ts`](../src/content/help-types.ts) distinguishes switch behavior from choice/input detail sections. Include the option or planner concept, scope, example, boundary, and pinned sources. Host-callback switches must describe a required binding, not a fictitious SDK boolean.
+
+Preserve keyboard opening, Escape/close behavior, focus restoration, and viewport-bounded scrolling on narrow screens. Browser checks must wait for navigation to transfer focus before opening help, and for close-time focus restoration before opening another popover. They also verify that reading help leaves the persisted plan unchanged.
+
 ### Evidence, not assumed SDK parity
 
 The application consumes materialized reference data with pinned source links. It must not infer identical feature availability merely because six SDKs share protocol concepts.
@@ -112,16 +120,17 @@ Show the conditions and source rationale. Do not manufacture a universal resolve
 
 ## Where future work belongs
 
-| Change                                             | Start here                                                                                                                      |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| New configuration choice, validation, or migration | [Plan schema](../src/domain/plan.ts), [presets](../src/domain/presets.ts), and domain tests                                     |
-| Runtime placement or language target               | [Target model](../src/domain/target.ts) and bootstrap adapters                                                                  |
-| Generated project behavior                         | [Bootstrap registry](../src/domain/bootstrap/index.ts), language adapter/templates, common project files, and contract tests    |
-| Explanation of a configuration consequence         | [Decision analysis](../src/domain/analysis.ts) plus a source-backed reference                                                   |
-| Built-in/default-tool facts                        | [Tool snapshot](../src/content/tool-catalog.json), [typed catalog](../src/content/builtin-tools.ts), and its capture script     |
-| Prompt reference or dynamic-region meaning         | [Prompt snapshot](../src/content/builtin-prompts.json), [input explanations](../src/content/prompt-inputs.ts), and prompt tests |
-| Workbench interaction                              | [Components](../src/components/) and production-browser checks                                                                  |
-| Persistence, undo/redo, or recovery                | [Draft store](../src/domain/store.ts), storage helpers, and recovery tests                                                      |
+| Change                                             | Start here                                                                                                                                   |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| New configuration choice, validation, or migration | [Plan schema](../src/domain/plan.ts), [presets](../src/domain/presets.ts), and domain tests                                                  |
+| Runtime placement or language target               | [Target model](../src/domain/target.ts) and bootstrap adapters                                                                               |
+| Generated project behavior                         | [Bootstrap registry](../src/domain/bootstrap/index.ts), language adapter/templates, common project files, and contract tests                 |
+| Explanation of a configuration consequence         | [Decision analysis](../src/domain/analysis.ts) plus a source-backed reference                                                                |
+| Point-of-use setting help                          | [Help definitions](../src/content/setting-help.ts), [shared popover](../src/components/SettingHelp.tsx), and educational-help browser checks |
+| Built-in/default-tool facts                        | [Tool snapshot](../src/content/tool-catalog.json), [typed catalog](../src/content/builtin-tools.ts), and its capture script                  |
+| Prompt reference or dynamic-region meaning         | [Prompt snapshot](../src/content/builtin-prompts.json), [input explanations](../src/content/prompt-inputs.ts), and prompt tests              |
+| Workbench interaction                              | [Components](../src/components/) and production-browser checks                                                                               |
+| Persistence, undo/redo, or recovery                | [Draft store](../src/domain/store.ts), storage helpers, and recovery tests                                                                   |
 
 Keep generated project templates and host-extension notes aligned. A new input is incomplete if the UI edits it but the selected language drops it, its host binding is missing, or its lifecycle meaning is misstated.
 

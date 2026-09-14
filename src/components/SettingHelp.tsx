@@ -2,10 +2,25 @@
 import { useId } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { CircleHelp, ExternalLink, X } from "lucide-react";
-import type { ContextToggleHelp } from "../content/context-help";
+import type { ToggleHelp, ValueHelp } from "../content/help-types";
 import "../setting-help.css";
 
-export function SettingHelp({ help, enabled }: { help: ContextToggleHelp; enabled: boolean }) {
+type SettingHelpProps = (
+    | { help: ToggleHelp; enabled: boolean; value?: never }
+    | { help: ValueHelp; value?: string | number; enabled?: never }
+) & { label?: string };
+
+export function SettingHelp(props: SettingHelpProps) {
+    const { help } = props;
+    const title = props.label ?? help.title;
+    const current = props.enabled ?? props.value;
+    const choice = "details" in help;
+    const callbackValue =
+        !choice && help.valueLabels && typeof current === "boolean"
+            ? current
+                ? help.valueLabels.enabled
+                : help.valueLabels.disabled
+            : undefined;
     const headingId = useId();
     const descriptionId = useId();
     return (
@@ -14,7 +29,7 @@ export function SettingHelp({ help, enabled }: { help: ContextToggleHelp; enable
                 <button
                     className="hb-setting-help-trigger"
                     type="button"
-                    aria-label={`Explain ${help.title}`}
+                    aria-label={`Explain ${title}`}
                     title={help.summary}
                 >
                     <CircleHelp size={16} aria-hidden="true" />
@@ -31,7 +46,7 @@ export function SettingHelp({ help, enabled }: { help: ContextToggleHelp; enable
                     aria-describedby={descriptionId}
                 >
                     <div className="hb-setting-help-heading">
-                        <h3 id={headingId}>{help.title}</h3>
+                        <h3 id={headingId}>{title}</h3>
                         <Popover.Close asChild>
                             <button
                                 type="button"
@@ -43,21 +58,44 @@ export function SettingHelp({ help, enabled }: { help: ContextToggleHelp; enable
                         </Popover.Close>
                     </div>
                     <p id={descriptionId} className="hb-setting-help-scope">
-                        This changes the generated session configuration. Nothing runs in this browser, and it
-                        is not a live-session toggle.
+                        {help.scope ??
+                            "This changes the generated session configuration. Nothing runs in this browser, and it is not a live-session toggle."}
                     </p>
                     <code className="hb-setting-help-option">
-                        {help.option}: {String(enabled)}
+                        {help.option}
+                        {!choice && !help.valueLabels ? `: ${String(current)}` : ""}
                     </code>
+                    {(callbackValue || (choice && current !== undefined)) && (
+                        <p className="hb-setting-help-current">
+                            {callbackValue ?? `Current choice: ${current}`}
+                        </p>
+                    )}
                     <dl className="hb-setting-help-effects">
-                        <div data-current={enabled || undefined}>
-                            <dt>When on</dt>
-                            <dd>{help.enabled}</dd>
-                        </div>
-                        <div data-current={!enabled || undefined}>
-                            <dt>When off</dt>
-                            <dd>{help.disabled}</dd>
-                        </div>
+                        {choice ? (
+                            help.details.map((detail) => (
+                                <div
+                                    key={detail.title}
+                                    data-current={
+                                        (detail.value !== undefined && detail.value === String(current)) ||
+                                        undefined
+                                    }
+                                >
+                                    <dt>{detail.title}</dt>
+                                    <dd>{detail.text}</dd>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <div data-current={current === true || undefined}>
+                                    <dt>When on</dt>
+                                    <dd>{help.enabled}</dd>
+                                </div>
+                                <div data-current={current === false || undefined}>
+                                    <dt>When off</dt>
+                                    <dd>{help.disabled}</dd>
+                                </div>
+                            </>
+                        )}
                         <div>
                             <dt>Example</dt>
                             <dd>{help.example}</dd>
@@ -68,16 +106,25 @@ export function SettingHelp({ help, enabled }: { help: ContextToggleHelp; enable
                         <p>{help.boundary}</p>
                     </div>
                     <p className="hb-setting-help-scope">
-                        Option names shown here use the SDK/runtime contract; language bootstraps translate
-                        them to the matching language API.
+                        These explanations distinguish planner choices, SDK options, and required host code. A
+                        valid configuration is not an authorization or deployment-readiness guarantee.
                     </p>
                     <div className="hb-setting-help-sources">
-                        {help.sources.map((source) => (
-                            <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer">
-                                {source.label}
-                                <ExternalLink size={12} aria-hidden="true" />
-                            </a>
-                        ))}
+                        {help.sources.map((source) =>
+                            source.url ? (
+                                <a
+                                    key={source.url}
+                                    href={source.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {source.label}
+                                    <ExternalLink size={12} aria-hidden="true" />
+                                </a>
+                            ) : (
+                                <span key={source.label}>{source.label}</span>
+                            ),
+                        )}
                     </div>
                     <Popover.Arrow className="hb-setting-help-arrow" />
                 </Popover.Content>

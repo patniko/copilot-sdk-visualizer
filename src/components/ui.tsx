@@ -91,8 +91,19 @@ export function Notice({
 interface FieldDetails {
     label: string;
     hint?: ReactNode;
+    help?: ReactNode;
     error?: string;
     monospace?: boolean;
+}
+
+function FieldLabel({ id, label, help }: { id: string; label: string; help?: ReactNode }) {
+    if (!help) return <label htmlFor={id}>{label}</label>;
+    return (
+        <div className="hb-field-heading">
+            <label htmlFor={id}>{label}</label>
+            {help}
+        </div>
+    );
 }
 
 function FieldHelp({ id, hint, error }: { id: string; hint?: ReactNode; error?: string }) {
@@ -119,6 +130,7 @@ function describedBy(id: string, hint: ReactNode, error?: string) {
 export function TextField({
     label,
     hint,
+    help,
     error,
     monospace,
     value,
@@ -133,7 +145,7 @@ export function TextField({
     const id = useId();
     return (
         <div className={clsx("hb-field", className)}>
-            <label htmlFor={id}>{label}</label>
+            <FieldLabel id={id} label={label} help={help} />
             <input
                 {...props}
                 id={id}
@@ -151,6 +163,7 @@ export function TextField({
 export function TextAreaField({
     label,
     hint,
+    help,
     error,
     monospace,
     value,
@@ -166,7 +179,7 @@ export function TextAreaField({
     const id = useId();
     return (
         <div className={clsx("hb-field", className)}>
-            <label htmlFor={id}>{label}</label>
+            <FieldLabel id={id} label={label} help={help} />
             <textarea
                 {...props}
                 id={id}
@@ -218,6 +231,7 @@ export interface Option<T extends string> {
 export function SelectField<T extends string>({
     label,
     hint,
+    help,
     error,
     value,
     options,
@@ -230,7 +244,7 @@ export function SelectField<T extends string>({
     const id = useId();
     return (
         <div className="hb-field">
-            <label htmlFor={id}>{label}</label>
+            <FieldLabel id={id} label={label} help={help} />
             <select
                 id={id}
                 className="hb-input hb-select"
@@ -260,6 +274,7 @@ export function ChoiceField<T extends string>({
     onValueChange,
     compact = false,
     hint,
+    help,
     error,
 }: FieldDetails & {
     value: T;
@@ -273,7 +288,8 @@ export function ChoiceField<T extends string>({
             className={clsx("hb-choice-field", compact && "hb-choice-compact")}
             aria-describedby={describedBy(id, hint, error)}
         >
-            <legend>{label}</legend>
+            <legend id={`${id}-label`}>{label}</legend>
+            {help && <div className="hb-choice-help">{help}</div>}
             <div className="hb-choices">
                 {options.map((option) => (
                     <label
@@ -314,7 +330,7 @@ export function ToggleField({
     description: string;
     checked: boolean;
     onCheckedChange: (checked: boolean) => void;
-    help?: ReactNode;
+    help: ReactNode;
 }) {
     const id = useId();
     return (

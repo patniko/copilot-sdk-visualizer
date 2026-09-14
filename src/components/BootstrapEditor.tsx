@@ -13,6 +13,8 @@ import {
 import { buildBootstrapProject } from "../domain/bootstrap";
 import type { BootstrapBlocker, BootstrapResult } from "../domain/bootstrap/types";
 import { LANGUAGES, RUNTIME_OPTIONS } from "../domain/target";
+import { SettingHelp } from "./SettingHelp";
+import { valueHelp } from "../content/setting-help";
 import type { RuntimeKind } from "../domain/target";
 import { sdkDocsForView } from "../content/sdk-docs";
 import { createPreset } from "../domain/presets";
@@ -69,6 +71,7 @@ export function BootstrapEditor({
             </ol>
             <Panel
                 title="Where should the runtime live?"
+                action={<SettingHelp help={valueHelp.runtime} value={plan.target.runtime} />}
                 description="Choose a process boundary, transport, and lifecycle owner. None of these choices creates a sandbox."
             >
                 <fieldset className="hb-runtime-options">
@@ -123,6 +126,7 @@ export function BootstrapEditor({
                 {plan.target.runtime === "managed" && (
                     <TextField
                         label="Managed runtime executable (optional)"
+                        help={<SettingHelp help={valueHelp.runtimePath} />}
                         value={plan.target.cliPath}
                         monospace
                         maxLength={1000}
@@ -139,6 +143,7 @@ export function BootstrapEditor({
                 {plan.target.runtime === "external" && (
                     <TextField
                         label="Existing runtime endpoint"
+                        help={<SettingHelp help={valueHelp.runtimeEndpoint} />}
                         value={plan.target.serverUrl}
                         monospace
                         maxLength={1500}
@@ -220,6 +225,7 @@ export function BootstrapEditor({
                 <div className="hb-language-picker">
                     <ChoiceField
                         label="Bootstrap language"
+                        help={<SettingHelp help={valueHelp.language} value={plan.target.language} />}
                         value={plan.target.language}
                         options={LANGUAGES.map((language) => ({ value: language.id, label: language.label }))}
                         onValueChange={(value) =>

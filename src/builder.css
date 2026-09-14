@@ -699,6 +699,7 @@
 }
 
 .hb-field > label,
+.hb-field-heading > label,
 .hb-choice-field > legend,
 .hb-mcp-tools > legend {
     padding: 0;
@@ -810,6 +811,32 @@
 .hb-choice-label {
     font-size: 12px;
     font-weight: 600;
+}
+
+.hb-field-heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.hb-field-heading > label {
+    min-width: 0;
+}
+
+.hb-choice-field:has(> .hb-choice-help) > legend {
+    float: left;
+    max-width: calc(100% - 42px);
+    margin-bottom: 10px;
+}
+
+.hb-choice-help {
+    float: right;
+    margin: -4px 0 8px 8px;
+}
+
+.hb-choice-help + .hb-choices {
+    clear: both;
 }
 
 .hb-choice-description {

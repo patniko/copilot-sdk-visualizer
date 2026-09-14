@@ -61,6 +61,14 @@
     background: var(--cp-surface-soft);
     color: var(--cp-accent);
     font-size: 11px;
+    overflow-wrap: anywhere;
+}
+.hb-setting-help-current {
+    margin: 0 0 12px;
+    color: var(--cp-accent);
+    font-size: 12px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
 }
 .hb-setting-help-effects {
     margin: 0;

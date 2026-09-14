@@ -5,6 +5,7 @@ import type { EditorProps } from "./editor";
 import { Badge, Button, LineListField, Notice, Panel, TextField, ToggleField } from "./ui";
 import { SettingHelp } from "./SettingHelp";
 import { contextToggleHelp } from "../content/context-help";
+import { valueHelp } from "../content/setting-help";
 
 export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
     return (
@@ -20,6 +21,7 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
             >
                 <TextField
                     label="Project working directory"
+                    help={<SettingHelp help={valueHelp.workspace} />}
                     value={plan.context.workspace}
                     placeholder="Optional, e.g. ./workspace"
                     monospace
@@ -102,6 +104,12 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                 <div className="hb-field-grid">
                     <LineListField
                         label="Skill directories"
+                        help={
+                            <SettingHelp
+                                help={valueHelp.skillDirectories}
+                                value={`${plan.context.skillDirectories.length} directories`}
+                            />
+                        }
                         values={plan.context.skillDirectories}
                         onValuesChange={(values) =>
                             edit((draft) => {
@@ -116,6 +124,12 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     />
                     <LineListField
                         label="Plugin directories"
+                        help={
+                            <SettingHelp
+                                help={valueHelp.pluginDirectories}
+                                value={`${plan.context.pluginDirectories.length} directories`}
+                            />
+                        }
                         values={plan.context.pluginDirectories}
                         onValuesChange={(values) =>
                             edit((draft) => {

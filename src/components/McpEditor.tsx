@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { Network, Plus, Trash2 } from "lucide-react";
 import { createMcpServer } from "../domain/plan";
+import { SettingHelp } from "./SettingHelp";
+import { valueHelp } from "../content/setting-help";
 import type { McpServer } from "../domain/plan";
 import { issueFor, uniqueName, useEditorRowIds } from "./editor";
 import type { EditorProps } from "./editor";
@@ -103,6 +105,7 @@ function ServerRow({ server, index, edit, issues }: EditorProps & { server: McpS
                 />
                 <TextField
                     label="MCP endpoint URL"
+                    help={<SettingHelp help={valueHelp.mcpEndpoint} />}
                     type="url"
                     value={server.url}
                     maxLength={1500}
@@ -126,6 +129,9 @@ function ServerRow({ server, index, edit, issues }: EditorProps & { server: McpS
                             <div className="hb-field-grid">
                                 <TextField
                                     label="Raw server tool name"
+                                    help={
+                                        <SettingHelp help={valueHelp.mcpNames} label="Raw server tool name" />
+                                    }
                                     value={tool.name}
                                     monospace
                                     maxLength={64}
@@ -141,6 +147,12 @@ function ServerRow({ server, index, edit, issues }: EditorProps & { server: McpS
                                 />
                                 <TextField
                                     label="Canonical runtime wire name"
+                                    help={
+                                        <SettingHelp
+                                            help={valueHelp.mcpNames}
+                                            label="Canonical runtime wire name"
+                                        />
+                                    }
                                     value={tool.wireName}
                                     placeholder="Enter the exact discovered name"
                                     monospace

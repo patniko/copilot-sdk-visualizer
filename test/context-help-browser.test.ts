@@ -24,6 +24,11 @@ it("explains every context switch without toggling it, and restores keyboard foc
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Context & packs\b/ })
             .click();
+        await expect
+            .poll(() =>
+                page.locator("#editor-heading").evaluate((element) => document.activeElement === element),
+            )
+            .toBe(true);
         for (const key of CONTEXT_TOGGLE_KEYS) {
             const help = contextToggleHelp[key];
             const button = page.getByRole("button", { name: `Explain ${help.title}`, exact: true });

@@ -7,6 +7,8 @@ import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
 import { inputKindLabels, toolActionLabel } from "./tool-catalog-ui";
 import { ToolCatalogSources } from "./ToolCatalogSources";
+import { SettingHelp } from "./SettingHelp";
+import { valueHelp } from "../content/setting-help";
 import { Badge, Button, ChoiceField, Notice, TextAreaField } from "./ui";
 
 export function BuiltinToolDetail({
@@ -43,7 +45,10 @@ export function BuiltinToolDetail({
                 <Badge>{spec.group}</Badge>
             </div>
             <div className="hb-tool-plan-control">
-                <p className="hb-small-label">Current plan selection</p>
+                <div className="hb-field-heading">
+                    <p className="hb-small-label">Current plan selection</p>
+                    <SettingHelp help={valueHelp.toolAction} value={settings.action} />
+                </div>
                 <ChoiceField
                     label={`${name} action`}
                     value={settings.action}
@@ -207,6 +212,7 @@ export function BuiltinToolDetail({
                     />
                     <TextAreaField
                         label={`${name} override parameters (JSON)`}
+                        help={<SettingHelp help={valueHelp.toolSchema} />}
                         monospace
                         spellCheck={false}
                         rows={9}
