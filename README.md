@@ -6,6 +6,8 @@ A standalone, local-first web application for designing a harness on the GitHub 
 
 This repository is independent of the runtime and language SDK repositories. It does not start agents, call model services, or execute tools. It helps an engineer understand configuration decisions and produces plans and SDK integration sketches.
 
+For the motivation, original design feedback, architectural intent, and a continuation checklist, read [Project context and intent](docs/project-context.md).
+
 ## What the builder does
 
 - Start from empty, minimal, or coding-oriented presets, then change actual configuration decisions.
@@ -13,10 +15,50 @@ This repository is independent of the runtime and language SDK repositories. It 
 - Compose prompt sections, context sources, custom agents, provider choices, policy hooks, session storage, and evaluation criteria.
 - See the resulting execution ownership, required host bindings, and scenario-specific limitations.
 - Save one draft in browser storage, undo/redo edits, and import/export the versioned planner format.
-- Export TypeScript integration sketches with explicit host callbacks and guarded credential references.
-- Explore a materialized catalog of 52 SDK controls, six scenario gaps, and commit-pinned evidence.
+- Choose an SDK-managed child process, an existing TCP runtime service, or experimental in-process hosting.
+- Generate language-specific bootstrap projects with dependency setup, an entrypoint, host extension points, local preflight, and run instructions.
+- Keep the TypeScript integration sketch and reversible planner JSON available as smaller exports.
+- Explore a materialized SDK control catalog, six scenario gaps, built-in prompt references, and commit-pinned evidence.
 
-The built-in picker is a curated primary set. In coding-default inventory mode, unlisted tools can remain inherited. The reference catalog documents additional SDK controls that are not yet editable in this first builder.
+The reference catalog documents additional SDK controls that are not all editable in the builder. Runtime capability, model, platform, and experiment gates still determine actual availability; selecting a tool is not the same as enabling every prerequisite or granting authority.
+
+## Complete built-in tool visibility
+
+`src/content/tool-catalog.json` records **59 built-in descriptors** and **33 selection aliases** from the pinned runtime source. It includes registry factories, lookup-only/specialized descriptors, both shell families, leaf registrations, and fixed extension-management definitions. Dynamic MCP and third-party extension tools are separate.
+
+Default status is deliberately qualified: six entries are enabled in the stated online/local/root/split-editing reference profile, 33 depend on capabilities/models/modes/policy, eight belong to platform-specific shell families, and 12 are internal or specialized. The reference is not a claim that every running CLI has only six tools, or that every compiled tool is on.
+
+Keeping a tool in inherited coding mode means leaving the runtime's selection policy intact. It does not force every catalog member on. The UI distinguishes reference defaults, the current plan's choices, and override routes verified by this snapshot. `catalog_search` is explicitly reserved; unverified override choices are preserved as plan data but are not emitted as runnable bootstrap code.
+
+Older nine-tool drafts migrate without broadening their effective inventory: new entries are removed for explicit inventories, or left to runtime defaults for inherited inventories. Existing choices are retained. The payload records the catalog revision so a malformed current catalog is not silently repaired.
+
+## From configuration to a running agent
+
+1. Configure behavior, tools, context, policies, identity, and session state.
+2. Open **Build & run** and choose the runtime placement and SDK language.
+3. Resolve any compatibility blockers. Unsupported selections are not silently dropped—for example, the inspected Java SDK does not expose a virtual SessionFs provider.
+4. Download the complete ZIP and start with its `README.md`, not an isolated code fragment.
+5. Install the SDK dependencies and provide the listed environment values and host integrations.
+6. Run the generated local preflight command. It checks prerequisites without starting a runtime or model.
+7. Run an agent turn explicitly in your own host. That action can make real model requests and execute effects allowed by the host policy.
+
+The inspected SDK source is newer than a verified package-release mapping. Bootstrap setup therefore uses an exact SDK source revision rather than pretending development versions are installable from public package registries. Source setup is an explicit action in the generated project; the visualizer never fetches or executes that SDK.
+
+An in-process runtime shares the application's address space, environment, and loaded native-library lifetime. A managed child gives a separate process boundary, not a sandbox. For an existing service, its operator—not the SDK client—owns server startup settings, authentication, networking, and shutdown.
+
+## Built-in prompt references
+
+The prompt editor includes twelve repository-backed section references. Literal defaults, fragments, model-dependent regions, and assembled groups are labeled separately; this is not a dump of a live session prompt.
+
+Runtime-provided regions have readable labels and an explanation catalog covering their meaning, source, example, and conditions. The earlier braced reference labels are **not SDK macros** to paste into a prompt. Section previews preserve user-authored text and do not pretend to resolve runtime inputs or group/model-specific assembly.
+
+To intentionally refresh the materialized prompt reference from a checkout, run:
+
+```bash
+node script/capture-prompt-reference.mjs /path/to/copilot-agent-runtime
+```
+
+Normal app use does not read that checkout.
 
 ## Local development
 
@@ -61,13 +103,15 @@ COPILOT_SDK_SOURCE=/path/to/copilot-sdk/nodejs/src/index.ts pnpm test:contract
 | `src/content/reference.json` | Independent, materialized research snapshot; no sibling-repository reads.           |
 | `src/components/`            | Accessible workbench editors, source inspection, and export UI.                     |
 
-The draft store writes only validated plans. Invalid edits retain the last valid saved version. A corrupt or unsupported saved draft is not silently overwritten; recovery requires an explicit replacement or import. Drafts are local to the browser origin; concurrent tabs use last-save-wins storage rather than a collaborative synchronization protocol.
+The draft store writes only validated plans. Payload version 2 adds runtime/language targets; version 1 drafts migrate with their behavior preserved and TypeScript/managed-process defaults. The storage key stays stable. Invalid edits retain the last valid saved version. A corrupt or unsupported saved draft is not silently overwritten; recovery requires an explicit replacement or import. Drafts are local to the browser origin; concurrent tabs use last-save-wins storage rather than a collaborative synchronization protocol.
 
 ## Exports and host code
 
 Plan JSON is this application's planner format, **not** serialized SDK `SessionConfig`. It includes design intent and evaluation notes as well as configuration.
 
 The TypeScript export defines `createHarness(host)`. The host must supply real permission handlers, tool implementations, credential callbacks, model choices, event observers, and a session filesystem provider where selected. The caller must stop the returned client when finished. No no-op permission or storage implementation is generated.
+
+Bootstrap projects add the runnable entrypoint, dependency manifest/setup, host module, configuration data, environment-name reference, and exact next steps. A generated scaffold is not a completed production integration: default policies deny effects, and selected custom tools, hooks, or virtual storage can remain explicit failing integration points until implemented.
 
 Only environment-variable names and callback references are used for provider credentials. Do not put secrets in prompts, names, endpoint URLs, or imported plans: browser draft storage is not an encrypted secret vault.
 
