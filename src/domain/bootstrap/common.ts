@@ -241,6 +241,7 @@ export function commonFiles(plan: HarnessPlan, project: Omit<BootstrapProject, "
         "## 2. Provide environment values and host integrations",
         "",
         "`.env.example` lists names only. Set them in your shell/process; this bootstrap does not automatically source an environment file. Never commit secret values.",
+        "If using the environment-backed GitHub token provider, `GITHUB_TOKEN_EXPIRES_AT` is the token issuer's actual future expiry as UNIX seconds, not a duration to reset on each request. Replace that starter adapter with your real acquisition/refresh service for production.",
         "",
         ...project.requirements.map((item) => `- **${item.title}** — \`${item.file}\`: ${item.detail}`),
         "",
@@ -277,6 +278,12 @@ export function commonFiles(plan: HarnessPlan, project: Omit<BootstrapProject, "
         "## Runtime placement and limitations",
         "",
         ...project.notes.map((note) => `- ${note}`),
+        ...(project.language === "java" || project.language === "rust"
+            ? [
+                  "",
+                  "Generated Java/Rust source and manifest syntax were checked, but full compilation/native startup was not verified on the visualizer author's installed toolchains. Build with the specified JDK/Rust version and test the exact platform before deployment.",
+              ]
+            : []),
         "",
         "## Configuration and quality ownership",
         "",

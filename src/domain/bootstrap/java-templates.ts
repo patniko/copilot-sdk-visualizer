@@ -129,10 +129,12 @@ final class Configuration {
                 case "empty" -> CopilotClientMode.EMPTY;
                 case "copilot-cli" -> CopilotClientMode.COPILOT_CLI;
                 default -> throw new IllegalArgumentException("Unknown client mode");
-            })
-            .setCopilotHome(text(client, "baseDirectory"))
-            .setSessionIdleTimeoutSeconds(Math.toIntExact(integer(client, "idleTimeoutSeconds")))
-            .setUseLoggedInUser(!session.has("provider") && "developer".equals(text(data, "identity")));
+            });
+        if (!"external".equals(text(client, "runtime"))) {
+            options.setCopilotHome(text(client, "baseDirectory"))
+                .setSessionIdleTimeoutSeconds(Math.toIntExact(integer(client, "idleTimeoutSeconds")))
+                .setUseLoggedInUser(!session.has("provider") && "developer".equals(text(data, "identity")));
+        }
         return options;
     }
 

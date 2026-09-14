@@ -1,38 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { useState } from "react";
-import { ArrowRight, Braces, CircleHelp, Plus, Search, Trash2, Wrench } from "lucide-react";
-import { BUILTIN_NAMES, BUILTIN_SPECS, createCustomTool } from "../domain/plan";
-import type { BuiltinName, CustomTool } from "../domain/plan";
+import { Plus, Trash2, Wrench } from "lucide-react";
+import { BUILTIN_NAMES, createCustomTool } from "../domain/plan";
+import type { CustomTool } from "../domain/plan";
+import { toolCatalog } from "../content/builtin-tools";
 import { toolSummary } from "../domain/analysis";
 import { issueFor, uniqueName } from "./editor";
 import type { EditorProps } from "./editor";
 import { McpEditor } from "./McpEditor";
-import {
-    Badge,
-    Button,
-    ChoiceField,
-    EmptyState,
-    Notice,
-    Panel,
-    TextAreaField,
-    TextField,
-    ToggleField,
-} from "./ui";
+import { ToolCatalogBrowser } from "./ToolCatalogBrowser";
+import { Button, ChoiceField, EmptyState, Panel, TextAreaField, TextField, ToggleField } from "./ui";
+import "../tool-catalog.css";
 
 export function ToolsEditor(props: EditorProps) {
     const { plan, edit, issues } = props;
-    const [query, setQuery] = useState("");
     const summary = toolSummary(plan);
-    const filtered = BUILTIN_NAMES.filter((name) =>
-        `${name} ${BUILTIN_SPECS[name].label} ${BUILTIN_SPECS[name].group}`
-            .toLowerCase()
-            .includes(query.trim().toLowerCase()),
-    );
     return (
         <div className="hb-editor-stack">
             <Panel
-                title="Make the advertised inventory intentional"
-                description="Availability and implementation are separate decisions. Keep a name, change its behavior, or remove it."
+                title="Choose the tool selection policy"
+                description="Current plan decisions are not a live enabled-tool inventory. Availability, implementation, and authority remain separate."
             >
                 <ChoiceField
                     label="Tool inventory"
@@ -41,12 +27,12 @@ export function ToolsEditor(props: EditorProps) {
                         {
                             value: "explicit",
                             label: "Explicit inventory",
-                            description: "Only the selected declarations",
+                            description: "Selected names, still subject to gates",
                         },
                         {
                             value: "coding-defaults",
                             label: "Coding defaults",
-                            description: "Selected tools + inherited inventory",
+                            description: "Leave runtime default selection intact",
                             disabled: plan.clientMode === "empty",
                         },
                     ]}
@@ -59,56 +45,38 @@ export function ToolsEditor(props: EditorProps) {
                     hint={
                         plan.clientMode === "empty"
                             ? "Empty client mode requires an explicit inventory. The client baseline is editable in Overview."
-                            : "Coding defaults can expose additional runtime tools not listed in this curated primary set."
+                            : summary.inherited
+                              ? toolCatalog.context.inheritedCoding
+                              : "Keep selects a name in the explicit inventory. Runtime, platform, feature, and permission gates still apply."
                     }
                 />
-                <div className="hb-tool-totals" aria-label="Current tool counts">
+                <div className="hb-tool-totals" aria-label="Current plan decisions, not enabled-tool counts">
                     <span>
-                        <strong>{summary.kept.length}</strong> kept
+                        <strong>{summary.kept.length}</strong>{" "}
+                        {summary.inherited
+                            ? "left to default policy / not excluded"
+                            : "selected built-in names"}
                     </span>
                     <span>
-                        <strong>{summary.overridden.length}</strong> overridden
+                        <strong>{summary.overridden.length}</strong> override requests
                     </span>
                     <span>
-                        <strong>{summary.removed.length}</strong> removed
+                        <strong>{summary.removed.length}</strong> exclusions
                     </span>
                     <span>
-                        <strong>{plan.customTools.length}</strong> custom
+                        <strong>{plan.customTools.length}</strong> custom declarations
                     </span>
                     <span>
-                        <strong>{summary.mcpTools}</strong> MCP
+                        <strong>{summary.mcpTools}</strong> MCP declarations
                     </span>
                 </div>
+                <p className="hb-field-hint">
+                    Switching inventory policy retains your Keep / Override / Remove choices. In inherited
+                    mode, Keep is labeled Runtime default and never forces all {BUILTIN_NAMES.length}{" "}
+                    descriptors on.
+                </p>
             </Panel>
-            <Panel
-                title="Primary built-in tools"
-                description="A curated primary set, not the full runtime catalog. Override routes the same tool name to your host."
-                action={<Badge>{BUILTIN_NAMES.length} primary tools</Badge>}
-            >
-                <div className="hb-search-field">
-                    <Search size={16} aria-hidden="true" />
-                    <TextField
-                        label="Filter primary tools"
-                        value={query}
-                        onValueChange={setQuery}
-                        placeholder="Find a tool by name or purpose"
-                        type="search"
-                    />
-                </div>
-                <div className="hb-builtin-list">
-                    {filtered.map((name) => (
-                        <BuiltinRow key={name} name={name} {...props} />
-                    ))}
-                    {filtered.length === 0 && (
-                        <p className="hb-muted-copy">No primary tools match this filter.</p>
-                    )}
-                </div>
-                <Notice title="Some names are deliberately reserved">
-                    <code>catalog_search</code> and <code>tool_search_tool</code> are not available in the
-                    generic custom-tool adder. Use the dedicated override control above for the listed
-                    built-ins.
-                </Notice>
-            </Panel>
+            <ToolCatalogBrowser {...props} />
             <Panel
                 title="Custom host tools"
                 description="Declare a capability the host will implement. This app never invokes its handler."
@@ -121,8 +89,6 @@ export function ToolsEditor(props: EditorProps) {
                                 crypto.randomUUID(),
                                 uniqueName("lookup_record", [
                                     ...BUILTIN_NAMES,
-                                    "catalog_search",
-                                    "tool_search_tool",
                                     ...plan.customTools.map((entry) => entry.name),
                                 ]),
                             );
@@ -150,122 +116,6 @@ export function ToolsEditor(props: EditorProps) {
             </Panel>
             <McpEditor {...props} />
         </div>
-    );
-}
-
-function BuiltinRow({ name, plan, edit, issues, onEvidence }: EditorProps & { name: BuiltinName }) {
-    const spec = BUILTIN_SPECS[name];
-    const settings = plan.tools[name];
-    return (
-        <article
-            className={`hb-builtin-row hb-builtin-${settings.action}`}
-            aria-label={`${name} built-in tool`}
-        >
-            <div className="hb-builtin-heading">
-                <div className="hb-builtin-identity">
-                    <span className="hb-tool-icon">
-                        <Braces size={17} aria-hidden="true" />
-                    </span>
-                    <div>
-                        <div className="hb-name-line">
-                            <code>{name}</code>
-                            <span>{spec.group}</span>
-                        </div>
-                        <p>{spec.label}</p>
-                    </div>
-                </div>
-                <ChoiceField
-                    label={`${name} action`}
-                    compact
-                    value={settings.action}
-                    options={[
-                        { value: "keep", label: "Keep" },
-                        { value: "override", label: "Override" },
-                        { value: "remove", label: "Remove" },
-                    ]}
-                    onValueChange={(value) =>
-                        edit((draft) => {
-                            draft.tools[name].action = value;
-                        })
-                    }
-                />
-            </div>
-            {settings.action === "override" && (
-                <div className="hb-override-editor">
-                    <div className="hb-route-change">
-                        <div>
-                            <span>Before</span>
-                            <code>{name}</code>
-                            <ArrowRight size={13} aria-hidden="true" />
-                            <span>Native implementation</span>
-                        </div>
-                        <div>
-                            <span>Now</span>
-                            <code>{name}</code>
-                            <ArrowRight size={13} aria-hidden="true" />
-                            <code>host.toolHandlers[&quot;{name}&quot;]</code>
-                        </div>
-                    </div>
-                    <TextAreaField
-                        label={`${name} override description`}
-                        rows={2}
-                        maxLength={600}
-                        value={settings.description}
-                        onValueChange={(value) =>
-                            edit((draft) => {
-                                draft.tools[name].description = value;
-                            })
-                        }
-                        error={issueFor(issues, `tools.${name}.description`)}
-                        hint="Describe the actual replacement behavior that the model should expect."
-                    />
-                    <TextAreaField
-                        label={`${name} override parameters (JSON)`}
-                        monospace
-                        spellCheck={false}
-                        rows={7}
-                        maxLength={12000}
-                        value={settings.parameters}
-                        onValueChange={(value) =>
-                            edit((draft) => {
-                                draft.tools[name].parameters = value;
-                            })
-                        }
-                        error={issueFor(issues, `tools.${name}.parameters`)}
-                        hint={
-                            'Your host schema must have top-level "type": "object". The starter schema is illustrative, not the native schema.'
-                        }
-                    />
-                    <div className="hb-override-boundary">
-                        <p>
-                            <strong>No automatic original implementation.</strong> Your handler owns the
-                            replacement effect and its authorization checks.
-                        </p>
-                        <Button
-                            variant="ghost"
-                            size="small"
-                            onClick={() =>
-                                onEvidence({
-                                    kind: "topic",
-                                    title: `What overriding ${name} changes`,
-                                    detail: "overridesBuiltInTool replaces the advertised description, parameter schema, and execution route under the same unqualified tool name. The host must provide the handler; native effects and native permission checks are not automatically inherited. Updating live declarations alone does not rebind SDK handlers.",
-                                    sources: [
-                                        "override-planning",
-                                        "override-schema",
-                                        "override-dispatch",
-                                        "override-permissions",
-                                        "sdk-live-tools",
-                                    ],
-                                })
-                            }
-                        >
-                            <CircleHelp size={15} aria-hidden="true" />
-                            Why this matters
-                        </Button>
-                    </div>
-                </div>
-            )}
-        </article>
     );
 }
 

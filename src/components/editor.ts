@@ -12,6 +12,7 @@ export type ViewId =
     | "agents"
     | "models"
     | "policy"
+    | "bootstrap"
     | "reference";
 
 export type Evidence =
@@ -54,6 +55,7 @@ export function useEditorRowIds(count: number) {
 
 export function viewForPath(path: string): ViewId {
     const first = path.split(".")[0];
+    if (first === "target") return "bootstrap";
     if (first === "prompt") return "prompt";
     if (first === "tools" || first === "customTools" || first === "mcpServers" || first === "inventory")
         return "tools";

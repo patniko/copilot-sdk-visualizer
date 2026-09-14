@@ -11,6 +11,7 @@ interface GeneratedOutput {
     sdk: string;
     plan: string;
     error: string | null;
+    sdkError: string | null;
 }
 
 export function ExportDialog({
@@ -18,11 +19,13 @@ export function ExportDialog({
     issues,
     blocked,
     onClose,
+    onBuild,
 }: {
     plan: HarnessPlan;
     issues: PlanIssue[];
     blocked: boolean;
     onClose: () => void;
+    onBuild?: () => void;
 }) {
     const [tab, setTab] = useState<"sdk" | "plan">("sdk");
     const [feedback, setFeedback] = useState<{ error: boolean; message: string } | null>(null);
@@ -32,20 +35,33 @@ export function ExportDialog({
                 sdk: "",
                 plan: "",
                 error: "Resolve the draft's validation or recovery issues before exporting.",
+                sdkError: null,
             };
         try {
-            return { sdk: generateSdkCode(plan), plan: exportPlan(plan), error: null };
+            const planner = exportPlan(plan);
+            try {
+                return { sdk: generateSdkCode(plan), plan: planner, error: null, sdkError: null };
+            } catch (error) {
+                return {
+                    sdk: "",
+                    plan: planner,
+                    error: null,
+                    sdkError: error instanceof Error ? error.message : String(error),
+                };
+            }
         } catch (error) {
             return {
                 sdk: "",
                 plan: "",
                 error: `Export failed: ${error instanceof Error ? error.message : String(error)}`,
+                sdkError: null,
             };
         }
     }, [plan, issues.length, blocked]);
     const text = output[tab];
     const label = tab === "sdk" ? "SDK TypeScript" : "Plan JSON";
-    const disabled = Boolean(output.error) || blocked || issues.length > 0;
+    const disabled =
+        Boolean(output.error || (tab === "sdk" && output.sdkError)) || blocked || issues.length > 0;
     const contracts = Array.from(new Set(hostContracts(plan)));
     const decisions = analyzePlan(plan);
 
@@ -97,10 +113,22 @@ export function ExportDialog({
             onOpenChange={(open) => {
                 if (!open) onClose();
             }}
-            title="Take the plan to your host"
-            description="Export a reversible planner file or a host-integration template. Neither is executed by this app."
+            title="Export plan & TypeScript sketch"
+            description="Keep the reversible planner file or inspect the single-file TypeScript integration reference. Neither is executed here."
             size="wide"
         >
+            <div className="hb-legacy-export-note">
+                <Notice title="For a complete language-specific project, use Build & run">
+                    This export is planner JSON or a TypeScript reference sketch, not the selected
+                    language&apos;s complete bootstrap. Build &amp; run includes dependencies, entrypoint,
+                    host notes, and install/preflight/run steps.
+                    {onBuild && (
+                        <Button variant="ghost" size="small" onClick={onBuild}>
+                            Open Build &amp; run
+                        </Button>
+                    )}
+                </Notice>
+            </div>
             {output.error && (
                 <Notice title="Export is unavailable" tone="error">
                     {output.error}
@@ -157,6 +185,11 @@ export function ExportDialog({
                             </div>
                         )}
                         <Tabs.Content value="sdk" className="hb-export-tab-content">
+                            {output.sdkError && (
+                                <Notice title="SDK sketch needs review" tone="error">
+                                    {output.sdkError}
+                                </Notice>
+                            )}
                             <p className="hb-export-explainer">
                                 A TypeScript integration sketch,{" "}
                                 <strong>not runnable without the required host bindings</strong>. Review and

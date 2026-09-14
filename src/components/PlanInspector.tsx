@@ -1,20 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import {
-    Activity,
-    ArrowDown,
-    ArrowUpRight,
-    Braces,
-    ChevronRight,
-    CircleDot,
-    Cpu,
-    Fingerprint,
-    Layers3,
-} from "lucide-react";
+import { Activity, ArrowDown, ArrowUpRight, Braces, ChevronRight, CircleDot, Layers3 } from "lucide-react";
 import { analyzePlan, hostContracts, toolSummary } from "../domain/analysis";
 import type { Decision } from "../domain/analysis";
 import type { HarnessPlan } from "../domain/plan";
+import { BUILTIN_NAMES, BUILTIN_SPECS, toolCatalog } from "../content/builtin-tools";
 import type { Evidence } from "./editor";
+import { RuntimePlacement } from "./RuntimePlacement";
+import { referenceBaselineNames, referenceDefaultGroups } from "./tool-catalog-ui";
 import { Badge, Button } from "./ui";
+import "../tool-catalog.css";
 
 const providerLabels = {
     copilot: "GitHub Copilot",
@@ -27,17 +21,20 @@ const decisionLabels = { host: "Host", review: "Review", gap: "Boundary" };
 export function PlanInspector({
     plan,
     onEvidence,
+    onBuild,
     onExport,
     exportDisabled,
 }: {
     plan: HarnessPlan;
     onEvidence: (evidence: Evidence) => void;
+    onBuild: () => void;
     onExport: () => void;
     exportDisabled: boolean;
 }) {
     const summary = toolSummary(plan);
     const contracts = Array.from(new Set(hostContracts(plan)));
     const decisions = analyzePlan(plan);
+    const unverifiedOverrides = summary.overridden.filter((name) => !BUILTIN_SPECS[name].overrideable);
     return (
         <aside className="hb-inspector" aria-labelledby="live-plan-heading" tabIndex={0}>
             <div className="hb-inspector-header">
@@ -52,32 +49,23 @@ export function PlanInspector({
             </div>
             <section
                 className="hb-runtime-map"
-                aria-label="Host to capabilities to shared runtime to provider and events"
+                aria-label="Runtime placement, configured capabilities, and provider events"
             >
-                <div className="hb-map-node">
-                    <Fingerprint size={17} aria-hidden="true" />
-                    <div>
-                        <strong>Your application host</strong>
-                        <span>Identity, permissions, handlers</span>
-                    </div>
-                </div>
+                <RuntimePlacement target={plan.target} compact />
                 <ArrowDown className="hb-map-arrow" size={15} aria-hidden="true" />
                 <div className="hb-map-node">
                     <Layers3 size={17} aria-hidden="true" />
                     <div>
                         <strong>Capabilities &amp; context</strong>
                         <span>
-                            {summary.knownVisible} known local tools + {summary.mcpTools} MCP
-                            {summary.inherited ? " + inherited" : ""}
+                            {summary.inherited
+                                ? `Runtime selects built-ins; ${summary.removed.length} named exclusions`
+                                : `${summary.kept.length} selected built-in names, subject to gates`}
                         </span>
-                    </div>
-                </div>
-                <ArrowDown className="hb-map-arrow" size={15} aria-hidden="true" />
-                <div className="hb-map-node hb-map-runtime">
-                    <Cpu size={21} aria-hidden="true" />
-                    <div>
-                        <strong>Same Copilot runtime</strong>
-                        <span>Shared execution engine</span>
+                        <span>
+                            {summary.overridden.length} override requests / {plan.customTools.length} custom /{" "}
+                            {summary.mcpTools} MCP declarations
+                        </span>
                     </div>
                 </div>
                 <ArrowDown className="hb-map-arrow" size={15} aria-hidden="true" />
@@ -94,35 +82,75 @@ export function PlanInspector({
             </section>
             <section className="hb-inspector-section">
                 <div className="hb-inspector-section-heading">
-                    <h3>Known inventory</h3>
+                    <h3>Current selection policy</h3>
                     <Badge accent={!summary.inherited}>
-                        {summary.inherited ? "Inherited + selected" : "Explicit"}
+                        {summary.inherited ? "Runtime defaults" : "Explicit names"}
                     </Badge>
                 </div>
-                <dl className="hb-count-grid">
+                <dl
+                    className="hb-count-grid hb-selection-count-grid"
+                    aria-label="Plan decisions, not enabled-tool counts"
+                >
                     <div>
-                        <dt>Kept</dt>
+                        <dt>{summary.inherited ? "Default policy" : "Selected names"}</dt>
                         <dd>{summary.kept.length}</dd>
                     </div>
                     <div>
-                        <dt>Overrides</dt>
+                        <dt>Override requests</dt>
                         <dd>{summary.overridden.length}</dd>
                     </div>
                     <div>
-                        <dt>Custom</dt>
+                        <dt>Custom declarations</dt>
                         <dd>{plan.customTools.length}</dd>
                     </div>
                     <div>
-                        <dt>MCP tools</dt>
+                        <dt>MCP declarations</dt>
                         <dd>{summary.mcpTools}</dd>
                     </div>
                 </dl>
                 <p className="hb-inspector-note">
-                    {summary.removed.length} primary tools removed.{" "}
+                    {summary.removed.length} named exclusions.{" "}
                     {summary.inherited
-                        ? "Unlisted coding tools can remain inherited."
-                        : "The primary built-in list is curated, not the entire native catalog."}
+                        ? "Default-policy entries are not excluded or overridden; the runtime still decides whether to offer them. They are not enabled-tool counts."
+                        : "Keep selects a name, not a guarantee of availability. Runtime, platform, feature, and permission gates still apply."}
                 </p>
+                <details className="hb-inspector-tool-reference">
+                    <summary>
+                        Reference coding defaults: {referenceBaselineNames.length} baseline entries
+                    </summary>
+                    <p>
+                        Illustrative online, local, top-level coding with split editing and no added
+                        allow/exclude filters. Not the current plan.
+                    </p>
+                    <div className="hb-chip-list">
+                        {referenceBaselineNames.map((name) => (
+                            <code key={name}>{name}</code>
+                        ))}
+                    </div>
+                    <p>
+                        {referenceDefaultGroups
+                            .filter((group) => group.status !== "baseline-enabled")
+                            .map((group) => `${group.names.length} ${group.status}`)
+                            .join(" / ")}
+                        .
+                    </p>
+                    <p>
+                        Shell families are platform-specific. Model, capability, service, and experiment
+                        conditions remain authoritative.
+                    </p>
+                    <p>
+                        {BUILTIN_NAMES.length} descriptors and {toolCatalog.context.aliases.length} separate
+                        selection aliases; aliases do not add tools.
+                    </p>
+                </details>
+                {unverifiedOverrides.length > 0 && (
+                    <p className="hb-inspector-unverified">
+                        {unverifiedOverrides.length} stored override{" "}
+                        {unverifiedOverrides.length === 1 ? "request has" : "requests have"} no verified
+                        route. SDK/bootstrap generation is blocked for those requests; valid planner JSON can
+                        retain them.
+                    </p>
+                )}
             </section>
             <section className="hb-inspector-section">
                 <div className="hb-inspector-section-heading">
@@ -151,8 +179,9 @@ export function PlanInspector({
                     </details>
                 )}
                 <p className="hb-inspector-note">
-                    Declarations are not implementations. Supply these in your host before using the SDK
-                    sketch.
+                    Declarations are not implementations. Build &amp; run turns these into explicit project
+                    integration requirements. Runtime-gated tools are potential capabilities, not confirmed
+                    active tools.
                 </p>
             </section>
             <section className="hb-inspector-section">
@@ -187,11 +216,14 @@ export function PlanInspector({
                 )}
             </section>
             <div className="hb-inspector-footer">
-                <Button onClick={onExport} disabled={exportDisabled}>
-                    Inspect the SDK sketch
+                <Button variant="primary" onClick={onBuild}>
+                    Build &amp; run
                     <ArrowUpRight size={15} aria-hidden="true" />
                 </Button>
-                <p>Configuration planning only. Nothing is running.</p>
+                <Button variant="ghost" size="small" onClick={onExport} disabled={exportDisabled}>
+                    Plan JSON / TypeScript sketch
+                </Button>
+                <p>Project commands are never executed here.</p>
             </div>
         </aside>
     );

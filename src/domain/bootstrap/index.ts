@@ -62,8 +62,12 @@ export function buildBootstrapProject(input: HarnessPlan): BootstrapResult {
     ];
     if (blockers.length) return { ok: false, blockers };
     const generated = adapter.generate(activePlan);
+    const requirements = [
+        ...new Map(generated.requirements.map((requirement) => [requirement.id, requirement])).values(),
+    ];
     const project = {
         ...generated,
+        requirements,
         name: projectName(plan),
         language: adapter.language,
         languageLabel: adapter.label,
@@ -73,6 +77,11 @@ export function buildBootstrapProject(input: HarnessPlan): BootstrapResult {
     for (const file of project.files) {
         if (paths.has(file.path)) throw new Error(`Duplicate generated file: ${file.path}`);
         paths.add(file.path);
+    }
+    for (const requirement of project.requirements) {
+        if (!paths.has(requirement.file)) {
+            throw new Error(`Missing host integration file: ${requirement.file}`);
+        }
     }
     return { ok: true, project, blockers: [] };
 }

@@ -92,7 +92,7 @@ it("edits a real override, preserves invalid drafts, exports it, and restores it
             .toBe(true);
 
         await page.getByRole("button", { name: "Export", exact: true }).click();
-        const dialog = page.getByRole("dialog", { name: "Take the plan to your host" });
+        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
         const code = await dialog
             .getByRole("textbox", { name: "SDK TypeScript integration sketch" })
             .inputValue();
@@ -285,7 +285,7 @@ it("preserves corrupt data until explicit recovery and exposes searchable eviden
                 .getByRole("searchbox", { name: "Search configuration catalog", exact: true })
                 .fill("overridesBuiltInTool");
             await expect
-                .poll(() => page.getByText("1 of 52 controls", { exact: true }).isVisible())
+                .poll(() => page.getByText("1 of 53 controls", { exact: true }).isVisible())
                 .toBe(true);
             const control = page.getByRole("button", { name: /^overridesBuiltInTool/ });
             await control.click();
@@ -305,7 +305,7 @@ it("preserves corrupt data until explicit recovery and exposes searchable eviden
     );
 });
 
-it("keeps all eight editors and export dialogs usable on a narrow screen", async () => {
+it("keeps all editors and export dialogs usable on a narrow screen", async () => {
     await exercise("mobile", async (page) => {
         await page.setViewportSize({ width: 390, height: 844 });
         for (const label of [
@@ -316,6 +316,7 @@ it("keeps all eight editors and export dialogs usable on a narrow screen", async
             /^Agents\b/,
             /^Models & identity\b/,
             /^Policy & state\b/,
+            /^Build & run\b/,
             /^Learn \/ reference\b/,
         ]) {
             await navigate(page, label);
@@ -331,7 +332,7 @@ it("keeps all eight editors and export dialogs usable on a narrow screen", async
         await page.getByRole("button", { name: "Switch to dark theme", exact: true }).click();
         expect(await page.locator("html").getAttribute("data-theme")).toBe("dark");
         await page.getByRole("button", { name: "Export", exact: true }).click();
-        const dialog = page.getByRole("dialog", { name: "Take the plan to your host" });
+        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
         expect(await dialog.isVisible()).toBe(true);
         expect(
             await page.getByRole("textbox", { name: "SDK TypeScript integration sketch" }).isVisible(),

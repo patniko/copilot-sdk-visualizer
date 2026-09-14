@@ -2,6 +2,7 @@
 import type { ViewId } from "./editor";
 
 const editableControls: Record<string, ViewId> = {
+    connection: "bootstrap",
     systemMessage: "prompt",
     availableTools: "tools",
     excludedTools: "tools",

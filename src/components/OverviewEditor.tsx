@@ -3,25 +3,29 @@ import { ArrowRight, Box, Check, Code2, FileCheck2, Layers3, ShieldCheck, Unplug
 import { PRESETS, SCENARIOS, changedAxes } from "../domain/presets";
 import type { ScenarioId } from "../domain/presets";
 import type { PresetId } from "../domain/plan";
+import { LANGUAGES, RUNTIME_OPTIONS } from "../domain/target";
+import { BUILTIN_NAMES, toolCatalog } from "../content/builtin-tools";
+import { referenceBaselineNames } from "./tool-catalog-ui";
 import type { EditorProps, ViewId } from "./editor";
 import { Badge, Button, ChoiceField, Panel } from "./ui";
+import "../tool-catalog.css";
 
 const profileDetails = {
     empty: {
         icon: Box,
-        inventory: "No inherited tools",
+        inventory: "Explicit inventory; no inherited tools",
         prompt: "Your prompt, end to end",
         footer: "Build from explicit decisions",
     },
     minimal: {
         icon: Layers3,
-        inventory: "2 selected session tools",
+        inventory: "Explicit: 2 selected session names",
         prompt: "A small, editable prompt",
         footer: "A proposed composition, not an SDK mode",
     },
     copilot: {
         icon: Code2,
-        inventory: "Primary + inherited tools",
+        inventory: "Runtime-default selection",
         prompt: "Coding guidance, extended",
         footer: "An opinionated coding starting point",
     },
@@ -33,6 +37,7 @@ const scenarioIcons = {
     "governed-workflow": ShieldCheck,
 };
 const axisViews: Record<string, ViewId> = {
+    "Runtime & language": "bootstrap",
     "Client baseline": "overview",
     Prompt: "prompt",
     "Built-in tools": "tools",
@@ -110,8 +115,30 @@ export function OverviewEditor({
             </div>
             <p className="hb-inline-note">
                 Profiles compose a <strong>new session</strong>. They do not switch a running SDK session or
-                change the shared runtime engine.
+                change the shared runtime engine. Applying a behavior profile keeps your runtime and language
+                choices.
             </p>
+            <div className="hb-overview-tool-catalog">
+                <div>
+                    <strong>Runtime defaults are a selection policy, not all tools switched on.</strong>
+                    <p>
+                        Empty and Minimal start with explicit inventories. Copilot preserves runtime model,
+                        platform, capability, and experiment choices. The full catalog has{" "}
+                        {BUILTIN_NAMES.length} descriptors and {toolCatalog.context.aliases.length} separate
+                        selection aliases.
+                    </p>
+                    <p>
+                        The illustrative online, local root coding reference uses split editing with no added
+                        filters: {referenceBaselineNames.length} baseline entries (
+                        {referenceBaselineNames.join(", ")}). Shell families are platform-specific; explicit
+                        selections still have gates.
+                    </p>
+                </div>
+                <Button size="small" onClick={() => onNavigate("tools")}>
+                    Browse all {BUILTIN_NAMES.length} built-ins
+                    <ArrowRight size={14} aria-hidden="true" />
+                </Button>
+            </div>
             <Panel
                 title="Make it fit your workload"
                 description="Apply a concrete recipe, then inspect what changed. Every application can be undone."
@@ -198,6 +225,31 @@ export function OverviewEditor({
                         </p>
                     )}
                 </div>
+            </Panel>
+            <Panel
+                title="Next: turn this composition into a project"
+                description="Choose a deployment target, inspect the actual dependency and entrypoint files, then integrate and run them in your host."
+            >
+                <div className="hb-overview-target">
+                    <div className="hb-chip-list">
+                        <Badge>
+                            {LANGUAGES.find((language) => language.id === plan.target.language)?.label ??
+                                plan.target.language}
+                        </Badge>
+                        <Badge>
+                            {RUNTIME_OPTIONS.find((runtime) => runtime.id === plan.target.runtime)?.title ??
+                                plan.target.runtime}
+                        </Badge>
+                    </div>
+                    <Button onClick={() => onNavigate("bootstrap")}>
+                        Choose runtime &amp; language
+                        <ArrowRight size={15} aria-hidden="true" />
+                    </Button>
+                </div>
+                <p className="hb-field-hint">
+                    This is independent of Empty, Minimal, or Copilot behavior. Host TODOs, environment
+                    requirements, and packaging limits stay explicit.
+                </p>
             </Panel>
         </div>
     );

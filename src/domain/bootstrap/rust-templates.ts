@@ -375,8 +375,10 @@ impl Configuration {
     pub(crate) fn client_options(&self) -> Result<ClientOptions> {
         let mut options = ClientOptions::new();
         options.mode = match self.client.mode { Mode::Empty => ClientMode::Empty, Mode::CopilotCli => ClientMode::CopilotCli };
-        options.use_logged_in_user = Some(self.session.provider.is_none() && matches!(self.identity, Identity::Developer));
-        options.session_idle_timeout_seconds = Some(self.client.idle_timeout_seconds);
+        if !matches!(self.client.runtime, Runtime::External) {
+            options.use_logged_in_user = Some(self.session.provider.is_none() && matches!(self.identity, Identity::Developer));
+            options.session_idle_timeout_seconds = Some(self.client.idle_timeout_seconds);
+        }
         options.transport = match self.client.runtime {
             Runtime::Managed => {
                 if !self.client.cli_path.trim().is_empty() {
@@ -392,7 +394,11 @@ impl Configuration {
             Runtime::Inprocess => Transport::InProcess,
         };
         match self.storage {
-            Storage::Local => options.base_directory = Some(PathBuf::from(&self.client.base_directory)),
+            Storage::Local => {
+                if !matches!(self.client.runtime, Runtime::External) {
+                    options.base_directory = Some(PathBuf::from(&self.client.base_directory));
+                }
+            }
             Storage::Virtual => {
                 let initial_cwd = match &self.session.working_directory {
                     Some(path) => path.to_str().context("Virtual workspace path must be UTF-8")?.to_owned(),

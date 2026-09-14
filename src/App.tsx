@@ -14,6 +14,7 @@ import {
     LayoutDashboard,
     LockKeyhole,
     Moon,
+    PackageOpen,
     Redo2,
     ShieldCheck,
     SlidersHorizontal,
@@ -29,6 +30,7 @@ import { PRESETS, SCENARIOS, applyScenario, changedAxes, createPreset } from "./
 import type { ScenarioId } from "./domain/presets";
 import type { HarnessPlan, PresetId } from "./domain/plan";
 import { AgentsEditor } from "./components/AgentsEditor";
+import { BootstrapEditor } from "./components/BootstrapEditor";
 import { ContextEditor } from "./components/ContextEditor";
 import { EvidenceDialog } from "./components/EvidenceDialog";
 import { ExportDialog } from "./components/ExportDialog";
@@ -58,6 +60,7 @@ const navigation = [
         icon: SlidersHorizontal,
     },
     { id: "policy", label: "Policy & state", detail: "Permissions & lifecycle", icon: ShieldCheck },
+    { id: "bootstrap", label: "Build & run", detail: "Language, files & host setup", icon: PackageOpen },
     { id: "reference", label: "Learn / reference", detail: "Source-backed boundaries", icon: BookOpen },
 ] as const;
 
@@ -99,8 +102,14 @@ const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description
         title: "Make the boundaries real.",
         description: "Keep permissions, persistence, observations, and your quality bar explicit.",
     },
+    bootstrap: {
+        eyebrow: "07 / Bring it to your host",
+        title: "Build the project. Wire the host.",
+        description:
+            "Configure behavior, choose runtime and language, install dependencies, integrate the host, then preflight and run locally.",
+    },
     reference: {
-        eyebrow: "07 / Source-backed learning",
+        eyebrow: "08 / Source-backed learning",
         title: "Understand the seams.",
         description: "Look up the supported surface, the lifecycle, and the limits behind each decision.",
     },
@@ -130,6 +139,7 @@ export default function App() {
     const heading = viewHeadings[view];
     const exportDisabled = blocked || issues.length > 0;
     const changes = changedAxes(plan);
+    const behaviorChanges = changes.filter((axis) => axis !== "Runtime & language");
     const saveLabel = blocked
         ? "Recovery needed"
         : issues.length
@@ -160,6 +170,7 @@ export default function App() {
 
     function applyChange(change: CompositionChange) {
         const next = change.kind === "scenario" ? applyScenario(plan, change.id) : createPreset(change.id);
+        if (change.kind === "preset") next.target = structuredClone(plan.target);
         replace(
             next,
             change.kind === "recovery"
@@ -171,7 +182,7 @@ export default function App() {
 
     function requestChange(change: CompositionChange) {
         const renamed = plan.name !== createPreset(plan.preset).name;
-        if (blocked || changes.length || renamed || issues.length) setPending(change);
+        if (blocked || behaviorChanges.length || renamed || issues.length) setPending(change);
         else applyChange(change);
     }
 
@@ -215,12 +226,12 @@ export default function App() {
                         )}
                     </Button>
                     <span className="hb-header-divider" aria-hidden="true" />
-                    <Button onClick={() => setImportOpen(true)}>
+                    <Button className="hb-import-action" onClick={() => setImportOpen(true)}>
                         <Upload size={16} aria-hidden="true" />
                         <span>Import</span>
                     </Button>
                     <Button
-                        variant="primary"
+                        className="hb-plan-export-action"
                         disabled={exportDisabled}
                         onClick={() => setExportOpen(true)}
                         title={
@@ -231,6 +242,15 @@ export default function App() {
                     >
                         <Download size={16} aria-hidden="true" />
                         <span>Export</span>
+                    </Button>
+                    <Button
+                        className="hb-build-cta"
+                        variant="primary"
+                        onClick={() => navigate("bootstrap")}
+                        title="Choose a runtime and language, then download a bootstrap project. Nothing runs here."
+                    >
+                        <PackageOpen size={16} aria-hidden="true" />
+                        Build &amp; run
                     </Button>
                 </div>
             </header>
@@ -434,6 +454,9 @@ export default function App() {
                             {view === "agents" && <AgentsEditor {...editorProps} />}
                             {view === "models" && <ModelsEditor {...editorProps} />}
                             {view === "policy" && <PolicyEditor {...editorProps} />}
+                            {view === "bootstrap" && (
+                                <BootstrapEditor {...editorProps} blocked={blocked} onNavigate={navigate} />
+                            )}
                         </fieldset>
                     )}
                     <footer className="hb-editor-footer">
@@ -444,6 +467,7 @@ export default function App() {
                 <PlanInspector
                     plan={plan}
                     onEvidence={setEvidence}
+                    onBuild={() => navigate("bootstrap")}
                     onExport={() => setExportOpen(true)}
                     exportDisabled={exportDisabled}
                 />
@@ -463,8 +487,8 @@ export default function App() {
                         pending.kind === "scenario"
                             ? "This recipe changes the relevant controls in your existing composition. Unrelated settings are retained."
                             : pending.kind === "recovery"
-                              ? "This explicitly starts a fresh Empty profile and allows it to replace the unreadable saved data."
-                              : "This replaces the full composition with the selected starting profile, including the draft name."
+                              ? "This explicitly starts a fresh Empty profile with the default TypeScript / managed-child target and replaces the unreadable saved data."
+                              : "This replaces the behavior composition and draft name. Your runtime placement, language, and connection settings are preserved."
                     }
                 >
                     <div className="hb-editor-stack">
@@ -477,7 +501,7 @@ export default function App() {
                         >
                             {pending.kind === "recovery"
                                 ? "If you have a valid exported plan, cancel and import it instead. Undo cannot recover unreadable stored data."
-                                : `You have ${changes.length} changed configuration ${changes.length === 1 ? "axis" : "axes"}${issues.length ? " and invalid in-progress fields" : ""}. Undo can restore the draft after applying this change.`}
+                                : `You have ${behaviorChanges.length} changed behavior ${behaviorChanges.length === 1 ? "axis" : "axes"}${issues.length ? " and invalid in-progress fields" : ""}. Runtime and language choices are kept. Undo can restore the draft after applying this change.`}
                         </Notice>
                         <div className="hb-dialog-actions">
                             <Button onClick={() => setPending(null)}>Cancel</Button>
@@ -508,6 +532,10 @@ export default function App() {
                     issues={issues}
                     blocked={blocked}
                     onClose={() => setExportOpen(false)}
+                    onBuild={() => {
+                        setExportOpen(false);
+                        navigate("bootstrap");
+                    }}
                 />
             )}
             {evidence && (

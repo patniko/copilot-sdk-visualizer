@@ -165,14 +165,15 @@ async function main() {
 main().catch(error => { console.error(error); process.exitCode = 1; });
 `;
         const requirements = commonRequirements(plan, "src/host.ts");
-        if (plan.target.runtime === "external") requirements.push({
-            id: "typescript-connection-token",
-            title: "Provide the existing runtime's connection token when required",
-            detail: "Set COPILOT_CONNECTION_TOKEN to match the service's transport credential. It is separate from GitHub identity and is never stored in the planner.",
-            file: ".env.example",
-            kind: "runtime",
-            environmentVariable: "COPILOT_CONNECTION_TOKEN",
-        });
+        if (plan.target.runtime === "external")
+            requirements.push({
+                id: "typescript-connection-token",
+                title: "Provide the existing runtime's connection token when required",
+                detail: "Set COPILOT_CONNECTION_TOKEN to match the service's transport credential. It is separate from GitHub identity and is never stored in the planner.",
+                file: ".env.example",
+                kind: "runtime",
+                environmentVariable: "COPILOT_CONNECTION_TOKEN",
+            });
         return {
             files: [
                 {
@@ -268,7 +269,7 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                 },
             ],
             commands: {
-                install: ["bash setup-sdk.sh", "npm run build"],
+                install: ["bash setup-sdk.sh --run", "npm run build"],
                 check: "npm run check",
                 run: 'npm start -- "Introduce yourself and explain your configured role."',
                 ...(plan.target.runtime === "external"

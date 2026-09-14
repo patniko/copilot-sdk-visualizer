@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { BookOpen, Plus, Trash2 } from "lucide-react";
 import { SECTION_NAMES } from "../domain/plan";
+import type { BuiltinPromptReference } from "../content/prompts";
+import { BuiltinPromptPanel } from "./BuiltinPromptPanel";
 import { issueFor, useEditorRowIds } from "./editor";
 import type { EditorProps } from "./editor";
 import { Badge, Button, ChoiceField, EmptyState, Notice, Panel, SelectField, TextAreaField } from "./ui";
@@ -10,6 +12,25 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
     const nextSection = SECTION_NAMES.find(
         (name) => !plan.prompt.sections.some((section) => section.name === name),
     );
+
+    function useLiteralReference(reference: BuiltinPromptReference) {
+        if (reference.kind !== "literal" || plan.prompt.mode !== "customize") return;
+        if (!plan.prompt.sections.some((section) => section.name === reference.id)) rows.appendId();
+        edit((draft) => {
+            const section = draft.prompt.sections.find((entry) => entry.name === reference.id);
+            if (section) {
+                section.action = "replace";
+                section.content = reference.content;
+            } else {
+                draft.prompt.sections.push({
+                    name: reference.id,
+                    action: "replace",
+                    content: reference.content,
+                });
+            }
+        });
+    }
+
     return (
         <div className="hb-editor-stack">
             <Panel
@@ -53,6 +74,7 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     }
                 />
             </Panel>
+            <BuiltinPromptPanel plan={plan} onUseLiteral={useLiteralReference} />
             {plan.prompt.mode === "customize" && (
                 <Panel
                     title="Named prompt sections"
@@ -148,6 +170,11 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                                             }
                                         />
                                     </div>
+                                    <BuiltinPromptPanel
+                                        plan={plan}
+                                        sectionName={section.name}
+                                        onUseLiteral={useLiteralReference}
+                                    />
                                     {contentActive ? (
                                         <TextAreaField
                                             label="Section content"
