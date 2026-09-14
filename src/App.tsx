@@ -434,7 +434,7 @@ export default function App() {
                         </div>
                     )}
                     {view === "reference" ? (
-                        <ReferencePanel onEvidence={setEvidence} />
+                        <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
                     ) : (
                         <fieldset className="hb-editor-fields" disabled={blocked} key={`${view}-${revision}`}>
                             <legend className="hb-sr-only">

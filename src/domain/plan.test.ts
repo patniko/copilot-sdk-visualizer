@@ -142,7 +142,7 @@ describe("scenario decisions", () => {
             expect(decision.sources.length).toBeGreaterThan(0);
             for (const source of decision.sources) expect(reference.sources[source], source).toBeDefined();
         }
-        expect(reference.controls).toHaveLength(53);
+        expect(reference.controls).toHaveLength(64);
         expect(reference.gaps).toHaveLength(6);
     });
 });

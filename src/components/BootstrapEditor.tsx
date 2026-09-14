@@ -1,10 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { useId, useMemo } from "react";
-import { ArrowRight, BookOpen, Cable, CircleAlert, Cpu, PackageOpen, Terminal } from "lucide-react";
+import {
+    ArrowRight,
+    BookOpen,
+    Cable,
+    CircleAlert,
+    Cpu,
+    ExternalLink,
+    PackageOpen,
+    Terminal,
+} from "lucide-react";
 import { buildBootstrapProject } from "../domain/bootstrap";
 import type { BootstrapBlocker, BootstrapResult } from "../domain/bootstrap/types";
 import { LANGUAGES, RUNTIME_OPTIONS } from "../domain/target";
 import type { RuntimeKind } from "../domain/target";
+import { sdkDocsForView } from "../content/sdk-docs";
 import { createPreset } from "../domain/presets";
 import { BootstrapProjectPanel } from "./BootstrapProjectPanel";
 import { RuntimePlacement } from "./RuntimePlacement";
@@ -90,6 +100,7 @@ export function BootstrapEditor({
                                         <span className="hb-runtime-option-description">
                                             {option.description}
                                         </span>
+                                        <span className="hb-runtime-option-setup">{option.setupPath}</span>
                                         <span className="hb-runtime-option-channel">{option.channel}</span>
                                     </span>
                                 </label>
@@ -185,6 +196,21 @@ export function BootstrapEditor({
                     <BookOpen size={15} aria-hidden="true" />
                     Inspect the connection boundary
                 </Button>
+                <div className="hb-setup-docs" role="note">
+                    <p className="hb-small-label">Matching SDK setup guides</p>
+                    <ul className="hb-setup-docs-links">
+                        {sdkDocsForView("bootstrap")?.links.map((link) => (
+                            <li key={link.url}>
+                                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                    {link.label}
+                                    <ExternalLink size={12} aria-hidden="true" />
+                                    <span className="hb-sr-only"> (opens SDK docs in a new tab)</span>
+                                </a>
+                                <span> — {link.note}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </Panel>
             <Panel
                 title="Choose the SDK language"

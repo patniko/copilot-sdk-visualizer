@@ -8,10 +8,46 @@ This repository is independent of the runtime and language SDK repositories. It 
 
 For the motivation, original design feedback, architectural intent, and a continuation checklist, read [Project context and intent](docs/project-context.md).
 
+## The layers: engine, harness, SDK, host
+
+One shared runtime engine can power many agents. A **harness** is the configuration on top of it. This tool helps you compose that harness and hand your host a project that runs it.
+
+| Layer                     | Responsibility                                                                           | Who owns it     |
+| ------------------------- | ---------------------------------------------------------------------------------------- | --------------- |
+| **Runtime engine**        | Session lifecycle, the model/tool loop, context processing, provider adaptation, events. | Shared — reused |
+| **Harness configuration** | Prompt, tool inventory and implementations, context, agents, methods, evaluation.        | You compose     |
+| **SDK / integration**     | A language-native client that carries config, binds host callbacks, delivers events.     | You wire        |
+| **Application / host**    | Product UX, identity, tenant authorization, deployment isolation, effectful services.    | You own         |
+
+Selecting a capability here is not the same as enabling every prerequisite or granting authority. Runtime capability, model, platform, and experiment gates still determine actual availability.
+
+## Build a harness in seven steps
+
+1. Understand the four layers above — you keep the engine and compose the harness.
+2. Start from the **Empty**, **Minimal**, or **Copilot** profile, then change actual configuration.
+3. See what each choice exposes, replaces, requires, and cannot guarantee.
+4. Open **Build & run** and choose runtime placement and SDK language.
+5. Resolve any compatibility blockers, then download the complete bootstrap ZIP.
+6. Install the SDK dependencies, implement the host extension points, and run local preflight.
+7. Run an agent turn in your own host — the only step that makes real model requests.
+
+The builder itself never runs that agent. Each step maps to an official SDK guide; see [Map to the GitHub Copilot SDK docs](#map-to-the-github-copilot-sdk-docs).
+
+## Quickstart (run the builder locally)
+
+Use Node.js 22.12 or newer and pnpm 11.19 (pinned in `package.json`).
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Vite binds to `127.0.0.1` only. Open the **Overview** tab and read the "Start here" guide, then follow the seven steps. For the full command set (format, lint, test, browser, and contract checks), see [Local development](#local-development).
+
 ## What the builder does
 
 - Start from empty, minimal, or coding-oriented presets, then change actual configuration decisions.
-- Browse the complete built-in catalog, keep or remove selections, and replace verified tool implementations; declare custom tools and explicit HTTP MCP integrations.
+- Keep, replace, or remove primary built-in tools; declare custom tools and explicit HTTP MCP integrations.
 - Compose prompt sections, context sources, custom agents, provider choices, policy hooks, session storage, and evaluation criteria.
 - See the resulting execution ownership, required host bindings, and scenario-specific limitations.
 - Save one draft in browser storage, undo/redo edits, and import/export the versioned planner format.
@@ -20,17 +56,23 @@ For the motivation, original design feedback, architectural intent, and a contin
 - Keep the TypeScript integration sketch and reversible planner JSON available as smaller exports.
 - Explore a materialized SDK control catalog, six scenario gaps, built-in prompt references, and commit-pinned evidence.
 
-The reference catalog documents additional SDK controls that are not all editable in the builder. Runtime capability, model, platform, and experiment gates still determine actual availability; selecting a tool is not the same as enabling every prerequisite or granting authority.
+The reference catalog documents additional SDK controls that are not all editable in the builder.
 
-## Complete built-in tool visibility
+## Map to the GitHub Copilot SDK docs
 
-`src/content/tool-catalog.json` records **59 built-in descriptors** and **33 selection aliases** from the pinned runtime source. It includes registry factories, lookup-only/specialized descriptors, both shell families, leaf registrations, and fixed extension-management definitions. Dynamic MCP and third-party extension tools are separate.
+The builder is a planning aid; the [`github/copilot-sdk` docs](https://github.com/github/copilot-sdk/tree/main/docs) are where you implement. The **Learn / reference → Map to SDK docs** tab cross-links every builder step to its guide. Highlights:
 
-Default status is deliberately qualified: six entries are enabled in the stated online/local/root/split-editing reference profile, 33 depend on capabilities/models/modes/policy, eight belong to platform-specific shell families, and 12 are internal or specialized. The reference is not a claim that every running CLI has only six tools, or that every compiled tool is on.
+| Builder step      | Read in the SDK docs                                                                                                                                                                                                                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Overview / start  | [Getting started](https://github.com/github/copilot-sdk/blob/main/docs/getting-started.md), [The agent loop](https://github.com/github/copilot-sdk/blob/main/docs/features/agent-loop.md)                                                                                                            |
+| Tools             | [MCP servers](https://github.com/github/copilot-sdk/blob/main/docs/features/mcp.md), [Plugin directories](https://github.com/github/copilot-sdk/blob/main/docs/features/plugin-directories.md)                                                                                                       |
+| Context & packs   | [Skills](https://github.com/github/copilot-sdk/blob/main/docs/features/skills.md), [Image input](https://github.com/github/copilot-sdk/blob/main/docs/features/image-input.md)                                                                                                                       |
+| Agents            | [Custom agents](https://github.com/github/copilot-sdk/blob/main/docs/features/custom-agents.md), [Fleet mode](https://github.com/github/copilot-sdk/blob/main/docs/features/fleet-mode.md)                                                                                                           |
+| Models & identity | [Authentication](https://github.com/github/copilot-sdk/blob/main/docs/auth/README.md), [Usage & billing](https://github.com/github/copilot-sdk/blob/main/docs/features/usage-and-billing.md)                                                                                                         |
+| Policy & state    | [Hooks](https://github.com/github/copilot-sdk/blob/main/docs/features/hooks.md), [Session limits](https://github.com/github/copilot-sdk/blob/main/docs/features/session-limits.md), [Session persistence](https://github.com/github/copilot-sdk/blob/main/docs/features/session-persistence.md)      |
+| Build & run       | [Choosing a setup path](https://github.com/github/copilot-sdk/blob/main/docs/setup/choosing-a-setup-path.md), [Bundled CLI](https://github.com/github/copilot-sdk/blob/main/docs/setup/bundled-cli.md), [Multi-tenancy](https://github.com/github/copilot-sdk/blob/main/docs/setup/multi-tenancy.md) |
 
-Keeping a tool in inherited coding mode means leaving the runtime's selection policy intact. It does not force every catalog member on. The UI distinguishes reference defaults, the current plan's choices, and override routes verified by this snapshot. `catalog_search` is explicitly reserved; unverified override choices are preserved as plan data but are not emitted as runnable bootstrap code.
-
-Older nine-tool drafts migrate without broadening their effective inventory: new entries are removed for explicit inventories, or left to runtime defaults for inherited inventories. Existing choices are retained. The payload records the catalog revision so a malformed current catalog is not silently repaired.
+These links track the SDK's living documentation. The in-app **reference catalog** stays commit-pinned to the recorded snapshot; the docs map is a separate reading aid.
 
 ## From configuration to a running agent
 
@@ -42,9 +84,21 @@ Older nine-tool drafts migrate without broadening their effective inventory: new
 6. Run the generated local preflight command. It checks prerequisites without starting a runtime or model.
 7. Run an agent turn explicitly in your own host. That action can make real model requests and execute effects allowed by the host policy.
 
+Runtime placement mirrors the SDK setup paths: a **managed child process** is the docs' default bundled/local CLI path, an **existing runtime service** is the backend-services path (apply the multi-tenancy guidance for concurrent users), and **in-process** hosting is experimental in every SDK.
+
 The inspected SDK source is newer than a verified package-release mapping. Bootstrap setup therefore uses an exact SDK source revision rather than pretending development versions are installable from public package registries. Source setup is an explicit action in the generated project; the visualizer never fetches or executes that SDK.
 
 An in-process runtime shares the application's address space, environment, and loaded native-library lifetime. A managed child gives a separate process boundary, not a sandbox. For an existing service, its operator—not the SDK client—owns server startup settings, authentication, networking, and shutdown.
+
+## Complete built-in tool visibility
+
+`src/content/tool-catalog.json` records **59 built-in descriptors** and **33 selection aliases** from the pinned runtime source. It includes registry factories, lookup-only/specialized descriptors, both shell families, leaf registrations, and fixed extension-management definitions. Dynamic MCP and third-party extension tools are separate.
+
+Default status is deliberately qualified: six entries are enabled in the stated online/local/root/split-editing reference profile, 33 depend on capabilities/models/modes/policy, eight belong to platform-specific shell families, and 12 are internal or specialized. The reference is not a claim that every running CLI has only six tools, or that every compiled tool is on.
+
+Keeping a tool in inherited coding mode means leaving the runtime's selection policy intact. It does not force every catalog member on. The UI distinguishes reference defaults, the current plan's choices, and override routes verified by this snapshot. `catalog_search` is explicitly reserved; unverified override choices are preserved as plan data but are not emitted as runnable bootstrap code.
+
+Older nine-tool drafts migrate without broadening their effective inventory: new entries are removed for explicit inventories, or left to runtime defaults for inherited inventories. Existing choices are retained. The payload records the catalog revision so a malformed current catalog is not silently repaired.
 
 ## Built-in prompt references
 
@@ -62,14 +116,7 @@ Normal app use does not read that checkout.
 
 ## Local development
 
-Use Node.js 22.12 or newer and pnpm 11.19 (pinned in `package.json`).
-
-```bash
-pnpm install
-pnpm dev
-```
-
-Vite binds to `127.0.0.1` only. The app is not deployed and this repository has no remote by default.
+The [Quickstart](#quickstart-run-the-builder-locally) covers install and dev. The full check set:
 
 ```bash
 pnpm format
@@ -101,6 +148,7 @@ COPILOT_SDK_SOURCE=/path/to/copilot-sdk/nodejs/src/index.ts pnpm test:contract
 | `src/domain/store.ts`        | Event-driven draft persistence and bounded undo/redo history.                       |
 | `src/hooks/useHarness.ts`    | React subscription to the draft store.                                              |
 | `src/content/reference.json` | Independent, materialized research snapshot; no sibling-repository reads.           |
+| `src/content/sdk-docs.ts`    | Cross-reference from each builder step to the living SDK documentation.             |
 | `src/components/`            | Accessible workbench editors, source inspection, and export UI.                     |
 
 The draft store writes only validated plans. Payload version 2 adds runtime/language targets; version 1 drafts migrate with their behavior preserved and TypeScript/managed-process defaults. The storage key stays stable. Invalid edits retain the last valid saved version. A corrupt or unsupported saved draft is not silently overwritten; recovery requires an explicit replacement or import. Drafts are local to the browser origin; concurrent tabs use last-save-wins storage rather than a collaborative synchronization protocol.

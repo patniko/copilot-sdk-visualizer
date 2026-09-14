@@ -1,15 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
-import { ArrowUpRight, BookOpen, Search } from "lucide-react";
+import { ArrowUpRight, BookOpen, ExternalLink, Search } from "lucide-react";
 import { reference } from "../content/reference";
+import { SDK_DOCS_HOME, SDK_DOC_MAP } from "../content/sdk-docs";
 import { controlCoverage, scopeLabel } from "./reference-ui";
-import type { Evidence } from "./editor";
-import { Badge, EmptyState, Notice, SelectField, TextField } from "./ui";
+import type { Evidence, ViewId } from "./editor";
+import { Badge, Button, EmptyState, Notice, SelectField, TextField } from "./ui";
 
 const catalogScopes = Array.from(new Set(reference.controls.flatMap((control) => control.scopes)));
 
-export function ReferencePanel({ onEvidence }: { onEvidence: (evidence: Evidence) => void }) {
+const viewLabels: Record<ViewId, string> = {
+    overview: "Overview",
+    prompt: "Prompt",
+    tools: "Tools",
+    context: "Context & packs",
+    agents: "Agents",
+    models: "Models & identity",
+    policy: "Policy & state",
+    bootstrap: "Build & run",
+    reference: "Reference",
+};
+
+export function ReferencePanel({
+    onEvidence,
+    onNavigate,
+}: {
+    onEvidence: (evidence: Evidence) => void;
+    onNavigate: (view: ViewId) => void;
+}) {
     const [query, setQuery] = useState("");
     const [scope, setScope] = useState("all");
     const [axis, setAxis] = useState("all");
@@ -36,6 +55,9 @@ export function ReferencePanel({ onEvidence }: { onEvidence: (evidence: Evidence
                     </Tabs.Trigger>
                     <Tabs.Trigger className="hb-tab" value="gaps">
                         Boundaries &amp; gaps<Badge>{reference.gaps.length}</Badge>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger className="hb-tab" value="sdk-docs">
+                        Map to SDK docs<Badge>{SDK_DOC_MAP.length}</Badge>
                     </Tabs.Trigger>
                 </Tabs.List>
                 <Tabs.Content value="catalog" className="hb-tab-content">
@@ -130,6 +152,52 @@ export function ReferencePanel({ onEvidence }: { onEvidence: (evidence: Evidence
                                     <ArrowUpRight size={13} aria-hidden="true" />
                                 </span>
                             </button>
+                        ))}
+                    </div>
+                </Tabs.Content>
+                <Tabs.Content value="sdk-docs" className="hb-tab-content">
+                    <Notice title="Where to read next in the official SDK docs" tone="accent">
+                        Each builder step maps to a guide in the <code>{"github/copilot-sdk"}</code> docs.
+                        These links point at the living documentation (main branch), unlike the commit-pinned
+                        evidence in the other tabs. Open the matching editor here, then follow the guide when
+                        you implement it in your host.{" "}
+                        <a href={SDK_DOCS_HOME} target="_blank" rel="noopener noreferrer">
+                            SDK docs home
+                            <ExternalLink size={13} aria-hidden="true" />
+                        </a>
+                    </Notice>
+                    <div className="hb-docmap-grid">
+                        {SDK_DOC_MAP.map((group) => (
+                            <section className="hb-docmap-card" key={group.view}>
+                                <header className="hb-docmap-head">
+                                    <div>
+                                        <span className="hb-kicker">{viewLabels[group.view]}</span>
+                                        <h4>{group.title}</h4>
+                                        <p className="hb-muted-copy">{group.summary}</p>
+                                    </div>
+                                    {group.view !== "reference" && (
+                                        <Button size="small" onClick={() => onNavigate(group.view)}>
+                                            Open editor
+                                            <ArrowUpRight size={13} aria-hidden="true" />
+                                        </Button>
+                                    )}
+                                </header>
+                                <ul className="hb-docmap-links">
+                                    {group.links.map((link) => (
+                                        <li key={link.url}>
+                                            <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                                {link.label}
+                                                <ExternalLink size={12} aria-hidden="true" />
+                                                <span className="hb-sr-only">
+                                                    {" "}
+                                                    (opens SDK docs in a new tab)
+                                                </span>
+                                            </a>
+                                            <p>{link.note}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
                         ))}
                     </div>
                 </Tabs.Content>

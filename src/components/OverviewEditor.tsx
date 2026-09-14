@@ -6,6 +6,7 @@ import type { PresetId } from "../domain/plan";
 import { LANGUAGES, RUNTIME_OPTIONS } from "../domain/target";
 import { BUILTIN_NAMES, toolCatalog } from "../content/builtin-tools";
 import { referenceBaselineNames } from "./tool-catalog-ui";
+import { HarnessPrimer } from "./HarnessPrimer";
 import type { EditorProps, ViewId } from "./editor";
 import { Badge, Button, ChoiceField, Panel } from "./ui";
 import "../tool-catalog.css";
@@ -66,6 +67,7 @@ export function OverviewEditor({
     const changes = changedAxes(plan);
     return (
         <div className="hb-editor-stack">
+            <HarnessPrimer onNavigate={onNavigate} />
             <div className="hb-profile-grid">
                 {PRESETS.map((preset) => {
                     const details = profileDetails[preset.id];
