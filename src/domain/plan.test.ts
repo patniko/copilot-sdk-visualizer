@@ -82,6 +82,8 @@ describe("harness plan and presets", () => {
         const plan = createPreset("minimal");
         plan.model.endpoint = "https://name:password@example.com";
         expect(HarnessPlanSchema.safeParse(plan).success).toBe(false);
+        plan.model.endpoint = "https://example.com?API_KEY=example-only";
+        expect(HarnessPlanSchema.safeParse(plan).success).toBe(false);
         expect(() => parsePlan(JSON.stringify({ ...createPreset("minimal"), schemaVersion: 2 }))).toThrow();
         const injected = {
             ...createPreset("minimal"),

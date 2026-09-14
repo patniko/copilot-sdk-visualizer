@@ -1,0 +1,204 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+import { ArrowRight, Box, Check, Code2, FileCheck2, Layers3, ShieldCheck, Unplug } from "lucide-react";
+import { PRESETS, SCENARIOS, changedAxes } from "../domain/presets";
+import type { ScenarioId } from "../domain/presets";
+import type { PresetId } from "../domain/plan";
+import type { EditorProps, ViewId } from "./editor";
+import { Badge, Button, ChoiceField, Panel } from "./ui";
+
+const profileDetails = {
+    empty: {
+        icon: Box,
+        inventory: "No inherited tools",
+        prompt: "Your prompt, end to end",
+        footer: "Build from explicit decisions",
+    },
+    minimal: {
+        icon: Layers3,
+        inventory: "2 selected session tools",
+        prompt: "A small, editable prompt",
+        footer: "A proposed composition, not an SDK mode",
+    },
+    copilot: {
+        icon: Code2,
+        inventory: "Primary + inherited tools",
+        prompt: "Coding guidance, extended",
+        footer: "An opinionated coding starting point",
+    },
+} satisfies Record<PresetId, { icon: typeof Box; inventory: string; prompt: string; footer: string }>;
+
+const scenarioIcons = {
+    "workspace-free": Unplug,
+    "tenant-documents": FileCheck2,
+    "governed-workflow": ShieldCheck,
+};
+const axisViews: Record<string, ViewId> = {
+    "Client baseline": "overview",
+    Prompt: "prompt",
+    "Built-in tools": "tools",
+    "Custom tools": "tools",
+    "MCP integrations": "tools",
+    Agents: "agents",
+    Context: "context",
+    Policy: "policy",
+    Models: "models",
+    Identity: "models",
+    "Session state": "policy",
+    "Events / evaluation": "policy",
+};
+
+export function OverviewEditor({
+    plan,
+    edit,
+    onApplyPreset,
+    onApplyScenario,
+    onNavigate,
+}: EditorProps & {
+    onApplyPreset: (id: PresetId) => void;
+    onApplyScenario: (id: ScenarioId) => void;
+    onNavigate: (view: ViewId) => void;
+}) {
+    const changes = changedAxes(plan);
+    return (
+        <div className="hb-editor-stack">
+            <div className="hb-profile-grid">
+                {PRESETS.map((preset) => {
+                    const details = profileDetails[preset.id];
+                    const Icon = details.icon;
+                    const selected = plan.preset === preset.id;
+                    return (
+                        <article
+                            key={preset.id}
+                            className={`hb-profile-card${selected ? " hb-profile-selected" : ""}`}
+                        >
+                            <div className="hb-profile-top">
+                                <span className="hb-profile-icon">
+                                    <Icon size={22} aria-hidden="true" />
+                                </span>
+                                {selected && (
+                                    <Badge accent>
+                                        <Check size={12} aria-hidden="true" /> Baseline
+                                    </Badge>
+                                )}
+                            </div>
+                            <div>
+                                <p className="hb-kicker">{preset.tag}</p>
+                                <h3>{preset.label}</h3>
+                                <p className="hb-profile-description">{preset.description}</p>
+                            </div>
+                            <div className="hb-profile-facts">
+                                <span>
+                                    <Check size={14} aria-hidden="true" />
+                                    {details.inventory}
+                                </span>
+                                <span>
+                                    <Check size={14} aria-hidden="true" />
+                                    {details.prompt}
+                                </span>
+                            </div>
+                            <Button
+                                variant={selected ? "primary" : "secondary"}
+                                onClick={() => onApplyPreset(preset.id)}
+                            >
+                                Apply {preset.label}
+                                <ArrowRight size={15} aria-hidden="true" />
+                            </Button>
+                            <p className="hb-profile-footnote">{details.footer}</p>
+                        </article>
+                    );
+                })}
+            </div>
+            <p className="hb-inline-note">
+                Profiles compose a <strong>new session</strong>. They do not switch a running SDK session or
+                change the shared runtime engine.
+            </p>
+            <Panel
+                title="Make it fit your workload"
+                description="Apply a concrete recipe, then inspect what changed. Every application can be undone."
+            >
+                <div className="hb-scenario-list">
+                    {SCENARIOS.map((scenario) => {
+                        const Icon = scenarioIcons[scenario.id];
+                        return (
+                            <article className="hb-scenario" key={scenario.id}>
+                                <span className="hb-scenario-icon">
+                                    <Icon size={20} aria-hidden="true" />
+                                </span>
+                                <div>
+                                    <h4>{scenario.title}</h4>
+                                    <p>{scenario.description}</p>
+                                </div>
+                                <Button
+                                    size="small"
+                                    onClick={() => onApplyScenario(scenario.id)}
+                                    aria-label={`Apply ${scenario.title}`}
+                                >
+                                    Apply
+                                    <ArrowRight size={14} aria-hidden="true" />
+                                </Button>
+                            </article>
+                        );
+                    })}
+                </div>
+            </Panel>
+            <Panel
+                title="Your composition, not a new engine"
+                description="The baseline is a comparison point. Each setting below and in the sidebar remains independently editable."
+                action={
+                    <Badge>
+                        {changes.length} changed {changes.length === 1 ? "axis" : "axes"}
+                    </Badge>
+                }
+            >
+                <ChoiceField
+                    label="SDK client baseline"
+                    value={plan.clientMode}
+                    options={[
+                        { value: "empty", label: "Empty", description: "Explicit host-owned composition" },
+                        {
+                            value: "copilot-cli",
+                            label: "Copilot CLI",
+                            description: "Coding-oriented foundation",
+                        },
+                    ]}
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.clientMode = value;
+                            if (value === "empty") draft.inventory = "explicit";
+                        })
+                    }
+                    hint="Choosing Empty also makes the inventory explicit. Neither client baseline is an operating-system sandbox."
+                />
+                <div className="hb-baseline-diff">
+                    <p className="hb-small-label">
+                        Differences from the{" "}
+                        {plan.preset === "copilot"
+                            ? "Copilot"
+                            : plan.preset === "minimal"
+                              ? "Minimal"
+                              : "Empty"}{" "}
+                        preset
+                    </p>
+                    {changes.length ? (
+                        <div className="hb-chip-list">
+                            {changes.map((axis) => (
+                                <button
+                                    className="hb-diff-chip"
+                                    key={axis}
+                                    onClick={() => onNavigate(axisViews[axis] ?? "overview")}
+                                >
+                                    {axis}
+                                    <ArrowRight size={12} aria-hidden="true" />
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="hb-muted-copy">
+                            The configuration matches this starting profile. Use the editors to make it yours.
+                        </p>
+                    )}
+                </div>
+            </Panel>
+        </div>
+    );
+}

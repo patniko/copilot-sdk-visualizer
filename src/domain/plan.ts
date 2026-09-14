@@ -203,6 +203,26 @@ function endpointError(value: string): string | undefined {
         const url = new URL(value);
         if (!["http:", "https:"].includes(url.protocol)) return "Use an HTTP or HTTPS endpoint.";
         if (url.username || url.password) return "Do not put credentials in endpoint URLs.";
+        const credentialKeys = new Set([
+            "api_key",
+            "apikey",
+            "api-key",
+            "key",
+            "token",
+            "access_token",
+            "access-token",
+            "authorization",
+            "password",
+            "secret",
+        ]);
+        const fragment = new URLSearchParams(url.hash.slice(1));
+        if (
+            [...url.searchParams.keys(), ...fragment.keys()].some((key) =>
+                credentialKeys.has(key.toLowerCase()),
+            )
+        ) {
+            return "Keep credential parameters out of endpoint URLs. Use environment references or host callbacks.";
+        }
     } catch {
         return "Enter a complete HTTP or HTTPS endpoint.";
     }

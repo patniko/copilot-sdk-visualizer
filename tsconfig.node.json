@@ -4,12 +4,14 @@
         "target": "es2023",
         "strict": true,
         "noUncheckedIndexedAccess": true,
-        "lib": ["ES2023"],
+        "lib": ["ES2023", "DOM"],
         "types": ["node"],
         "skipLibCheck": true,
 
         /* Bundler mode */
-        "module": "nodenext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
         "allowImportingTsExtensions": true,
         "verbatimModuleSyntax": true,
         "moduleDetection": "force",

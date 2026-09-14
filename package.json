@@ -12,7 +12,7 @@
         "format": "oxfmt .",
         "format:check": "oxfmt --check .",
         "test": "vitest run --project unit",
-        "test:browser": "vitest run --project browser",
+        "test:browser": "pnpm run build && vitest run --project browser",
         "test:contract": "vitest run --project contract",
         "preview": "vite preview --host 127.0.0.1"
     },
