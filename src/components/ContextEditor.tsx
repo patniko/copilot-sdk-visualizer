@@ -3,6 +3,8 @@ import { FolderOpen, LibraryBig } from "lucide-react";
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
 import { Badge, Button, LineListField, Notice, Panel, TextField, ToggleField } from "./ui";
+import { SettingHelp } from "./SettingHelp";
+import { contextToggleHelp } from "../content/context-help";
 
 export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
     return (
@@ -33,7 +35,13 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                 <div className="hb-toggle-list">
                     <ToggleField
                         label="Configuration discovery"
-                        description="Allow the future host to discover trusted project configuration and instructions."
+                        description="Discover supported host/project configuration; explicitly supplied settings take precedence."
+                        help={
+                            <SettingHelp
+                                help={contextToggleHelp.discovery}
+                                enabled={plan.context.discovery}
+                            />
+                        }
                         checked={plan.context.discovery}
                         onCheckedChange={(checked) =>
                             edit((draft) => {
@@ -43,7 +51,8 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     />
                     <ToggleField
                         label="Skills"
-                        description="Enable skill loading independently of whether the skill tool is in the inventory."
+                        description="Allow built-in and directory-based skills to load; tool selection is a separate choice."
+                        help={<SettingHelp help={contextToggleHelp.skills} enabled={plan.context.skills} />}
                         checked={plan.context.skills}
                         onCheckedChange={(checked) =>
                             edit((draft) => {
@@ -53,7 +62,13 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     />
                     <ToggleField
                         label="File-based hooks"
-                        description="Opt into configured file hooks. This is separate from host callback hooks."
+                        description="Load file-defined lifecycle hooks, including commands in .github/hooks/."
+                        help={
+                            <SettingHelp
+                                help={contextToggleHelp.fileHooks}
+                                enabled={plan.context.fileHooks}
+                            />
+                        }
                         checked={plan.context.fileHooks}
                         onCheckedChange={(checked) =>
                             edit((draft) => {
@@ -63,7 +78,8 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     />
                     <ToggleField
                         label="Host Git operations"
-                        description="Allow the runtime's host Git integration for the intended project."
+                        description="Supply Git branch, status, and history context—not permission to commit or push."
+                        help={<SettingHelp help={contextToggleHelp.hostGit} enabled={plan.context.hostGit} />}
                         checked={plan.context.hostGit}
                         onCheckedChange={(checked) =>
                             edit((draft) => {
@@ -72,6 +88,11 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                         }
                     />
                 </div>
+                <p className="hb-field-hint">
+                    Use the help buttons for on/off behavior and examples. Empty and Minimal start with these
+                    switches off; the builder&apos;s Copilot composition opts in. Those are profile choices,
+                    not universal SDK defaults.
+                </p>
             </Panel>
             <Panel
                 title="Reviewed capability packs"

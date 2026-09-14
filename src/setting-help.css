@@ -1,0 +1,114 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. */
+.hb-setting-help-trigger,
+.hb-setting-help-close {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    padding: 4px;
+    border: 1px solid var(--cp-border);
+    border-radius: 10px;
+    background: var(--cp-surface);
+    color: var(--cp-text-muted);
+    cursor: pointer;
+}
+.hb-setting-help-trigger:hover,
+.hb-setting-help-trigger[data-state="open"],
+.hb-setting-help-close:hover {
+    color: var(--cp-accent);
+    border-color: var(--cp-accent);
+    background: var(--cp-accent-soft);
+}
+.hb-setting-help {
+    width: min(430px, calc(100vw - 32px));
+    max-height: min(690px, calc(100dvh - 32px), var(--radix-popover-content-available-height, 690px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 20px;
+    border: 1px solid var(--cp-border-strong);
+    border-radius: 16px;
+    background: var(--cp-surface);
+    color: var(--cp-text);
+    box-shadow: var(--cp-shadow);
+    z-index: 100;
+    font-size: 13px;
+    line-height: 1.55;
+}
+.hb-setting-help-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 12px;
+}
+.hb-setting-help-heading h3 {
+    margin: 2px 0 12px;
+    font-size: 16px;
+    font-weight: 650;
+}
+.hb-setting-help-scope {
+    margin: 0 0 12px;
+    color: var(--cp-text-muted);
+    font-size: 11px;
+}
+.hb-setting-help-option {
+    display: inline-block;
+    padding: 5px 8px;
+    margin-bottom: 14px;
+    border: 1px solid var(--cp-border);
+    border-radius: 7px;
+    background: var(--cp-surface-soft);
+    color: var(--cp-accent);
+    font-size: 11px;
+}
+.hb-setting-help-effects {
+    margin: 0;
+}
+.hb-setting-help-effects > div {
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--cp-border);
+    border-radius: 10px;
+}
+.hb-setting-help-effects > [data-current] {
+    border-color: var(--cp-accent);
+    background: var(--cp-accent-soft);
+}
+.hb-setting-help-effects dt {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cp-text);
+    margin-bottom: 4px;
+}
+.hb-setting-help-effects dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.hb-setting-help-boundary {
+    margin: 14px 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--cp-accent);
+}
+.hb-setting-help-boundary strong {
+    font-size: 11px;
+}
+.hb-setting-help-boundary p {
+    margin: 4px 0 0;
+    font-size: 12px;
+}
+.hb-setting-help-sources {
+    display: grid;
+    gap: 7px;
+    font-size: 11px;
+}
+.hb-setting-help-sources a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--cp-link);
+    overflow-wrap: anywhere;
+}
+.hb-setting-help-arrow {
+    fill: var(--cp-surface);
+}

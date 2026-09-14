@@ -308,21 +308,31 @@ export function ToggleField({
     description,
     checked,
     onCheckedChange,
+    help,
 }: {
     label: string;
     description: string;
     checked: boolean;
     onCheckedChange: (checked: boolean) => void;
+    help?: ReactNode;
 }) {
     const id = useId();
     return (
-        <label className="hb-toggle-row">
-            <span className="hb-toggle-copy">
-                <strong>{label}</strong>
-                <span id={`${id}-hint`}>{description}</span>
-            </span>
-            <span className="hb-toggle-control">
+        <div className="hb-toggle-row">
+            <div className="hb-toggle-copy">
+                <div className="hb-toggle-heading">
+                    <label htmlFor={id}>
+                        <strong>{label}</strong>
+                    </label>
+                    {help}
+                </div>
+                <label className="hb-toggle-description" htmlFor={id} id={`${id}-hint`}>
+                    {description}
+                </label>
+            </div>
+            <label className="hb-toggle-control" htmlFor={id}>
                 <input
+                    id={id}
                     className="hb-sr-only"
                     type="checkbox"
                     role="switch"
@@ -332,8 +342,8 @@ export function ToggleField({
                     onChange={(event) => onCheckedChange(event.currentTarget.checked)}
                 />
                 <span className="hb-switch" aria-hidden="true" />
-            </span>
-        </label>
+            </label>
+        </div>
     );
 }
 

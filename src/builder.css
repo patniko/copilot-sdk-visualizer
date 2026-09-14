@@ -883,7 +883,7 @@
     gap: 24px;
     padding-block: 16px;
     border-bottom: 1px solid var(--cp-border);
-    cursor: pointer;
+    cursor: default;
 }
 
 .hb-toggle-row:first-child {
@@ -899,6 +899,24 @@
     display: grid;
     gap: 4px;
     min-width: 0;
+}
+
+.hb-toggle-heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hb-toggle-heading label,
+.hb-toggle-description,
+.hb-toggle-control {
+    cursor: pointer;
+}
+
+.hb-toggle-copy > .hb-toggle-description {
+    color: var(--cp-text-muted);
+    font-size: 11px;
+    line-height: 1.7;
 }
 
 .hb-toggle-copy strong {

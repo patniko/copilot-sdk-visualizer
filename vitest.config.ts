@@ -9,7 +9,11 @@ export default defineConfig({
                 test: {
                     name: "browser",
                     environment: "node",
-                    include: ["test/browser.test.ts", "test/bootstrap-browser.test.ts"],
+                    include: [
+                        "test/browser.test.ts",
+                        "test/bootstrap-browser.test.ts",
+                        "test/context-help-browser.test.ts",
+                    ],
                     testTimeout: 60_000,
                     hookTimeout: 60_000,
                     retry: 0,
