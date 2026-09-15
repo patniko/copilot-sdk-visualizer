@@ -1,5 +1,4 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { KeyRound, SlidersHorizontal } from "lucide-react";
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
 import { Badge, Button, ChoiceField, Notice, Panel, SelectField, TextField } from "./ui";
@@ -15,22 +14,65 @@ const endpointExamples = {
 export function ModelsEditor({ plan, edit, issues }: EditorProps) {
     const byok = plan.model.provider !== "copilot";
     const endpointExample = plan.model.provider === "copilot" ? "" : endpointExamples[plan.model.provider];
+
     return (
         <div className="hb-editor-stack">
             <Panel
-                title="Provider and model"
-                description="A host-owned endpoint and model choice, not a live model catalog."
-                action={<SlidersHorizontal size={19} aria-hidden="true" />}
+                title="How will this harness access a model?"
+                description="Start with who owns inference. The remaining decisions follow from that choice."
+                action={<Badge>Step 1</Badge>}
             >
-                <div className="hb-field-grid">
+                <ChoiceField
+                    label="Inference access"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.modelProvider}
+                            value={byok ? "Bring your own" : "GitHub Copilot"}
+                        />
+                    }
+                    value={byok ? "byok" : "copilot"}
+                    options={[
+                        {
+                            value: "copilot",
+                            label: "GitHub Copilot account",
+                            description:
+                                "GitHub manages billing, inference, model access, and service availability.",
+                        },
+                        {
+                            value: "byok",
+                            label: "Bring your own inference",
+                            description:
+                                "You operate the endpoint, credentials, billing, capacity, and model availability.",
+                        },
+                    ]}
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.model.provider = value === "copilot" ? "copilot" : "openai";
+                        })
+                    }
+                />
+                <Notice
+                    title={byok ? "You own the inference stack" : "GitHub manages the inference service"}
+                    tone="accent"
+                >
+                    {byok
+                        ? "Connect a local OpenAI-compatible server, a third-party provider, or Azure inference. Your host owns credentials, provider charges, deployment capacity, and model compatibility."
+                        : "The selected GitHub Copilot account or organization determines billing, entitlements, and which models are available. Your host authenticates the caller; it does not operate a separate inference endpoint."}
+                </Notice>
+            </Panel>
+
+            {byok ? (
+                <Panel
+                    title="Connect your inference provider"
+                    description="Choose the provider contract first, then point the host at the endpoint you operate."
+                    action={<Badge>Step 2</Badge>}
+                >
                     <SelectField
-                        label="Model provider"
-                        help={<SettingHelp help={valueHelp.modelProvider} value={plan.model.provider} />}
+                        label="Provider type"
                         value={plan.model.provider}
                         options={[
-                            { value: "copilot", label: "GitHub Copilot" },
-                            { value: "openai", label: "OpenAI" },
-                            { value: "azure", label: "Azure OpenAI" },
+                            { value: "openai", label: "OpenAI-compatible (cloud or local)" },
+                            { value: "azure", label: "Azure inference" },
                             { value: "anthropic", label: "Anthropic" },
                         ]}
                         onValueChange={(value) =>
@@ -38,136 +80,104 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                                 draft.model.provider = value;
                             })
                         }
+                        hint="Local model servers and third-party gateways can use the OpenAI-compatible route when they implement the selected wire API."
                     />
                     <TextField
-                        label="Model ID"
-                        help={
-                            <SettingHelp
-                                help={valueHelp.modelId}
-                                value={plan.model.id.trim() || "Host supplied"}
-                            />
-                        }
-                        value={plan.model.id}
-                        maxLength={120}
-                        placeholder="Supplied by your host"
-                        onValueChange={(value) =>
-                            edit((draft) => {
-                                draft.model.id = value;
-                            })
-                        }
-                        error={issueFor(issues, "model.id")}
-                        hint="Leave blank to require host.model in the SDK sketch."
-                    />
-                </div>
-                {byok && (
-                    <div className="hb-editor-stack hb-tight-stack">
-                        <TextField
-                            label="Provider endpoint"
-                            help={<SettingHelp help={valueHelp.providerEndpoint} />}
-                            type="url"
-                            value={plan.model.endpoint}
-                            maxLength={1500}
-                            placeholder={endpointExample}
-                            spellCheck={false}
-                            onValueChange={(value) =>
-                                edit((draft) => {
-                                    draft.model.endpoint = value;
-                                })
-                            }
-                            error={issueFor(issues, "model.endpoint")}
-                            hint="An editable HTTP(S) endpoint. No URL credentials, API keys, or secret query parameters."
-                        />
-                        <div className="hb-example-row">
-                            <span>Endpoint examples are illustrative, not verified connections.</span>
-                            <Button
-                                variant="ghost"
-                                size="small"
-                                onClick={() =>
-                                    edit((draft) => {
-                                        draft.model.endpoint = endpointExample;
-                                    })
-                                }
-                            >
-                                Use example
-                            </Button>
-                        </div>
-                        {(plan.model.provider === "openai" || plan.model.provider === "azure") && (
-                            <ChoiceField
-                                label="Provider wire API"
-                                help={<SettingHelp help={valueHelp.wireApi} value={plan.model.wireApi} />}
-                                value={plan.model.wireApi}
-                                options={[
-                                    { value: "responses", label: "Responses" },
-                                    { value: "completions", label: "Chat completions" },
-                                ]}
-                                onValueChange={(value) =>
-                                    edit((draft) => {
-                                        draft.model.wireApi = value;
-                                    })
-                                }
-                                hint="Choose the wire contract supported by your actual endpoint."
-                            />
-                        )}
-                    </div>
-                )}
-                {!byok && issueFor(issues, "model.endpoint") && (
-                    <TextField
-                        label="Retained provider endpoint"
+                        label="Provider endpoint"
                         help={<SettingHelp help={valueHelp.providerEndpoint} />}
+                        type="url"
                         value={plan.model.endpoint}
                         maxLength={1500}
+                        placeholder={endpointExample}
+                        spellCheck={false}
                         onValueChange={(value) =>
                             edit((draft) => {
                                 draft.model.endpoint = value;
                             })
                         }
                         error={issueFor(issues, "model.endpoint")}
-                        hint="This endpoint is unused by GitHub Copilot. Clear it or correct it so the reversible plan does not retain an invalid or credential-bearing URL."
+                        hint="An HTTP(S) inference endpoint. Keep API keys and credential query parameters out of the URL."
                     />
-                )}
-                <div className="hb-field-grid">
-                    <SelectField
-                        label="Reasoning effort"
-                        help={<SettingHelp help={valueHelp.reasoning} value={plan.model.reasoningEffort} />}
-                        value={plan.model.reasoningEffort}
+                    <div className="hb-example-row">
+                        <span>Examples are illustrative and are never contacted by this planner.</span>
+                        <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={() =>
+                                edit((draft) => {
+                                    draft.model.endpoint = endpointExample;
+                                })
+                            }
+                        >
+                            Use example
+                        </Button>
+                    </div>
+                    {(plan.model.provider === "openai" || plan.model.provider === "azure") && (
+                        <ChoiceField
+                            label="Provider wire API"
+                            help={<SettingHelp help={valueHelp.wireApi} value={plan.model.wireApi} />}
+                            value={plan.model.wireApi}
+                            options={[
+                                {
+                                    value: "responses",
+                                    label: "Responses",
+                                    description: "Use an endpoint implementing the Responses API.",
+                                },
+                                {
+                                    value: "completions",
+                                    label: "Chat completions",
+                                    description: "Use an endpoint implementing Chat Completions.",
+                                },
+                            ]}
+                            onValueChange={(value) =>
+                                edit((draft) => {
+                                    draft.model.wireApi = value;
+                                })
+                            }
+                        />
+                    )}
+                </Panel>
+            ) : (
+                <Panel
+                    title="Connect a GitHub Copilot account"
+                    description="Choose whose Copilot entitlement the future host uses for inference."
+                    action={<Badge>Step 2</Badge>}
+                >
+                    <ChoiceField
+                        label="GitHub credential ownership"
+                        help={<SettingHelp help={valueHelp.identity} value={plan.identity} />}
+                        value={plan.identity}
                         options={[
-                            { value: "default", label: "Model default" },
-                            { value: "low", label: "Low" },
-                            { value: "medium", label: "Medium" },
-                            { value: "high", label: "High" },
-                            { value: "xhigh", label: "Extra high" },
+                            {
+                                value: "host-token",
+                                label: "Per-session token callback",
+                                description: "Your host supplies and refreshes an explicitly scoped token.",
+                            },
+                            {
+                                value: "developer",
+                                label: "Developer login",
+                                description: "Use the future local runtime's signed-in GitHub account.",
+                            },
                         ]}
                         onValueChange={(value) =>
                             edit((draft) => {
-                                draft.model.reasoningEffort = value;
+                                draft.identity = value;
                             })
                         }
                     />
-                    <SelectField
-                        label="Context tier"
-                        help={<SettingHelp help={valueHelp.contextTier} value={plan.model.contextTier} />}
-                        value={plan.model.contextTier}
-                        options={[
-                            { value: "default", label: "Model default" },
-                            { value: "long_context", label: "Long context" },
-                        ]}
-                        onValueChange={(value) =>
-                            edit((draft) => {
-                                draft.model.contextTier = value;
-                            })
-                        }
-                    />
-                </div>
-                <p className="hb-field-hint">
-                    Support is provider- and model-dependent. This planner does not discover models, verify
-                    availability, or make inference requests.
-                </p>
-            </Panel>
+                    <Notice title="No token values belong in this plan">
+                        {plan.identity === "host-token"
+                            ? "The generated host requires a GitHub token provider. Use this route for explicit per-session identity, especially in shared services."
+                            : "The future local runtime uses its developer login. This is convenient for local development, not a substitute for tenant authorization in a shared service."}
+                    </Notice>
+                </Panel>
+            )}
+
             {byok && (
                 <Panel
-                    title="Provider credential binding"
-                    description="Name a host secret source. Never paste an actual credential into the plan."
-                    action={<Badge>Host-owned</Badge>}
+                    title="Bind provider credentials"
+                    description="Tell the future host where to obtain a secret without storing the secret in the plan."
+                    action={<Badge>Step 3</Badge>}
                 >
                     <ChoiceField
                         label="Provider credential source"
@@ -177,12 +187,12 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                             {
                                 value: "api-key",
                                 label: "Environment variable",
-                                description: "An API-key variable name only",
+                                description: "Read an API-key variable in the host process.",
                             },
                             {
                                 value: "bearer-callback",
-                                label: "Bearer callback",
-                                description: "Experimental host integration",
+                                label: "Bearer-token callback",
+                                description: "Acquire and refresh a token through host code.",
                             },
                         ]}
                         onValueChange={(value) =>
@@ -206,21 +216,116 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                                 })
                             }
                             error={issueFor(issues, "model.credentialEnv")}
-                            hint="Example: MODEL_API_KEY. The generated host reads process.env; this browser never reads its value."
+                            hint="Enter a variable name such as MODEL_API_KEY, never the credential value."
                         />
                     ) : (
-                        <Notice title="Experimental: host.providerToken">
-                            Supply a provider bearer-token callback in the host. The host owns caching and
-                            refresh. This callback is distinct from a per-session GitHub token provider.
+                        <Notice title="Host implementation required">
+                            Supply a provider bearer-token callback in the host. The host owns acquisition,
+                            caching, expiry, and refresh.
                         </Notice>
                     )}
                 </Panel>
             )}
+
+            <Panel
+                title="Choose model behavior"
+                description={
+                    byok
+                        ? "Select a model exposed by your endpoint, then request only the capabilities it supports."
+                        : "Select an available Copilot model or let the host resolve one from account and organization policy."
+                }
+                action={<Badge>Step {byok ? 4 : 3}</Badge>}
+            >
+                <div className="hb-field-grid">
+                    <TextField
+                        label="Model ID"
+                        help={
+                            <SettingHelp
+                                help={valueHelp.modelId}
+                                value={plan.model.id.trim() || "Host supplied"}
+                            />
+                        }
+                        value={plan.model.id}
+                        maxLength={120}
+                        placeholder={
+                            byok ? "Model exposed by your endpoint" : "Resolved by Copilot or your host"
+                        }
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.model.id = value;
+                            })
+                        }
+                        error={issueFor(issues, "model.id")}
+                        hint={
+                            byok
+                                ? "Use the model identifier accepted by your provider endpoint."
+                                : "Leave blank to let the future host supply a model allowed for the Copilot account."
+                        }
+                    />
+                    <SelectField
+                        label="Reasoning effort"
+                        help={<SettingHelp help={valueHelp.reasoning} value={plan.model.reasoningEffort} />}
+                        value={plan.model.reasoningEffort}
+                        options={[
+                            { value: "default", label: "Model default" },
+                            { value: "low", label: "Low" },
+                            { value: "medium", label: "Medium" },
+                            { value: "high", label: "High" },
+                            { value: "xhigh", label: "Extra high" },
+                        ]}
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.model.reasoningEffort = value;
+                            })
+                        }
+                    />
+                </div>
+                <SelectField
+                    label="Context tier"
+                    help={<SettingHelp help={valueHelp.contextTier} value={plan.model.contextTier} />}
+                    value={plan.model.contextTier}
+                    options={[
+                        { value: "default", label: "Model default" },
+                        { value: "long_context", label: "Long context" },
+                    ]}
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.model.contextTier = value;
+                        })
+                    }
+                    hint="Model availability, reasoning levels, and context tiers depend on the active account or provider."
+                />
+                <p className="hb-field-hint">
+                    This planner does not discover models, verify entitlements, test endpoint compatibility,
+                    or make inference requests.
+                </p>
+            </Panel>
+
+            {!byok && issueFor(issues, "model.endpoint") && (
+                <Panel
+                    title="Retained provider endpoint"
+                    description="This BYOK value is inactive for GitHub Copilot, but the reversible plan cannot retain an invalid or credential-bearing URL."
+                >
+                    <TextField
+                        label="Retained provider endpoint"
+                        help={<SettingHelp help={valueHelp.providerEndpoint} />}
+                        value={plan.model.endpoint}
+                        maxLength={1500}
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.model.endpoint = value;
+                            })
+                        }
+                        error={issueFor(issues, "model.endpoint")}
+                    />
+                </Panel>
+            )}
+
             {(plan.model.provider === "copilot" || plan.model.credential !== "api-key") &&
                 issueFor(issues, "model.credentialEnv") && (
                     <Panel
                         title="Retained provider setting"
-                        description="This value is not used by the active credential route, but must remain a valid environment variable name in the reversible plan."
+                        description="This value is inactive for the selected route, but must remain a valid environment variable name in the reversible plan."
                     >
                         <TextField
                             label="Retained API-key environment variable name"
@@ -238,47 +343,6 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                         />
                     </Panel>
                 )}
-            <Panel
-                title="GitHub identity ownership"
-                description="Keep the caller's identity separate from the model provider and each downstream service."
-                action={<KeyRound size={19} aria-hidden="true" />}
-            >
-                <ChoiceField
-                    label="GitHub credential ownership"
-                    help={<SettingHelp help={valueHelp.identity} value={plan.identity} />}
-                    value={plan.identity}
-                    options={[
-                        {
-                            value: "host-token",
-                            label: "Host token callback",
-                            description: "Explicit per-session identity",
-                        },
-                        {
-                            value: "developer",
-                            label: "Developer identity",
-                            description: "Future host's logged-in user",
-                        },
-                    ]}
-                    onValueChange={(value) =>
-                        edit((draft) => {
-                            draft.identity = value;
-                        })
-                    }
-                />
-                <Notice
-                    title={
-                        byok
-                            ? "GitHub identity is retained, not used by this provider route"
-                            : "No token values belong in this plan"
-                    }
-                >
-                    {byok
-                        ? "The BYOK sketch uses the provider credential source above. Switching providers preserves this GitHub identity choice without reading any credentials."
-                        : plan.identity === "host-token"
-                          ? "The sketch requires host.callbacks.gitHubTokenProvider. Your host supplies and scopes the credential at runtime."
-                          : "The sketch opts into the future host's logged-in developer credentials. Shared services should use explicit session identity and downstream authorization instead."}
-                </Notice>
-            </Panel>
         </div>
     );
 }

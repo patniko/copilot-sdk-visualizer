@@ -6,6 +6,7 @@ import type { ReferenceControl, ReferenceGap } from "../content/reference";
 
 export type ViewId =
     | "overview"
+    | "base-profile"
     | "prompt"
     | "tools"
     | "context"
@@ -56,6 +57,7 @@ export function useEditorRowIds(count: number) {
 export function viewForPath(path: string): ViewId {
     const first = path.split(".")[0];
     if (first === "target") return "bootstrap";
+    if (first === "clientMode" || first === "preset") return "base-profile";
     if (first === "prompt") return "prompt";
     if (first === "tools" || first === "customTools" || first === "mcpServers" || first === "inventory")
         return "tools";

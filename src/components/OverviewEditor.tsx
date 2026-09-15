@@ -41,7 +41,7 @@ const scenarioIcons = {
 };
 const axisViews: Record<string, ViewId> = {
     "Runtime & language": "bootstrap",
-    "Client baseline": "overview",
+    "Client baseline": "base-profile",
     Prompt: "prompt",
     "Built-in tools": "tools",
     "Custom tools": "tools",
@@ -55,7 +55,15 @@ const axisViews: Record<string, ViewId> = {
     "Events / evaluation": "policy",
 };
 
-export function OverviewEditor({
+export function OverviewEditor({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
+    return (
+        <div className="hb-editor-stack">
+            <HarnessPrimer onNavigate={onNavigate} />
+        </div>
+    );
+}
+
+export function BaseProfileEditor({
     plan,
     edit,
     onApplyPreset,
@@ -69,7 +77,6 @@ export function OverviewEditor({
     const changes = changedAxes(plan);
     return (
         <div className="hb-editor-stack">
-            <HarnessPrimer onNavigate={onNavigate} />
             <div className="hb-profile-grid">
                 {PRESETS.map((preset) => {
                     const details = profileDetails[preset.id];

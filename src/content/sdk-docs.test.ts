@@ -41,5 +41,6 @@ describe("SDK docs map", () => {
         expect(SDK_GETTING_STARTED).toMatch(/^https:\/\//);
         expect(sdkDocsForView("bootstrap")?.links.some((link) => /bundled-cli/.test(link.url))).toBe(true);
         expect(sdkDocsForView("overview")?.view).toBe("overview");
+        expect(sdkDocsForView("base-profile")?.view).toBe("base-profile");
     });
 });

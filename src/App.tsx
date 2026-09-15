@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
     ArrowRight,
     BookOpen,
-    Box,
     Check,
     ChevronRight,
     CircleAlert,
@@ -12,6 +11,7 @@ import {
     FileText,
     FolderOpen,
     LayoutDashboard,
+    Layers3,
     LockKeyhole,
     Moon,
     PackageOpen,
@@ -32,11 +32,12 @@ import type { HarnessPlan, PresetId } from "./domain/plan";
 import { AgentsEditor } from "./components/AgentsEditor";
 import { BootstrapEditor } from "./components/BootstrapEditor";
 import { ContextEditor } from "./components/ContextEditor";
+import { CopilotMark } from "./components/CopilotMark";
 import { EvidenceDialog } from "./components/EvidenceDialog";
 import { ExportDialog } from "./components/ExportDialog";
 import { ImportDialog } from "./components/ImportDialog";
 import { ModelsEditor } from "./components/ModelsEditor";
-import { OverviewEditor } from "./components/OverviewEditor";
+import { BaseProfileEditor, OverviewEditor } from "./components/OverviewEditor";
 import { PlanInspector } from "./components/PlanInspector";
 import { PolicyEditor } from "./components/PolicyEditor";
 import { PromptEditor } from "./components/PromptEditor";
@@ -48,7 +49,8 @@ import { Badge, Button, Modal, Notice } from "./components/ui";
 import "./builder.css";
 
 const navigation = [
-    { id: "overview", label: "Overview", detail: "Profiles & scenarios", icon: LayoutDashboard },
+    { id: "overview", label: "Overview", detail: "How the harness fits together", icon: LayoutDashboard },
+    { id: "base-profile", label: "Base Profile", detail: "Profiles & scenarios", icon: Layers3 },
     { id: "prompt", label: "Prompt", detail: "Behavior & instructions", icon: FileText },
     { id: "tools", label: "Tools", detail: "Inventory & implementations", icon: Wrench },
     { id: "context", label: "Context & packs", detail: "Inputs & discovery", icon: FolderOpen },
@@ -66,50 +68,55 @@ const navigation = [
 
 const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description: string }> = {
     overview: {
-        eyebrow: "Start with intention",
+        eyebrow: "Start here",
+        title: "Understand the harness.",
+        description: "See what the shared runtime provides, what you compose, and what your host owns.",
+    },
+    "base-profile": {
+        eyebrow: "01 / Starting point",
         title: "Compose the behavior.",
         description: "Keep the engine. Choose a starting point, then make each boundary your own.",
     },
     prompt: {
-        eyebrow: "01 / Instructions",
+        eyebrow: "02 / Instructions",
         title: "Give the work a frame.",
         description: "Choose how much of the system prompt you own, and make the operating rules explicit.",
     },
     tools: {
-        eyebrow: "02 / Capabilities",
+        eyebrow: "03 / Capabilities",
         title: "Same tool. Your implementation.",
         description: "Separate what the model can see from what the host actually does.",
     },
     context: {
-        eyebrow: "03 / Inputs",
+        eyebrow: "04 / Inputs",
         title: "Be deliberate about context.",
         description:
             "Supply the project, instructions, and capability packs your future host should make available.",
     },
     agents: {
-        eyebrow: "04 / Delegation",
+        eyebrow: "05 / Delegation",
         title: "Give every role a purpose.",
         description:
             "Define focused specialists without confusing tool visibility, model preference, and authority.",
     },
     models: {
-        eyebrow: "05 / Connection",
+        eyebrow: "06 / Connection",
         title: "Choose the model. Own the identity.",
         description: "Plan the provider and credential bindings without putting secrets in the browser.",
     },
     policy: {
-        eyebrow: "06 / Host responsibilities",
+        eyebrow: "07 / Host responsibilities",
         title: "Make the boundaries real.",
         description: "Keep permissions, persistence, observations, and your quality bar explicit.",
     },
     bootstrap: {
-        eyebrow: "07 / Bring it to your host",
+        eyebrow: "08 / Bring it to your host",
         title: "Build the project. Wire the host.",
         description:
             "Configure behavior, choose runtime and language, install dependencies, integrate the host, then preflight and run locally.",
     },
     reference: {
-        eyebrow: "08 / Source-backed learning",
+        eyebrow: "09 / Source-backed learning",
         title: "Understand the seams.",
         description: "Look up the supported surface, the lifecycle, and the limits behind each decision.",
     },
@@ -196,7 +203,7 @@ export default function App() {
             <header className="hb-header">
                 <div className="hb-brand">
                     <span className="hb-brand-mark">
-                        <Box size={25} strokeWidth={1.6} aria-hidden="true" />
+                        <CopilotMark size={25} />
                     </span>
                     <div>
                         <h1>Harness Builder</h1>
@@ -440,8 +447,9 @@ export default function App() {
                             <legend className="hb-sr-only">
                                 {navigation.find((entry) => entry.id === view)?.label} editor
                             </legend>
-                            {view === "overview" && (
-                                <OverviewEditor
+                            {view === "overview" && <OverviewEditor onNavigate={navigate} />}
+                            {view === "base-profile" && (
+                                <BaseProfileEditor
                                     {...editorProps}
                                     onApplyPreset={(id) => requestChange({ kind: "preset", id })}
                                     onApplyScenario={(id) => requestChange({ kind: "scenario", id })}

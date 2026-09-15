@@ -122,7 +122,7 @@ it("gives every Policy & state switch consistent on/off and host-boundary help",
 it("uses the same help interaction for choices and inputs in every configuration editor", async () => {
     await withApp("cross-editor-educational-help", async (page) => {
         const cases: { view: RegExp; title: string; heading: string }[] = [
-            { view: /^Overview\b/, title: "SDK client baseline", heading: "Empty" },
+            { view: /^Base Profile\b/, title: "SDK client baseline", heading: "Empty" },
             { view: /^Prompt\b/, title: "System message mode", heading: "Customize" },
             { view: /^Prompt\b/, title: "Section action", heading: "Preserve" },
             { view: /^Tools\b/, title: "Tool inventory", heading: "Explicit" },
@@ -137,7 +137,11 @@ it("uses the same help interaction for choices and inputs in every configuration
             { view: /^Context & packs\b/, title: "Plugin directories", heading: "Explicit opt-in" },
             { view: /^Agents\b/, title: "Agent model preference", heading: "Fallback behavior" },
             { view: /^Agents\b/, title: "Root-only tool exclusions", heading: "Direction matters" },
-            { view: /^Models & identity\b/, title: "Model provider", heading: "Copilot versus BYOK" },
+            {
+                view: /^Models & identity\b/,
+                title: "Inference access",
+                heading: "Managed versus bring your own",
+            },
             { view: /^Models & identity\b/, title: "Reasoning effort", heading: "Model default" },
             {
                 view: /^Models & identity\b/,
@@ -154,6 +158,7 @@ it("uses the same help interaction for choices and inputs in every configuration
         await page.setViewportSize({ width: 390, height: 844 });
         for (const view of [
             /^Overview\b/,
+            /^Base Profile\b/,
             /^Prompt\b/,
             /^Tools\b/,
             /^Context & packs\b/,

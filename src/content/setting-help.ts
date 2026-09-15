@@ -391,17 +391,17 @@ export const valueHelp = {
         refs("sdk-pack-inputs", "plugin-components", "plugin-reload-boundary"),
     ),
     modelProvider: setting(
-        "Model provider",
+        "Inference access",
         "provider",
-        "Choose the inference channel independently of tool and prompt configuration.",
+        "Choose whether GitHub Copilot manages inference or your host connects to an inference provider.",
         [
             {
-                title: "Copilot versus BYOK",
-                text: "Copilot uses the chosen Copilot identity route. BYOK uses the selected endpoint and provider credential binding; the stored Copilot identity choice is inactive for that route in this planner.",
+                title: "Managed versus bring your own",
+                text: "GitHub Copilot manages billing, inference, entitlements, and model availability for its account route. Bring your own uses the endpoint and provider credential binding operated by your host.",
             },
         ],
-        "Use a host-owned OpenAI-compatible or Anthropic endpoint for the same approved tool workflow.",
-        "No model discovery, compatibility check, or inference runs here. Provider support and output behavior are not identical across models.",
+        "Use a local OpenAI-compatible server, a third-party provider, or Azure inference while keeping the same approved tool workflow.",
+        "Bring your own means your application owns provider billing, capacity, credentials, compatibility, and availability. No model discovery or inference runs here.",
         refs("sdk-providers", "runtime-loop"),
     ),
     modelId: setting(

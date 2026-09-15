@@ -106,7 +106,7 @@ it("migrates existing drafts and makes a real runtime-specific bootstrap ZIP", a
             await expect.poll(async () => (await stored(page)).target.serverUrl).toBe("tcp://127.0.0.1:4567");
             await page
                 .getByRole("navigation", { name: "Harness workflow" })
-                .getByRole("button", { name: /^Overview\b/ })
+                .getByRole("button", { name: /^Base Profile\b/ })
                 .click();
             await page.getByRole("button", { name: "Apply Copilot", exact: true }).click();
             await page

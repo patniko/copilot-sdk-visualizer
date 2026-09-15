@@ -123,6 +123,14 @@ it("edits a real override, preserves invalid drafts, exports it, and restores it
 it("applies and undoes actual profile and scenario decisions", async () => {
     await exercise("profiles-and-scenarios", async (page) => {
         await page.getByRole("textbox", { name: "Draft name" }).fill("Keep my draft");
+        expect(
+            await page
+                .getByRole("heading", { name: "What is a harness, and how do you build one?" })
+                .isVisible(),
+        ).toBe(true);
+        expect(await page.getByRole("button", { name: "Apply Copilot", exact: true }).count()).toBe(0);
+        await navigate(page, /^Base Profile\b/);
+        expect(await page.getByRole("heading", { name: "Compose the behavior." }).isVisible()).toBe(true);
         await page.getByRole("button", { name: "Apply Copilot", exact: true }).click();
         const confirmation = page.getByRole("dialog", { name: "Apply Copilot?" });
         await confirmation.getByRole("button", { name: "Apply Copilot", exact: true }).click();
@@ -166,14 +174,24 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
             .toBe("Be concise and cite evidence.");
 
         await navigate(page, /^Models & identity\b/);
-        await page.getByLabel("Model provider", { exact: true }).selectOption("openai");
+        await page
+            .getByRole("group", { name: "Inference access", exact: true })
+            .getByText("Bring your own inference", { exact: true })
+            .click();
         await page.getByRole("textbox", { name: "Provider endpoint", exact: true }).fill("not-an-endpoint");
-        await page.getByLabel("Model provider", { exact: true }).selectOption("copilot");
+        await page
+            .getByRole("group", { name: "Inference access", exact: true })
+            .getByText("GitHub Copilot account", { exact: true })
+            .click();
         await page.getByRole("textbox", { name: "Retained provider endpoint", exact: true }).fill("");
         await expect
             .poll(() => page.getByRole("button", { name: "Export", exact: true }).isEnabled())
             .toBe(true);
-        await page.getByLabel("Model provider", { exact: true }).selectOption("azure");
+        await page
+            .getByRole("group", { name: "Inference access", exact: true })
+            .getByText("Bring your own inference", { exact: true })
+            .click();
+        await page.getByLabel("Provider type", { exact: true }).selectOption("azure");
         await page
             .getByRole("textbox", { name: "Provider endpoint", exact: true })
             .fill("https://example.openai.azure.com/openai/v1");
@@ -184,7 +202,7 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
         await expect.poll(async () => (await savedPlan(page)).model.credentialEnv).toBe("TEST_MODEL_KEY");
         await page
             .getByRole("group", { name: "Provider credential source", exact: true })
-            .getByText("Experimental host integration", { exact: true })
+            .getByText("Bearer-token callback", { exact: true })
             .click();
         await expect.poll(async () => (await savedPlan(page)).model.credential).toBe("bearer-callback");
 
@@ -310,6 +328,7 @@ it("keeps all editors and export dialogs usable on a narrow screen", async () =>
         await page.setViewportSize({ width: 390, height: 844 });
         for (const label of [
             /^Overview\b/,
+            /^Base Profile\b/,
             /^Prompt\b/,
             /^Tools\b/,
             /^Context & packs\b/,

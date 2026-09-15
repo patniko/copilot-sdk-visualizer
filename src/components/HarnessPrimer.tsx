@@ -46,7 +46,7 @@ const layers = [
 
 const steps: { label: string; view?: ViewId }[] = [
     { label: "Understand the four layers above", view: undefined },
-    { label: "Pick a starting profile and configure it", view: "overview" },
+    { label: "Pick a starting profile and configure it", view: "base-profile" },
     { label: "See what each choice exposes and requires", view: "prompt" },
     { label: "Choose runtime placement and SDK language", view: "bootstrap" },
     { label: "Download the complete bootstrap project", view: "bootstrap" },

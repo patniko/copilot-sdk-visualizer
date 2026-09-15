@@ -48,6 +48,23 @@ export const SDK_DOC_MAP: SdkDocGroup[] = [
         ],
     },
     {
+        view: "base-profile",
+        title: "Choose a base profile",
+        summary: "Pick the SDK starting point that best matches the behavior and ownership you need.",
+        links: [
+            {
+                label: "Choosing a setup path",
+                url: doc("setup/choosing-a-setup-path.md"),
+                note: "Personas and a decision matrix for selecting a starting composition.",
+            },
+            {
+                label: "Getting started",
+                url: doc("getting-started.md"),
+                note: "See a complete baseline application before customizing each decision.",
+            },
+        ],
+    },
+    {
         view: "prompt",
         title: "Behavior & instructions",
         summary: "How the prompt is processed and how to keep long sessions coherent.",
