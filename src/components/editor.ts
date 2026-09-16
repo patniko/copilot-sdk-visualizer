@@ -6,6 +6,7 @@ import type { ReferenceControl, ReferenceGap } from "../content/reference";
 
 export type ViewId =
     | "overview"
+    | "runtime"
     | "base-profile"
     | "prompt"
     | "tools"

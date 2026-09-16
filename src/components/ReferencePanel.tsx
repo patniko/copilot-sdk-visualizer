@@ -12,6 +12,7 @@ const catalogScopes = Array.from(new Set(reference.controls.flatMap((control) =>
 
 const viewLabels: Record<ViewId, string> = {
     overview: "Overview",
+    runtime: "Runtime map",
     "base-profile": "Base Profile",
     prompt: "Prompt",
     tools: "Tools",

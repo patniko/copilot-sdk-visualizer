@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ArrowRight,
     BookOpen,
@@ -14,6 +14,7 @@ import {
     Layers3,
     LockKeyhole,
     Moon,
+    Network,
     PackageOpen,
     Redo2,
     Settings2,
@@ -44,6 +45,7 @@ import { PlanInspector } from "./components/PlanInspector";
 import { PolicyEditor } from "./components/PolicyEditor";
 import { PromptEditor } from "./components/PromptEditor";
 import { ReferencePanel } from "./components/ReferencePanel";
+import { RuntimeExplorer } from "./components/RuntimeExplorer";
 import { ToolsEditor } from "./components/ToolsEditor";
 import { viewForPath } from "./components/editor";
 import type { EditorProps, Evidence, ViewId } from "./components/editor";
@@ -52,6 +54,7 @@ import "./builder.css";
 
 const navigation = [
     { id: "overview", label: "Overview", detail: "How the harness fits together", icon: LayoutDashboard },
+    { id: "runtime", label: "Runtime map", detail: "What the engine gives you", icon: Network },
     { id: "base-profile", label: "Base Profile", detail: "Profiles & scenarios", icon: Layers3 },
     { id: "prompt", label: "Prompt", detail: "Behavior & instructions", icon: FileText },
     { id: "tools", label: "Tools", detail: "Inventory & implementations", icon: Wrench },
@@ -74,6 +77,12 @@ const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description
         eyebrow: "Start here",
         title: "Understand the harness.",
         description: "See what the shared runtime provides, what you compose, and what your host owns.",
+    },
+    runtime: {
+        eyebrow: "Meet the runtime",
+        title: "Your harness. A whole engine underneath.",
+        description:
+            "Explore the shared machinery, the configuration seams, and the authority your host keeps.",
     },
     "base-profile": {
         eyebrow: "01 / Starting point",
@@ -139,10 +148,24 @@ function changeLabel(change: CompositionChange) {
         : (PRESETS.find((preset) => preset.id === change.id)?.label ?? change.id);
 }
 
+function viewFromLocation(): ViewId {
+    return navigation.find((entry) => `#${entry.id}` === window.location.hash)?.id ?? "overview";
+}
+
 export default function App() {
     const harness = useHarness();
     const { plan, issues, blocked, saveError, canUndo, canRedo } = harness;
-    const [view, setView] = useState<ViewId>("overview");
+    const [view, setView] = useState<ViewId>(viewFromLocation);
+    useEffect(() => {
+        const onHashChange = () => {
+            if (window.location.hash && !navigation.some((entry) => `#${entry.id}` === window.location.hash))
+                return;
+            setView(viewFromLocation());
+            window.requestAnimationFrame(() => document.getElementById("editor-heading")?.focus());
+        };
+        window.addEventListener("hashchange", onHashChange);
+        return () => window.removeEventListener("hashchange", onHashChange);
+    }, []);
     const [theme, setTheme] = useState(() =>
         document.documentElement.dataset.theme === "dark" ? "dark" : "light",
     );
@@ -175,6 +198,7 @@ export default function App() {
 
     function navigate(next: ViewId) {
         setView(next);
+        if (window.location.hash !== `#${next}`) window.history.pushState(null, "", `#${next}`);
         window.requestAnimationFrame(() => document.getElementById("editor-heading")?.focus());
     }
 
@@ -205,8 +229,15 @@ export default function App() {
     const editorProps: EditorProps = { plan, edit, issues, onEvidence: setEvidence };
 
     return (
-        <div className="harness-builder">
-            <a className="hb-skip-link" href="#builder-main">
+        <div className={`harness-builder${view === "runtime" ? " hb-runtime-mode" : ""}`}>
+            <a
+                className="hb-skip-link"
+                href="#builder-main"
+                onClick={(event) => {
+                    event.preventDefault();
+                    document.getElementById("builder-main")?.focus();
+                }}
+            >
                 Skip to editor
             </a>
             <header className="hb-header">
@@ -270,71 +301,73 @@ export default function App() {
                     </Button>
                 </div>
             </header>
-            <div className="hb-draft-bar">
-                <div className="hb-draft-identity">
-                    <label htmlFor="harness-draft-name">Draft name</label>
-                    <input
-                        id="harness-draft-name"
-                        value={plan.name}
-                        className="hb-draft-name"
-                        maxLength={80}
-                        disabled={blocked}
-                        aria-invalid={issues.some((issue) => issue.path === "name")}
-                        aria-describedby={
-                            issues.some((issue) => issue.path === "name") ? "draft-validation" : undefined
-                        }
-                        onChange={(event) => {
-                            const value = event.currentTarget.value;
-                            edit((draft) => {
-                                draft.name = value;
-                            });
-                        }}
-                    />
-                </div>
-                <div className="hb-draft-actions">
-                    <span
-                        className={`hb-save-status${exportDisabled || saveError ? " hb-save-status-error" : ""}`}
-                        role="status"
-                    >
-                        {exportDisabled || saveError ? (
-                            <CircleAlert size={14} aria-hidden="true" />
-                        ) : (
-                            <Check size={14} aria-hidden="true" />
-                        )}
-                        {saveLabel}
-                    </span>
-                    <div className="hb-history" aria-label="Draft history">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Undo"
-                            title="Undo the last plan change"
-                            disabled={!canUndo || blocked}
-                            onClick={() => {
-                                harness.undo();
-                                setRevision((current) => current + 1);
-                                setFeedback("Previous draft restored.");
+            {view !== "runtime" && (
+                <div className="hb-draft-bar">
+                    <div className="hb-draft-identity">
+                        <label htmlFor="harness-draft-name">Draft name</label>
+                        <input
+                            id="harness-draft-name"
+                            value={plan.name}
+                            className="hb-draft-name"
+                            maxLength={80}
+                            disabled={blocked}
+                            aria-invalid={issues.some((issue) => issue.path === "name")}
+                            aria-describedby={
+                                issues.some((issue) => issue.path === "name") ? "draft-validation" : undefined
+                            }
+                            onChange={(event) => {
+                                const value = event.currentTarget.value;
+                                edit((draft) => {
+                                    draft.name = value;
+                                });
                             }}
+                        />
+                    </div>
+                    <div className="hb-draft-actions">
+                        <span
+                            className={`hb-save-status${exportDisabled || saveError ? " hb-save-status-error" : ""}`}
+                            role="status"
                         >
-                            <Undo2 size={17} aria-hidden="true" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Redo"
-                            title="Redo the last undone change"
-                            disabled={!canRedo || blocked}
-                            onClick={() => {
-                                harness.redo();
-                                setRevision((current) => current + 1);
-                                setFeedback("Draft change reapplied.");
-                            }}
-                        >
-                            <Redo2 size={17} aria-hidden="true" />
-                        </Button>
+                            {exportDisabled || saveError ? (
+                                <CircleAlert size={14} aria-hidden="true" />
+                            ) : (
+                                <Check size={14} aria-hidden="true" />
+                            )}
+                            {saveLabel}
+                        </span>
+                        <div className="hb-history" aria-label="Draft history">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Undo"
+                                title="Undo the last plan change"
+                                disabled={!canUndo || blocked}
+                                onClick={() => {
+                                    harness.undo();
+                                    setRevision((current) => current + 1);
+                                    setFeedback("Previous draft restored.");
+                                }}
+                            >
+                                <Undo2 size={17} aria-hidden="true" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Redo"
+                                title="Redo the last undone change"
+                                disabled={!canRedo || blocked}
+                                onClick={() => {
+                                    harness.redo();
+                                    setRevision((current) => current + 1);
+                                    setFeedback("Draft change reapplied.");
+                                }}
+                            >
+                                <Redo2 size={17} aria-hidden="true" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
             <div className="hb-workspace">
                 <div className="hb-sidebar">
                     <p className="hb-nav-label">Compose your harness</p>
@@ -385,13 +418,15 @@ export default function App() {
                     </div>
                 </div>
                 <main id="builder-main" tabIndex={-1} className="hb-main" aria-labelledby="editor-heading">
-                    <div className="hb-page-heading">
-                        <p className="hb-kicker">{heading.eyebrow}</p>
-                        <h2 id="editor-heading" tabIndex={-1}>
-                            {heading.title}
-                        </h2>
-                        <p>{heading.description}</p>
-                    </div>
+                    {view !== "runtime" && (
+                        <div className="hb-page-heading">
+                            <p className="hb-kicker">{heading.eyebrow}</p>
+                            <h2 id="editor-heading" tabIndex={-1}>
+                                {heading.title}
+                            </h2>
+                            <p>{heading.description}</p>
+                        </div>
+                    )}
                     {blocked && (
                         <Notice title="Your saved draft needs explicit recovery" tone="error">
                             <p>
@@ -449,7 +484,9 @@ export default function App() {
                             </Button>
                         </div>
                     )}
-                    {view === "reference" ? (
+                    {view === "runtime" ? (
+                        <RuntimeExplorer onNavigate={navigate} onEvidence={setEvidence} />
+                    ) : view === "reference" ? (
                         <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
                     ) : view === "advanced" ? (
                         <AdvancedEditor />
@@ -483,13 +520,15 @@ export default function App() {
                         Browser-local planning. Exported paths and bindings refer to your future host.
                     </footer>
                 </main>
-                <PlanInspector
-                    plan={plan}
-                    onEvidence={setEvidence}
-                    onBuild={() => navigate("bootstrap")}
-                    onExport={() => setExportOpen(true)}
-                    exportDisabled={exportDisabled}
-                />
+                {view !== "runtime" && (
+                    <PlanInspector
+                        plan={plan}
+                        onEvidence={setEvidence}
+                        onBuild={() => navigate("bootstrap")}
+                        onExport={() => setExportOpen(true)}
+                        exportDisabled={exportDisabled}
+                    />
+                )}
             </div>
             {pending && (
                 <Modal

@@ -28,6 +28,28 @@ function doc(path: string): string {
 /** One group per builder view, in workflow order, each pointing at the matching SDK feature/setup guides. */
 export const SDK_DOC_MAP: SdkDocGroup[] = [
     {
+        view: "runtime",
+        title: "Runtime capability map",
+        summary: "What the runtime provides, how the SDK connects it, and what your application still owns.",
+        links: [
+            {
+                label: "The agent loop",
+                url: doc("features/agent-loop.md"),
+                note: "The shared execution engine behind the map; not a loop you implement in the SDK.",
+            },
+            {
+                label: "Plugin directories",
+                url: doc("features/plugin-directories.md"),
+                note: "Bundle supported skills, hooks, agents, and integrations for runtime loading.",
+            },
+            {
+                label: "Multi-tenancy & servers",
+                url: doc("setup/multi-tenancy.md"),
+                note: "Application identity, credential scope, and isolation remain host responsibilities.",
+            },
+        ],
+    },
+    {
         view: "overview",
         title: "Start & mental model",
         summary: "The end-to-end tutorial and how the SDK, CLI, and runtime fit together.",
