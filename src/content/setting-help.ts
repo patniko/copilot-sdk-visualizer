@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { getSource, reference } from "./reference";
 import type { HelpSource, ToggleHelp, ValueHelp } from "./help-types";
+import { copilotModelCatalog } from "./models";
 
 const sessionScope =
     "A new-session configuration choice. Editing this planner does not change a running agent.";
@@ -410,13 +411,20 @@ export const valueHelp = {
         "Name a model available to your chosen runtime/provider, or have the host supply it.",
         [
             {
+                title: "Copilot model catalog",
+                text: "GitHub Copilot uses a bundled snapshot of the runtime's public model IDs. The SDK's client.listModels() discovers live account models in your future host. Existing IDs outside the snapshot are retained; BYOK accepts the identifier exposed by your endpoint.",
+            },
+            {
                 title: "Blank value",
-                text: "The generated host requires a model value instead of inventing a model ID. Explicit values are passed to the configured model route.",
+                text: "Host supplied keeps the model ID blank. The generated host requires a model value instead of inventing a model ID. Explicit values are passed to the configured model route.",
             },
         ],
         "Keep model selection in an enterprise policy service rather than hardcoding it in each harness.",
         "The builder does not validate live availability or quality. A recognizable ID is not proof that an account or provider can use it.",
-        refs("sdk-model-change", "sdk-providers"),
+        refs("sdk-model-change", "sdk-providers").concat([
+            { label: "SDK live model discovery", url: copilotModelCatalog.sources.sdk },
+            { label: "Runtime public model catalog", url: copilotModelCatalog.sources.runtime },
+        ]),
     ),
     providerEndpoint: setting(
         "Provider endpoint",
@@ -424,12 +432,16 @@ export const valueHelp = {
         "The HTTP(S) inference endpoint used by a BYOK provider.",
         [
             {
+                title: "Optional in the planner",
+                text: "Leave this blank to supply the endpoint string in the generated host, like an enabled callback implementation. Saving and exporting remain available; generated preflight and startup report the missing endpoint until you implement it. No example endpoint is substituted.",
+            },
+            {
                 title: "Different endpoints",
                 text: "This is not the SDK/runtime TCP connection or an MCP server. Choose the API format the inference service actually supports.",
             },
         ],
         "Use the approved provider gateway URL while keeping its credential in an environment binding or callback.",
-        "Do not embed usernames, passwords, or credential query parameters. The browser does not call or verify this endpoint.",
+        "Nonempty endpoints must be valid HTTP(S) URLs without usernames, passwords, or credential query parameters. The browser does not call or verify this endpoint.",
         refs("sdk-providers"),
     ),
     wireApi: setting(

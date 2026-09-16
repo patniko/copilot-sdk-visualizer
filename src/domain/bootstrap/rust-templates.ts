@@ -329,7 +329,10 @@ impl Configuration {
             if let Err(error) = required_env("COPILOT_GITHUB_TOKEN") { issues.push(error.to_string()); }
         }
         // __S2S_LOCAL_PREFLIGHT_END__
-        if self.session.provider.is_some() {
+        if let Some(provider) = &self.session.provider {
+            if provider.base_url.trim().is_empty() {
+                if let Err(error) = host::provider_endpoint() { issues.push(error.to_string()); }
+            }
             let result = match self.credential {
                 Credential::ApiKey => required_env(&self.credential_env),
                 Credential::BearerCallback => host::raw_bearer_token(),
@@ -521,7 +524,11 @@ impl Configuration {
         if let Some(data) = &data.provider {
             let mut provider = ProviderConfig::default();
             provider.provider_type = Some(data.provider_type.clone());
-            provider.base_url = data.base_url.clone();
+            provider.base_url = if data.base_url.trim().is_empty() {
+                host::provider_endpoint()?
+            } else {
+                data.base_url.clone()
+            };
             provider.wire_api = data.wire_api.clone();
             match self.credential {
                 Credential::ApiKey => provider.api_key = Some(required_env(&self.credential_env)?),

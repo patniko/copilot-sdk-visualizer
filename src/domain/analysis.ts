@@ -27,6 +27,7 @@ export function toolSummary(plan: HarnessPlan) {
 export function hostContracts(plan: HarnessPlan): string[] {
     const required = ["Permission policy"];
     if (!plan.model.id.trim()) required.push("Model selection");
+    if (plan.model.provider !== "copilot" && !plan.model.endpoint.trim()) required.push("Provider endpoint");
     if (plan.model.provider === "copilot" && plan.identity === "host-token")
         required.push("GitHub token provider");
     if (plan.model.provider === "copilot" && plan.identity === "s2s-installation")
@@ -171,7 +172,7 @@ export function analyzePlan(plan: HarnessPlan): Decision[] {
             id: "provider",
             kind: "host",
             title: "Provider selection does not establish model parity",
-            detail: "Supply credentials in host code and verify the model, endpoint, and provider-native features. The application does not discover models or make inference requests.",
+            detail: "Supply credentials in host code and verify the model, endpoint, and provider-native features. A blank provider endpoint becomes a required host string, not an export blocker. The application does not discover models or make inference requests.",
             sources: ["sdk-providers", "runtime-output"],
         });
     if (plan.model.credential === "bearer-callback" && plan.model.provider !== "copilot")

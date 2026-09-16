@@ -135,7 +135,7 @@ export function generateSdkCode(input: HarnessPlan): string {
             : [
                   "            provider: {",
                   `                type: ${json(plan.model.provider)},`,
-                  `                baseUrl: ${json(plan.model.endpoint)},`,
+                  `                baseUrl: ${plan.model.endpoint.trim() ? json(plan.model.endpoint) : 'required(host.providerEndpoint?.trim(), "provider endpoint")'},`,
                   ...(plan.model.provider === "anthropic"
                       ? []
                       : [`                wireApi: ${json(plan.model.wireApi)},`]),
@@ -251,6 +251,7 @@ export function generateSdkCode(input: HarnessPlan): string {
         `    callbacks: Pick<SessionConfig, "onPermissionRequest" | "onUserInputRequest"${s2s ? "" : ' | "gitHubTokenProvider"'} | "createSessionFsProvider" | "onEvent" | "hooks">;`,
         '    toolHandlers: Record<string, NonNullable<Tool["handler"]>>;',
         "    model?: string;",
+        "    providerEndpoint?: string;",
         '    providerToken?: ProviderConfig["bearerTokenProvider"];',
         "}",
         "",

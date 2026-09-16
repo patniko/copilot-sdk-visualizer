@@ -500,6 +500,15 @@ var ToolHandlers = map[string]copilot.ToolHandler{}
 var PreToolHook copilot.PreToolUseHandler
 var PostToolHook copilot.PostToolUseHandler
 var SessionFilesystemFactory func(*copilot.Session) copilot.SessionFSProvider
+var ProviderEndpoint string
+
+func requiredProviderEndpoint() (string, error) {
+	value := strings.TrimSpace(ProviderEndpoint)
+	if value == "" {
+		return "", errors.New("provide the provider endpoint string in host.go ProviderEndpoint")
+	}
+	return value, nil
+}
 
 func requiredEnv(name string) (string, error) {
 	value := os.Getenv(name)
@@ -700,6 +709,10 @@ func preflight(settings HostSettings, config *copilot.SessionConfig, tools []cop
 		}
 		// __COPILOT_IDENTITY_PREFLIGHT_END__
 	} else {
+		if strings.TrimSpace(config.Provider.BaseURL) == "" {
+			_, err := requiredProviderEndpoint()
+			add(err)
+		}
 		switch settings.Credential {
 		case "api-key":
 			_, err := requiredEnv(settings.CredentialEnv)
@@ -750,6 +763,13 @@ func bindHost(settings HostSettings, config *copilot.SessionConfig, tools []copi
 	}
 	// __COPILOT_IDENTITY_BINDING_END__
 	if config.Provider != nil {
+		if strings.TrimSpace(config.Provider.BaseURL) == "" {
+			endpoint, err := requiredProviderEndpoint()
+			if err != nil {
+				return err
+			}
+			config.Provider.BaseURL = endpoint
+		}
 		if settings.Credential == "bearer-callback" {
 			config.Provider.BearerTokenProvider = acquireBearerToken
 		} else {

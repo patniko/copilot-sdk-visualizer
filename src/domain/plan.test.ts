@@ -100,6 +100,36 @@ describe("harness plan and presets", () => {
         expect(() => parsePlan(JSON.stringify(injected))).toThrow();
         expect(() => parsePlan("界".repeat(400_000))).toThrow(/1 MB/);
     });
+
+    it.each(["copilot", "openai", "azure", "anthropic"] as const)(
+        "allows deferred %s endpoints but still validates provided URLs",
+        (provider) => {
+            const plan = createPreset("empty");
+            plan.model.provider = provider;
+            for (const endpoint of ["", " \t "]) {
+                plan.model.endpoint = endpoint;
+                expect(parsePlan(JSON.stringify(plan))).toEqual(plan);
+                expect(hostContracts(plan).includes("Provider endpoint")).toBe(provider !== "copilot");
+            }
+            for (const endpoint of [
+                "not-an-endpoint",
+                "ftp://example.com",
+                "https://example.com?api_key=example-only",
+            ]) {
+                plan.model.endpoint = endpoint;
+                expect(HarnessPlanSchema.safeParse(plan).success).toBe(false);
+            }
+            plan.model.endpoint = "https://example.com/v1";
+            expect(HarnessPlanSchema.safeParse(plan).success).toBe(true);
+            expect(hostContracts(plan)).not.toContain("Provider endpoint");
+        },
+    );
+
+    it("still requires an endpoint for declared MCP servers", () => {
+        const plan = createPreset("empty");
+        plan.mcpServers = [{ ...createMcpServer("mcp"), url: "" }];
+        expect(HarnessPlanSchema.safeParse(plan).success).toBe(false);
+    });
 });
 
 describe("scenario decisions", () => {

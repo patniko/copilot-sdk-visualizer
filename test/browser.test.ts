@@ -9,6 +9,7 @@ import type { HarnessPlan } from "../src/domain/plan";
 import { createPreset } from "../src/domain/presets";
 import { STORAGE_KEY } from "../src/domain/storage";
 import { reference } from "../src/content/reference";
+import { copilotModelCatalog } from "../src/content/models";
 import { startBrowserHarness } from "./browser-harness";
 import type { BrowserHarness } from "./browser-harness";
 
@@ -155,6 +156,115 @@ it("applies and undoes actual profile and scenario decisions", async () => {
             .click();
         await expect.poll(async () => (await savedPlan(page)).tools.view.action).toBe("override");
         expect((await savedPlan(page)).prompt.content).toContain("tenant's authorized documents");
+    });
+});
+
+it("selects Copilot catalog models and preserves the choice through undo, reload, and export", async () => {
+    const initial = createPreset("minimal");
+    initial.model.provider = "copilot";
+    initial.model.id = "";
+    await exercise(
+        "copilot-model-catalog",
+        async (page) => {
+            await navigate(page, /^Models & identity\b/);
+            const model = page.getByRole("combobox", { name: "Model ID", exact: true });
+            expect(await page.getByRole("textbox", { name: "Model ID", exact: true }).count()).toBe(0);
+            expect(
+                await model
+                    .locator("option")
+                    .evaluateAll((options) => options.map((option) => option.getAttribute("value"))),
+            ).toEqual(["", ...copilotModelCatalog.modelIds]);
+            expect(await model.inputValue()).toBe("");
+            await model.selectOption("gpt-6-astra");
+            await expect.poll(async () => (await savedPlan(page)).model.id).toBe("gpt-6-astra");
+            await page.getByRole("button", { name: "Undo", exact: true }).click();
+            await expect.poll(() => model.inputValue()).toBe("");
+            await page.getByRole("button", { name: "Redo", exact: true }).click();
+            await expect.poll(() => model.inputValue()).toBe("gpt-6-astra");
+            await page.reload({ waitUntil: "domcontentloaded" });
+            await navigate(page, /^Models & identity\b/);
+            expect(await model.inputValue()).toBe("gpt-6-astra");
+
+            await page.getByRole("button", { name: "Export", exact: true }).click();
+            const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+            expect(
+                await dialog.getByRole("textbox", { name: "SDK TypeScript integration sketch" }).inputValue(),
+            ).toContain('model: "gpt-6-astra"');
+            await dialog.getByRole("tab", { name: "Plan JSON" }).click();
+            expect(
+                parsePlan(await dialog.getByRole("textbox", { name: "Exported plan JSON" }).inputValue())
+                    .model.id,
+            ).toBe("gpt-6-astra");
+            await page.keyboard.press("Escape");
+            await model.selectOption("");
+            await expect.poll(async () => (await savedPlan(page)).model.id).toBe("");
+        },
+        JSON.stringify(initial),
+    );
+});
+
+it("retains unlisted Copilot IDs and leaves BYOK model entry free-form", async () => {
+    const initial = createPreset("minimal");
+    initial.model.provider = "copilot";
+    initial.model.id = "future-copilot-model";
+    await exercise(
+        "copilot-model-retained",
+        async (page) => {
+            await navigate(page, /^Models & identity\b/);
+            const model = page.getByRole("combobox", { name: "Model ID", exact: true });
+            expect(await model.inputValue()).toBe(initial.model.id);
+            expect(await model.locator("option:checked").textContent()).toContain("not in bundled catalog");
+            expect((await savedPlan(page)).model.id).toBe(initial.model.id);
+            const access = page.getByRole("group", { name: "Inference access", exact: true });
+            await access.getByText("Bring your own inference", { exact: true }).click();
+            const providerModel = page.getByRole("textbox", { name: "Model ID", exact: true });
+            expect(await providerModel.inputValue()).toBe(initial.model.id);
+            await providerModel.fill("my-provider/deployment");
+            await access.getByText("GitHub Copilot account", { exact: true }).click();
+            expect(await model.inputValue()).toBe("my-provider/deployment");
+            expect(await model.locator("option:checked").textContent()).toContain("not in bundled catalog");
+            await model.selectOption("claude-sonnet-5");
+            await expect.poll(async () => (await savedPlan(page)).model.id).toBe("claude-sonnet-5");
+            expect(await model.locator('option[value="my-provider/deployment"]').count()).toBe(0);
+            await access.getByText("Bring your own inference", { exact: true }).click();
+            expect(await providerModel.inputValue()).toBe("claude-sonnet-5");
+        },
+        JSON.stringify(initial),
+    );
+});
+
+it("allows blank provider endpoints while preserving save, reload, and export", async () => {
+    await exercise("deferred-provider-endpoint", async (page) => {
+        await navigate(page, /^Models & identity\b/);
+        await page
+            .getByRole("group", { name: "Inference access", exact: true })
+            .getByText("Bring your own inference", { exact: true })
+            .click();
+        const endpoint = page.getByRole("textbox", { name: "Provider endpoint", exact: true });
+        await endpoint.fill("");
+        expect(await endpoint.getAttribute("aria-invalid")).toBe("false");
+        await expect.poll(async () => (await savedPlan(page)).model.provider).toBe("openai");
+        expect((await savedPlan(page)).model.endpoint).toBe("");
+        expect(await page.getByRole("button", { name: "Export", exact: true }).isEnabled()).toBe(true);
+        await page.reload({ waitUntil: "domcontentloaded" });
+        await navigate(page, /^Models & identity\b/);
+        expect(await endpoint.inputValue()).toBe("");
+        expect(await endpoint.getAttribute("aria-invalid")).toBe("false");
+        await page.getByRole("button", { name: "Export", exact: true }).click();
+        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+        expect(
+            await dialog.getByRole("textbox", { name: "SDK TypeScript integration sketch" }).inputValue(),
+        ).toContain('baseUrl: required(host.providerEndpoint?.trim(), "provider endpoint")');
+        await page.keyboard.press("Escape");
+        await navigate(page, /^Build & run\b/);
+        expect(await page.getByRole("button", { name: "Download ZIP", exact: true }).isEnabled()).toBe(true);
+        await navigate(page, /^Models & identity\b/);
+        await endpoint.fill("not-an-endpoint");
+        expect(await endpoint.getAttribute("aria-invalid")).toBe("true");
+        expect(await page.getByRole("button", { name: "Export", exact: true }).isDisabled()).toBe(true);
+        await endpoint.fill("");
+        expect(await endpoint.getAttribute("aria-invalid")).toBe("false");
+        expect(await page.getByRole("button", { name: "Export", exact: true }).isEnabled()).toBe(true);
     });
 });
 

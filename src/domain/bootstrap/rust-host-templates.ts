@@ -32,6 +32,15 @@ pub(crate) fn implemented_tools() -> &'static [&'static str] { &[] }
 pub(crate) const PRE_TOOL_IMPLEMENTED: bool = false;
 pub(crate) const POST_TOOL_IMPLEMENTED: bool = false;
 pub(crate) const SESSION_FS_IMPLEMENTED: bool = false;
+pub(crate) const PROVIDER_ENDPOINT: &str = "";
+
+pub(crate) fn provider_endpoint() -> Result<String> {
+    let value = PROVIDER_ENDPOINT.trim();
+    if value.is_empty() {
+        bail!("Provide the provider endpoint string in src/host.rs PROVIDER_ENDPOINT.");
+    }
+    Ok(value.to_owned())
+}
 
 pub(crate) fn required_env(name: &str) -> Result<String> {
     let value = std::env::var(name).map_err(|_| anyhow!("Set {name} in the process environment"))?;

@@ -38,6 +38,7 @@ it("type-checks generated sketches against an explicitly supplied SDK checkout",
         plan.model.endpoint = "https://example.com/v1";
         plan.model.credential = provider === "azure" ? "bearer-callback" : "api-key";
         variants.push(plan);
+        variants.push({ ...plan, model: { ...plan.model, endpoint: "" } });
     }
     for (const runtime of ["managed", "external", "inprocess"] as const) {
         const plan = createPreset("minimal");

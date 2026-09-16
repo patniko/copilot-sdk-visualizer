@@ -535,7 +535,16 @@ internal static class Host
     public static Func<PreToolUseHookInput, HookInvocation, Task<PreToolUseHookOutput?>>? PreToolHook { get; set; }
     public static Func<PostToolUseHookInput, HookInvocation, Task<PostToolUseHookOutput?>>? PostToolHook { get; set; }
     public static Func<CopilotSession, SessionFsProvider>? SessionFilesystemFactory { get; set; }
+    public static string? ProviderEndpoint { get; set; }
     private static readonly SemaphoreSlim ConsoleGate = new(1, 1);
+
+    private static string RequiredProviderEndpoint()
+    {
+        var value = ProviderEndpoint?.Trim();
+        if (string.IsNullOrEmpty(value))
+            throw new NotImplementedException("Provide the provider endpoint string in Host.cs ProviderEndpoint.");
+        return value;
+    }
 
     public static string RequiredEnvironment(string name)
     {
@@ -707,6 +716,8 @@ internal static class Host
         }
         if (string.IsNullOrWhiteSpace(config.Model))
             Check(() => config.Model = RequiredEnvironment("COPILOT_MODEL").Trim());
+        if (config.Provider is not null && string.IsNullOrWhiteSpace(config.Provider.BaseUrl))
+            Check(() => RequiredProviderEndpoint());
         if (config.Provider is null)
         {
             // __COPILOT_IDENTITY_PREFLIGHT_START__
@@ -756,6 +767,8 @@ internal static class Host
         // __COPILOT_IDENTITY_BINDING_END__
         if (config.Provider is not null)
         {
+            if (string.IsNullOrWhiteSpace(config.Provider.BaseUrl))
+                config.Provider.BaseUrl = RequiredProviderEndpoint();
             if (settings.Credential == "bearer-callback")
                 config.Provider.BearerTokenProvider = AcquireBearerToken;
             else

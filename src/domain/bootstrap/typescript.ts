@@ -23,6 +23,7 @@ export const typescriptAdapter: LanguageAdapter = {
             githubProvider: plan.model.provider === "copilot" && plan.identity === "host-token",
             providerCallback:
                 plan.model.provider !== "copilot" && plan.model.credential === "bearer-callback",
+            providerEndpoint: plan.model.provider !== "copilot" && !plan.model.endpoint.trim(),
             model: plan.model.id.trim(),
         };
         const githubExtension = s2s ? "" : '    githubTokenProvider?: Callbacks["gitHubTokenProvider"];\n';
@@ -63,7 +64,7 @@ interface IntegrationSpec {
     env: string[]; tools: string[];
     preToolHook: boolean; postToolHook: boolean; virtualStorage: boolean;
     userInput: boolean; observeEvents: boolean; githubProvider: boolean;
-    providerCallback: boolean; model: string;
+    providerCallback: boolean; providerEndpoint: boolean; model: string;
 }
 const spec: IntegrationSpec = JSON.parse(readFileSync(new URL("../integration.json", import.meta.url), "utf8"));
 type Callbacks = HostBindings["callbacks"];
@@ -79,6 +80,7 @@ export const extensions: {
     sessionFs?: Callbacks["createSessionFsProvider"];
 ${githubExtension}\
     providerToken?: HostBindings["providerToken"];
+    providerEndpoint?: string;
 } = { tools: {} };
 
 function env(name: string): string {
@@ -103,6 +105,7 @@ ${githubPreflight}
     if (spec.preToolHook && !extensions.preToolUse) issues.push("Implement src/host.ts extensions.preToolUse");
     if (spec.postToolHook && !extensions.postToolUse) issues.push("Implement src/host.ts extensions.postToolUse");
     if (spec.virtualStorage && !extensions.sessionFs) issues.push("Implement src/host.ts extensions.sessionFs (real SessionFsProvider)");
+    if (spec.providerEndpoint && !extensions.providerEndpoint?.trim()) issues.push("Provide src/host.ts extensions.providerEndpoint (provider endpoint string)");
     return issues;
 }
 
@@ -142,6 +145,7 @@ ${githubBinding}
     const host: HostBindings = {
         callbacks, toolHandlers: extensions.tools,
         model: spec.model || env("COPILOT_MODEL"),
+        ...(spec.providerEndpoint ? { providerEndpoint: extensions.providerEndpoint } : {}),
         ...(spec.providerCallback ? { providerToken: extensions.providerToken ?? (async () => env("MODEL_BEARER_TOKEN")) } : {}),
     };
     return { host, close: () => abort.abort() };
@@ -273,6 +277,7 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                         "",
                         "- `extensions.tools`: implement each selected custom/override handler. Validate arguments and tenant/resource authority.",
                         "- `extensions.permissionPolicy`: default is reject. Supply your production authorization and approval rules before allowing effects.",
+                        "- `extensions.providerEndpoint`: supply the endpoint string when it was left blank in the planner. Preflight and startup fail until it is provided.",
                         "- `extensions.preToolUse` / `postToolUse`: required only if selected; replace with real policy/result processing.",
                         "- `extensions.sessionFs`: return a real SDK SessionFsProvider when virtual storage is selected.",
                         ...(s2s

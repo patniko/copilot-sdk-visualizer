@@ -145,6 +145,14 @@ export function commonRequirements(plan: HarnessPlan, hostFile: string): Bootstr
             kind: "review",
         },
     ];
+    if (plan.model.provider !== "copilot" && !plan.model.endpoint.trim())
+        items.push({
+            id: "provider-endpoint",
+            title: "Provide the inference provider endpoint",
+            detail: `Set the provider endpoint string in ${hostFile}. Local preflight and startup reject the missing implementation; no example or default endpoint is used.`,
+            file: hostFile,
+            kind: "host-code",
+        });
     for (const name of environmentNames(plan))
         items.push({
             id: `env-${name}`,
