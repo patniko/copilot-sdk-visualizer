@@ -46,6 +46,7 @@ Vite binds to `127.0.0.1` only. Open the **Overview** tab and read the "Start he
 
 ## What the builder does
 
+- Explore a dedicated **Runtime map** (`/#runtime`) without changing your draft: select capabilities, inspect ownership and evidence, or step through an illustrative model/tool turn.
 - Start from empty, minimal, or coding-oriented presets, then change actual configuration decisions.
 - Keep, replace, or remove primary built-in tools; declare custom tools and explicit HTTP MCP integrations.
 - Compose prompt sections, context sources, custom agents, provider choices, policy hooks, session storage, and evaluation criteria.
@@ -58,6 +59,14 @@ Vite binds to `127.0.0.1` only. Open the **Overview** tab and read the "Start he
 - Explore a materialized SDK control catalog, six scenario gaps, built-in prompt references, and commit-pinned evidence.
 
 The reference catalog documents additional SDK controls that are not all editable in the builder.
+
+## What the runtime gives you
+
+Open **Runtime map** from the sidebar or the Overview entry card. The full-width, read-only page explains the runtime independently of the draft configurator: one shared agent loop connects plugins, skills, tools, MCP, delegation, inference, authentication, permissions/hooks, context, and sessions/events.
+
+Each node explains **what you do not rebuild**, **what your harness or host still supplies**, and the precise boundary. Related-capability links connect the ideas; source evidence uses the existing pinned snapshot, and configuration links return to the relevant editor. The **Trace a turn** walkthrough highlights configuration, context assembly, inference, authorization, execution, and continuation. It is an illustrative approved-tool path, not a live agent, call graph, enabled inventory, or guarantee of task success.
+
+The map does not mutate the plan or require the runtime/SDK checkouts. The SDK carries configuration, callbacks, and events; the runtime executes the shared machinery; the host still owns identity, tenant authorization, secrets, deployment isolation, and evaluation. Provider features, plugin components, and SDK surfaces remain version-dependent. Browser history and direct `/#runtime` navigation support sharing the explainer; mobile uses a compact capability layout, with no automatic walkthrough playback and reduced-motion support.
 
 ## Educational setting help
 
@@ -148,17 +157,19 @@ COPILOT_SDK_SOURCE=/path/to/copilot-sdk/nodejs/src/index.ts pnpm test:contract
 
 ## Architecture
 
-| Area                         | Responsibility                                                                      |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| `src/domain/plan.ts`         | Versioned plan schema, bounded input validation, and stable tool/agent definitions. |
-| `src/domain/presets.ts`      | Starting compositions, reversible scenario changes, and baseline differences.       |
-| `src/domain/analysis.ts`     | Deterministic decisions and host requirements, not readiness/security scores.       |
-| `src/domain/export.ts`       | Lossless plan export and source-backed SDK integration sketches.                    |
-| `src/domain/store.ts`        | Event-driven draft persistence and bounded undo/redo history.                       |
-| `src/hooks/useHarness.ts`    | React subscription to the draft store.                                              |
-| `src/content/reference.json` | Independent, materialized research snapshot; no sibling-repository reads.           |
-| `src/content/sdk-docs.ts`    | Cross-reference from each builder step to the living SDK documentation.             |
-| `src/components/`            | Accessible workbench editors, source inspection, and export UI.                     |
+| Area                                 | Responsibility                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `src/domain/plan.ts`                 | Versioned plan schema, bounded input validation, and stable tool/agent definitions.               |
+| `src/domain/presets.ts`              | Starting compositions, reversible scenario changes, and baseline differences.                     |
+| `src/domain/analysis.ts`             | Deterministic decisions and host requirements, not readiness/security scores.                     |
+| `src/domain/export.ts`               | Lossless plan export and source-backed SDK integration sketches.                                  |
+| `src/domain/store.ts`                | Event-driven draft persistence and bounded undo/redo history.                                     |
+| `src/hooks/useHarness.ts`            | React subscription to the draft store.                                                            |
+| `src/content/reference.json`         | Independent, materialized research snapshot; no sibling-repository reads.                         |
+| `src/content/sdk-docs.ts`            | Cross-reference from each builder step to the living SDK documentation.                           |
+| `src/content/runtime-map.ts`         | Source-backed capability narratives, ownership boundaries, topology, and illustrative turn steps. |
+| `src/components/RuntimeExplorer.tsx` | Read-only runtime map, capability detail, and walkthrough, separate from draft configuration.     |
+| `src/components/`                    | Accessible workbench editors, source inspection, and export UI.                                   |
 
 The draft store writes only validated plans. Payload version 2 adds runtime/language targets; version 1 drafts migrate with their behavior preserved and TypeScript/managed-process defaults. The storage key stays stable. Invalid edits retain the last valid saved version. A corrupt or unsupported saved draft is not silently overwritten; recovery requires an explicit replacement or import. Drafts are local to the browser origin; concurrent tabs use last-save-wins storage rather than a collaborative synchronization protocol.
 
