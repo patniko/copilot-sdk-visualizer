@@ -14,6 +14,7 @@
         "test": "vitest run --project unit",
         "test:browser": "pnpm run build && vitest run --project browser",
         "test:contract": "vitest run --project contract",
+        "deploy:pages": "node script/deploy-pages.mjs",
         "preview": "vite preview --host 127.0.0.1"
     },
     "dependencies": {
@@ -35,6 +36,7 @@
         "@types/react-dom": "^19.2.4",
         "@vitejs/plugin-react": "^6.1.0",
         "autoprefixer": "^10.6.0",
+        "gh-pages": "^6.3.0",
         "oxfmt": "^0.67.0",
         "oxlint": "^1.79.0",
         "playwright": "^1.63.0",

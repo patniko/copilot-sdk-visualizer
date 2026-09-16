@@ -44,6 +44,27 @@ pnpm dev
 
 Vite binds to `127.0.0.1` only. Open the **Overview** tab and read the "Start here" guide, then follow the seven steps. For the full command set (format, lint, test, browser, and contract checks), see [Local development](#local-development).
 
+## Publish to GitHub Pages
+
+The local deploy command builds the current source and publishes `dist/` to the repository's `gh-pages`
+branch:
+
+```bash
+pnpm deploy:pages
+```
+
+The command requires a clean working tree and a source branch that has already been pushed to its upstream.
+This keeps the deployed files traceable to a source commit. To validate the production build without
+publishing, run:
+
+```bash
+pnpm deploy:pages -- --dry-run
+```
+
+The first time, open the repository's **Settings → Pages** and select **Deploy from a branch**, then choose
+`gh-pages` and `/ (root)`. Subsequent runs update the same branch and site. The deployment adds `.nojekyll`;
+no GitHub Actions workflow or committed `dist/` directory is required.
+
 ## What the builder does
 
 - Explore a dedicated **Runtime map** (`/#runtime`) without changing your draft: select capabilities, inspect ownership and evidence, or step through an illustrative model/tool turn.
