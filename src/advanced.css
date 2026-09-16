@@ -2,7 +2,7 @@
 
 .hb-advanced-summary {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -150,6 +150,40 @@
     line-height: 1.65;
 }
 
+.hb-advanced-contract {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--cp-border);
+    border-radius: 10px;
+    background: var(--cp-border);
+}
+
+.hb-advanced-contract > div {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    padding: 12px;
+    background: var(--cp-surface);
+}
+
+.hb-advanced-contract dt {
+    color: var(--cp-accent);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.hb-advanced-contract dd {
+    margin: 0;
+    color: var(--cp-text);
+    font-size: 11px;
+    line-height: 1.55;
+}
+
 .hb-advanced-meta {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -193,6 +227,7 @@
 @media (max-width: 760px) {
     .hb-advanced-summary,
     .hb-advanced-filters,
+    .hb-advanced-contract,
     .hb-advanced-meta {
         grid-template-columns: minmax(0, 1fr);
     }

@@ -485,18 +485,31 @@ it("shows source-backed advanced controls without making runtime internals edita
         expect(await page.getByRole("radio").count()).toBe(0);
         expect(await page.getByRole("checkbox").count()).toBe(0);
 
+        await page.getByLabel("Category", { exact: true }).selectOption("Limits & throughput");
         await page
             .getByRole("searchbox", { name: "Search advanced controls", exact: true })
-            .fill("autopilot continuation");
-        expect(
-            await page.getByRole("heading", { name: "Runtime-owned autopilot continuation" }).isVisible(),
-        ).toBe(true);
+            .fill("view and read");
+        const viewLimits = page.locator(".hb-advanced-card").filter({ hasText: "View and read size limits" });
+        expect(await viewLimits.isVisible()).toBe(true);
+        expect(await viewLimits.getByText(/Soft cutoff: 20 KiB/).isVisible()).toBe(true);
         expect(await page.locator('a[href*="copilot-agent-runtime"]').count()).toBeGreaterThan(0);
 
+        await page.getByLabel("Category", { exact: true }).selectOption("all");
+        await page
+            .getByRole("searchbox", { name: "Search advanced controls", exact: true })
+            .fill("compaction thresholds");
+        const compaction = page
+            .locator(".hb-advanced-card")
+            .filter({ hasText: "Infinite-session compaction thresholds" });
+        expect(await compaction.getByText(/Background compaction 0.80/).isVisible()).toBe(true);
+
         await page.getByLabel("Support level", { exact: true }).selectOption("Documented SDK");
+        expect(await compaction.isVisible()).toBe(true);
+        await page.getByLabel("Support level", { exact: true }).selectOption("Experimental");
         expect(await page.getByText("No matching advanced controls", { exact: true }).isVisible()).toBe(true);
+        await page.getByLabel("Support level", { exact: true }).selectOption("Runtime contract");
         await page.getByRole("searchbox", { name: "Search advanced controls", exact: true }).fill("");
-        expect(await page.getByRole("heading", { name: "Auto-model routing preference" }).isVisible()).toBe(
+        expect(await page.getByRole("heading", { name: "Per-turn structured output" }).isVisible()).toBe(
             true,
         );
     });

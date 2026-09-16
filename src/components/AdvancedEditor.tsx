@@ -6,6 +6,7 @@ import {
     Database,
     ExternalLink,
     Eye,
+    Gauge,
     LockKeyhole,
     Puzzle,
     RefreshCw,
@@ -20,6 +21,7 @@ import "../advanced.css";
 
 const categoryIcons = {
     "Security posture": ShieldCheck,
+    "Limits & throughput": Gauge,
     "Privacy & persistence": Database,
     "Model execution": BrainCircuit,
     Lifecycle: RefreshCw,
@@ -44,10 +46,16 @@ export function AdvancedEditor() {
             (category === "all" || control.category === category) &&
             (support === "all" || control.support === support) &&
             `${control.title} ${control.key} ${control.summary} ${control.opportunity} ${control.layer} ${control.scope} ${control.support}`
+                .concat(
+                    ` ${control.leverKind ?? ""} ${control.valueType ?? ""} ${control.defaultValue ?? ""} ${control.constraints ?? ""}`,
+                )
                 .toLowerCase()
                 .includes(normalized),
     );
     const sensitiveCount = advancedControls.filter((control) => control.sensitive).length;
+    const quantifiedCount = advancedControls.filter(
+        (control) => control.defaultValue || control.constraints,
+    ).length;
 
     return (
         <div className="hb-editor-stack">
@@ -70,6 +78,10 @@ export function AdvancedEditor() {
                 <div>
                     <strong>{sensitiveCount}</strong>
                     <span>sensitive boundaries</span>
+                </div>
+                <div>
+                    <strong>{quantifiedCount}</strong>
+                    <span>quantified levers</span>
                 </div>
             </div>
 
@@ -96,7 +108,7 @@ export function AdvancedEditor() {
                             type="search"
                             value={query}
                             onValueChange={setQuery}
-                            placeholder="Search sandbox, telemetry, compaction..."
+                            placeholder="Search compaction, view limits, timeouts..."
                         />
                     </div>
                     <SelectField
@@ -168,6 +180,37 @@ export function AdvancedEditor() {
                                                 </div>
                                             </div>
                                             <p className="hb-advanced-summary-copy">{control.summary}</p>
+                                            {(control.leverKind ||
+                                                control.valueType ||
+                                                control.defaultValue ||
+                                                control.constraints) && (
+                                                <dl className="hb-advanced-contract">
+                                                    {control.leverKind && (
+                                                        <div>
+                                                            <dt>Lever status</dt>
+                                                            <dd>{control.leverKind}</dd>
+                                                        </div>
+                                                    )}
+                                                    {control.valueType && (
+                                                        <div>
+                                                            <dt>Value type</dt>
+                                                            <dd>{control.valueType}</dd>
+                                                        </div>
+                                                    )}
+                                                    {control.defaultValue && (
+                                                        <div>
+                                                            <dt>Default / effective limit</dt>
+                                                            <dd>{control.defaultValue}</dd>
+                                                        </div>
+                                                    )}
+                                                    {control.constraints && (
+                                                        <div>
+                                                            <dt>Range and constraints</dt>
+                                                            <dd>{control.constraints}</dd>
+                                                        </div>
+                                                    )}
+                                                </dl>
+                                            )}
                                             <dl className="hb-advanced-meta">
                                                 <div>
                                                     <dt>Layer</dt>

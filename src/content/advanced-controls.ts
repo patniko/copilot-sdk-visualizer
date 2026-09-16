@@ -3,6 +3,7 @@ import { reference } from "./reference";
 
 export type AdvancedCategory =
     | "Security posture"
+    | "Limits & throughput"
     | "Privacy & persistence"
     | "Model execution"
     | "Lifecycle"
@@ -10,6 +11,12 @@ export type AdvancedCategory =
     | "Diagnostics";
 
 export type AdvancedSupport = "Documented SDK" | "Typed SDK" | "Runtime contract" | "Experimental";
+export type AdvancedLeverKind =
+    | "Configurable today"
+    | "Indirectly configurable"
+    | "Invocation option"
+    | "Future API"
+    | "Fixed safeguard";
 
 export type AdvancedControl = {
     id: string;
@@ -21,6 +28,10 @@ export type AdvancedControl = {
     layer: string;
     scope: string;
     support: AdvancedSupport;
+    leverKind?: AdvancedLeverKind;
+    valueType?: string;
+    defaultValue?: string;
+    constraints?: string;
     readOnlyReason: string;
     sourceLabel: string;
     sourceUrl: string;
@@ -32,6 +43,7 @@ const runtime = `https://github.com/github/copilot-agent-runtime/blob/${referenc
 
 export const advancedCategories: AdvancedCategory[] = [
     "Security posture",
+    "Limits & throughput",
     "Privacy & persistence",
     "Model execution",
     "Lifecycle",
@@ -188,6 +200,205 @@ export const advancedControls: AdvancedControl[] = [
         sensitive: true,
     },
     {
+        id: "large-output-policy",
+        category: "Limits & throughput",
+        title: "Large-output spill policy",
+        key: "largeOutput.{enabled,maxSizeBytes,outputDirectory}",
+        summary:
+            "Spills oversized tool output to a file and returns a preview plus reference instead of placing the full payload in model context.",
+        opportunity:
+            "Tune the balance between immediate context, storage, and recoverable output beneath the existing large-output toggle.",
+        layer: "Public SDK / runtime tool layer",
+        scope: "Session / tool result",
+        support: "Typed SDK",
+        leverKind: "Configurable today",
+        valueType: "Boolean, byte count, and host path",
+        defaultValue: "SDK documentation: 51,200 bytes; pinned runtime fallback when omitted: 20,480 bytes",
+        constraints:
+            "Positive byte threshold. The output directory is host-owned and may contain sensitive tool results.",
+        readOnlyReason:
+            "The SDK and pinned runtime disagree on the omission default, so an editor must show configured and effective values separately.",
+        sourceLabel: "LargeOutputConfig",
+        sourceUrl: `${sdk}/nodejs/src/types.ts#L1976-L2000`,
+        sensitive: true,
+    },
+    {
+        id: "view-read-limits",
+        category: "Limits & throughput",
+        title: "View and read size limits",
+        key: "view.view_range / forceReadLargeFiles / largeOutput.maxSizeBytes",
+        summary:
+            "The un-ranged view path uses the effective large-output threshold as a soft cutoff, while fixed hard caps protect whole-file and ranged reads.",
+        opportunity:
+            "Make it clear why a file returns range guidance, truncation, or metadata instead of its complete contents.",
+        layer: "Runtime built-in tool",
+        scope: "Per view invocation",
+        support: "Runtime contract",
+        leverKind: "Indirectly configurable",
+        valueType: "Byte limits plus one-based inclusive line range",
+        defaultValue:
+            "Soft cutoff: 20 KiB runtime fallback; hard cap: 10 MiB un-ranged, 1 GiB with view_range",
+        constraints:
+            "view_range=[start,-1] reads to EOF. forceReadLargeFiles bypasses soft guidance, not hard file-size caps.",
+        readOnlyReason:
+            "Only the soft budget is indirectly configurable through large-output policy; the hard limits are implementation safeguards.",
+        sourceLabel: "Runtime view tool limits",
+        sourceUrl: `${runtime}/src/runtime/src/tools/view.rs#L13-L31`,
+    },
+    {
+        id: "tool-search-threshold",
+        category: "Limits & throughput",
+        title: "Tool-search deferral threshold",
+        key: "toolSearch.{enabled,deferThreshold}",
+        summary:
+            "Defers MCP and external tools behind tool_search_tool once the visible tool inventory crosses a configured threshold.",
+        opportunity:
+            "Control prompt size and tool-selection quality for harnesses with large capability catalogs.",
+        layer: "Public SDK / runtime tool catalog",
+        scope: "Session / tool inventory",
+        support: "Typed SDK",
+        leverKind: "Configurable today",
+        valueType: "Boolean and non-negative integer",
+        defaultValue: "30 visible tools",
+        constraints:
+            "The threshold changes which tools are immediately visible; it does not disable deferred tools.",
+        readOnlyReason:
+            "The UX needs to explain deferred discovery and effective tool visibility before this becomes an editable number.",
+        sourceLabel: "ToolSearchConfig",
+        sourceUrl: `${sdk}/nodejs/src/types.ts#L790-L813`,
+    },
+    {
+        id: "mcp-timeouts",
+        category: "Limits & throughput",
+        title: "MCP request and tool timeout",
+        key: "mcpServers[name].timeout",
+        summary:
+            "Bounds metadata, resource, and tool requests for each MCP server, with different runtime defaults by operation.",
+        opportunity: "Tune slow remote services without giving every MCP operation an unbounded wait.",
+        layer: "Public SDK / MCP client",
+        scope: "Per MCP server",
+        support: "Documented SDK",
+        leverKind: "Configurable today",
+        valueType: "Milliseconds",
+        defaultValue: "60,000 ms metadata requests; 180,000 ms tool calls",
+        constraints:
+            "A configured timeout overrides both phases. Progress notifications can reset eligible tool-call deadlines.",
+        readOnlyReason:
+            "The current planner models only endpoint and tool names; timeout belongs in a fuller per-server transport configuration.",
+        sourceLabel: "MCP timeout configuration",
+        sourceUrl: `${sdk}/docs/features/mcp.md#L282-L317`,
+    },
+    {
+        id: "session-credit-budget",
+        category: "Limits & throughput",
+        title: "Session AI-credit budget",
+        key: "sessionLimits.maxAiCredits",
+        summary:
+            "Applies a soft AI-credit ceiling to the current session accounting window, including participating subagents.",
+        opportunity:
+            "Set a workload budget and stop subsequent model calls after the runtime reconciles usage.",
+        layer: "Public SDK / runtime accounting",
+        scope: "Session accounting window",
+        support: "Documented SDK",
+        leverKind: "Configurable today",
+        valueType: "Finite number of AI credits",
+        defaultValue: "No explicit session ceiling",
+        constraints:
+            "Minimum 30 credits. One model call may overshoot before the next call is blocked; replacement limits must exceed usage already accrued.",
+        readOnlyReason:
+            "This is a post-paid soft ceiling rather than a hard pre-request spending guarantee and needs budget-event UX.",
+        sourceLabel: "Session limits guide",
+        sourceUrl: `${sdk}/docs/features/session-limits.md#L1-L25`,
+    },
+    {
+        id: "worker-limits",
+        category: "Limits & throughput",
+        title: "Subagent and factory execution limits",
+        key: "FactoryLimits / subagents.maxConcurrency / subagents.maxDepth",
+        summary:
+            "Caps concurrent and total workers, nesting depth, active execution time, and AI-credit use for agent factories and subagent trees.",
+        opportunity: "Bound parallelism, cost, and runaway orchestration in advanced multi-agent workloads.",
+        layer: "SDK factory API / runtime settings",
+        scope: "Factory run / agent tree",
+        support: "Typed SDK",
+        leverKind: "Configurable today",
+        valueType: "Positive integers, seconds, and AI credits",
+        defaultValue: "Factory concurrent runs: 4; other limits inherit runtime or factory declarations",
+        constraints:
+            "CLI subagent concurrency/depth allow 1–128; factory concurrent runs allow 1–16; timeoutSeconds must be positive.",
+        readOnlyReason:
+            "Factory invocation limits and CLI-wide subagent topology have different owners and should not be collapsed into one global slider.",
+        sourceLabel: "FactoryLimits",
+        sourceUrl: `${sdk}/nodejs/src/types.ts#L2110-L2129`,
+    },
+    {
+        id: "hook-timeout",
+        category: "Limits & throughput",
+        title: "Declarative hook timeout",
+        key: "hooks[].timeoutSec / timeout",
+        summary:
+            "Places one deadline around command or HTTP hook execution, including interpreter fallback attempts.",
+        opportunity:
+            "Prevent file-based automation hooks from stalling session lifecycle and tool boundaries.",
+        layer: "Runtime hook configuration",
+        scope: "Per hook invocation",
+        support: "Runtime contract",
+        leverKind: "Configurable today",
+        valueType: "Positive seconds",
+        defaultValue: "30 seconds",
+        constraints:
+            "Timeout and failure behavior vary by hook type; several policy hooks fail open with diagnostics.",
+        readOnlyReason:
+            "This applies to declarative file/HTTP hooks, not SDK callback hooks, and requires a separate trusted hook editor.",
+        sourceLabel: "Hook timeout parser",
+        sourceUrl: `${runtime}/src/runtime/src/hooks/config.rs#L820-L823`,
+        sensitive: true,
+    },
+    {
+        id: "retry-policy",
+        category: "Limits & throughput",
+        title: "Model retry and rate-limit backoff",
+        key: "service.agent.retryPolicy",
+        summary:
+            "Controls retryable status codes, retry count, and rate-limit delay growth for model transport failures.",
+        opportunity:
+            "Tune resilience for service workloads without hiding long waits or multiplying provider cost.",
+        layer: "Runtime operator settings",
+        scope: "Model transport / process",
+        support: "Runtime contract",
+        leverKind: "Future API",
+        valueType: "Retry count, status codes, and delay policy",
+        defaultValue: "5 retries; 5 s delay; 1 s initial extra; 2× growth; 180 s Retry-After cap",
+        constraints:
+            "Responses transport may apply a 60-second maximum. Only retryable error-code selection has an environment override.",
+        readOnlyReason: "This is an operator/runtime setting rather than a portable SDK session option.",
+        sourceLabel: "Runtime retry policy",
+        sourceUrl: `${runtime}/src/native/sdk-contract/src/runtime_contracts.rs#L995-L1029`,
+    },
+    {
+        id: "tool-invocation-safeguards",
+        category: "Limits & throughput",
+        title: "Built-in tool invocation safeguards",
+        key: "bash.initial_wait / read_agent.timeout / event pagination",
+        summary:
+            "Built-in tools impose bounded waits, result counts, and page sizes even when no persistent session setting exists.",
+        opportunity:
+            "Document operational ceilings so hosts can design around background execution and pagination rather than treating limits as failures.",
+        layer: "Runtime built-in tools",
+        scope: "Per invocation",
+        support: "Runtime contract",
+        leverKind: "Invocation option",
+        valueType: "Seconds, recipient counts, event counts, and byte budgets",
+        defaultValue:
+            "Shell wait 30 s; agent wait 30 s; event page 200; persisted event page soft budget 1 MiB",
+        constraints:
+            "Shell wait range 30–600 s; agent wait max 180 s; write_agent max 16 recipients; event reads max 1,000 records.",
+        readOnlyReason:
+            "These are invocation-level contracts or fixed safeguards, not one coherent session configuration.",
+        sourceLabel: "Runtime generated tool contracts",
+        sourceUrl: `${runtime}/src/core/generated/api.ts`,
+    },
+    {
         id: "file-change-tracking",
         category: "Privacy & persistence",
         title: "File-change tracking baseline",
@@ -231,6 +442,12 @@ export const advancedControls: AdvancedControl[] = [
         layer: "Public SDK",
         scope: "Session",
         support: "Typed SDK",
+        leverKind: "Configurable today",
+        valueType: "Boolean and persistent | in-memory storage mode",
+        defaultValue:
+            "Public numeric retrieval tuning is unavailable; runtime internals use top-K 5, candidate-K 20, similarity 0.6, MMR 0.85",
+        constraints:
+            "Only retrieval enablement and cache storage mode are public; numeric ranking thresholds remain runtime implementation details.",
         readOnlyReason:
             "Persistent caches can cross session boundaries, while disabling retrieval can reduce answer quality.",
         sourceLabel: "Embedding storage options",
@@ -340,17 +557,23 @@ export const advancedControls: AdvancedControl[] = [
         id: "model-capabilities",
         category: "Model execution",
         title: "Model capability overrides",
-        key: "modelCapabilities / modelCapabilitiesOverrides",
+        key: "modelCapabilities / provider.maxPromptTokens / provider.maxOutputTokens",
         summary:
             "Overrides runtime knowledge of vision, reasoning, adaptive thinking, token limits, image limits, and media types.",
         opportunity: "Support custom or newly deployed models before runtime metadata catches up.",
-        layer: "SDK over runtime contract",
+        layer: "Public SDK / provider configuration",
         scope: "Session / model",
-        support: "Experimental",
+        support: "Typed SDK",
+        leverKind: "Configurable today",
+        valueType: "Partial capability object and token counts",
+        defaultValue:
+            "BYOK runtime fallbacks before catalog overrides: 128k prompt tokens and 200k context window",
+        constraints:
+            "Provider and per-model token limits can override runtime knowledge; advertised values must match the actual endpoint.",
         readOnlyReason:
             "Overstating capabilities can cause invalid requests, truncation, or context overflow.",
         sourceLabel: "Model capability overrides",
-        sourceUrl: `${sdk}/nodejs/src/generated/rpc.ts#L13418-L13482`,
+        sourceUrl: `${sdk}/nodejs/src/types.ts#L3169-L3181`,
         sensitive: true,
     },
     {
@@ -370,6 +593,28 @@ export const advancedControls: AdvancedControl[] = [
         sourceUrl: `${runtime}/src/core/sharedApi/sessionTypes.ts#L998-L1008`,
     },
     {
+        id: "structured-output",
+        category: "Model execution",
+        title: "Per-turn structured output",
+        key: 'responseFormat: { type: "json_schema", jsonSchema }',
+        summary:
+            "Requests provider-native JSON-schema output for every model call in one turn without changing later turns or subagents.",
+        opportunity:
+            "Support typed downstream workflows without relying entirely on prompt-only JSON instructions.",
+        layer: "Runtime send contract",
+        scope: "Per turn",
+        support: "Runtime contract",
+        leverKind: "Future API",
+        valueType: "JSON Schema request",
+        defaultValue: "No response format constraint",
+        constraints:
+            "Schema serialization max 32 MiB; incompatible with immediate steering; remote and HydraFusion routes reject it; output remains unvalidated text.",
+        readOnlyReason:
+            "The pinned public SDK does not expose this runtime field, so generated hosts cannot use it portably yet.",
+        sourceLabel: "Runtime responseFormat contract",
+        sourceUrl: `${runtime}/src/native/sdk-contract/src/api/rpc.rs#L14946-L14985`,
+    },
+    {
         id: "compaction-thresholds",
         category: "Lifecycle",
         title: "Infinite-session compaction thresholds",
@@ -379,7 +624,12 @@ export const advancedControls: AdvancedControl[] = [
         opportunity: "Tune latency and context safety beneath the existing infinite-sessions toggle.",
         layer: "Public SDK",
         scope: "Session",
-        support: "Typed SDK",
+        support: "Documented SDK",
+        leverKind: "Configurable today",
+        valueType: "Fractions of the model context window",
+        defaultValue: "Background compaction 0.80; blocking buffer exhaustion 0.95",
+        constraints:
+            "Documented range 0–1 with background lower than buffer. Process environment overrides can supersede session values.",
         readOnlyReason:
             "Poor thresholds can create repeated compaction, latency spikes, or context exhaustion.",
         sourceLabel: "Infinite session thresholds",
@@ -401,6 +651,26 @@ export const advancedControls: AdvancedControl[] = [
         sourceLabel: "ResumeSessionConfig",
         sourceUrl: `${sdk}/nodejs/src/types.ts#L3000-L3018`,
         sensitive: true,
+    },
+    {
+        id: "message-delivery",
+        category: "Lifecycle",
+        title: "Message steering and queueing",
+        key: "MessageOptions.mode: enqueue | immediate",
+        summary: "Chooses whether a message waits behind current work or steers the active turn immediately.",
+        opportunity:
+            "Make interactive correction and queued follow-up behavior an explicit host UX decision.",
+        layer: "Public SDK / runtime queue",
+        scope: "Per message",
+        support: "Typed SDK",
+        leverKind: "Invocation option",
+        valueType: "enqueue | immediate",
+        defaultValue: "enqueue",
+        constraints:
+            "Runtime-only operations also include prepend, queue pause, editing/removal, and sendNow; no queue-length cap was found.",
+        readOnlyReason: "This is a live message-delivery choice rather than static harness configuration.",
+        sourceLabel: "MessageOptions",
+        sourceUrl: `${sdk}/nodejs/src/types.ts#L3376-L3382`,
     },
     {
         id: "autopilot-continuation",
@@ -562,6 +832,11 @@ export const advancedControls: AdvancedControl[] = [
         layer: "Runtime diagnostics",
         scope: "Session / process",
         support: "Runtime contract",
+        leverKind: "Configurable today",
+        valueType: "Host path and boolean",
+        defaultValue: "Subagent inclusion false; event files rotate at 10 MiB",
+        constraints:
+            "No total event-log retention cap was found. Process debug logs keep one active plus four archived 10 MiB segments per family.",
         readOnlyReason: "Paths and transcripts may contain sensitive project and interaction data.",
         sourceLabel: "CLI session log defaults",
         sourceUrl: `${runtime}/src/cli/sessions/cliSessionDefaults.ts#L52-L80`,
