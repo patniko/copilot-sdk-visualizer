@@ -32,7 +32,21 @@ it("explores every capability, its evidence, and the configurator without modify
     const { page, context, errors, external } = await harness.open();
     try {
         const original = await saved(page);
+        const overviewTheme = await page.locator(".harness-builder").evaluate((element) => {
+            const style = getComputedStyle(element);
+            return ["--cp-bg", "--cp-surface", "--cp-border", "--cp-text", "--cp-accent"].map((name) =>
+                style.getPropertyValue(name).trim(),
+            );
+        });
         await page.getByRole("button", { name: "Explore the runtime map", exact: true }).click();
+        expect(
+            await page.locator(".harness-builder").evaluate((element) => {
+                const style = getComputedStyle(element);
+                return ["--cp-bg", "--cp-surface", "--cp-border", "--cp-text", "--cp-accent"].map((name) =>
+                    style.getPropertyValue(name).trim(),
+                );
+            }),
+        ).toEqual(overviewTheme);
         const map = page.getByRole("group", { name: "Runtime capability topology" });
         const detail = page.locator("#runtime-capability-detail");
         expect(await map.getByRole("button").count()).toBe(runtimeCapabilities.length);
