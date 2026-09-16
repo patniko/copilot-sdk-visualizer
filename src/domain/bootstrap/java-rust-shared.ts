@@ -106,7 +106,7 @@ export function javaRustRequirements(plan: HarnessPlan, hostFile: string): Boots
             "GITHUB_TOKEN_EXPIRES_AT",
             "Supply the token's real expiry as a UNIX timestamp in seconds. Each acquisition subtracts the current time and rejects nonpositive remaining lifetime; the adapter never invents or resets a TTL. Replace the host provider to integrate an actual refreshing token broker.",
         );
-    } else if (plan.model.provider === "copilot") {
+    } else if (plan.model.provider === "copilot" && plan.identity === "developer") {
         requirements.push({
             id: "developer-auth",
             title: "Provision developer authentication on the runtime host",
@@ -170,6 +170,7 @@ Run on the existing runtime's host, not necessarily the application machine.
 Required environment:
   COPILOT_RUNTIME_EXECUTABLE  Compatible copilot-runtime wrapper (adjacent runtime.node/assets).
   COPILOT_CONNECTION_TOKEN   Nonempty shared TCP connection token, also set on the client.
+${plan.identity === "s2s-installation" ? "  COPILOT_GITHUB_TOKEN       Fresh GitHub App installation token; runtime host only.\n" : ""}\
 This script sets the planned server state/login/idle policy. It does not set up
 TLS, public binding, a sandbox, or tenant authorization.
 HELP
@@ -178,12 +179,13 @@ if [[ $# -eq 0 || \${1:-} == --help ]]; then usage; exit 0; fi
 if [[ $# -ne 1 || $1 != --run ]]; then usage >&2; exit 2; fi
 : "\${COPILOT_RUNTIME_EXECUTABLE:?Set the compatible runtime wrapper on the server host}"
 : "\${COPILOT_CONNECTION_TOKEN:?Set the shared TCP connection token on both hosts}"
+${plan.identity === "s2s-installation" ? ': "${COPILOT_GITHUB_TOKEN:?Set a fresh GitHub App installation token on the runtime host}"\n' : ""}\
 if [[ ! -f $COPILOT_RUNTIME_EXECUTABLE || ! -x $COPILOT_RUNTIME_EXECUTABLE ]]; then
     printf '%s\\n' 'COPILOT_RUNTIME_EXECUTABLE must name an executable file.' >&2
     exit 1
 fi
 ${plan.session.storage === "local" ? `export COPILOT_HOME=${shellLiteral(plan.session.baseDirectory)}\n` : "# SessionFs paths belong to the client provider; server-global storage remains host-owned.\n"}${plan.clientMode === "empty" ? "export COPILOT_DISABLE_KEYTAR=1\n" : ""}args=(--server --no-auto-update --port ${endpoint.port})
-${plan.session.idleTimeoutSeconds > 0 ? `args+=(--session-idle-timeout ${plan.session.idleTimeoutSeconds})\n` : ""}${plan.identity === "host-token" ? "args+=(--no-auto-login)\n" : ""}exec "$COPILOT_RUNTIME_EXECUTABLE" "\${args[@]}"
+${plan.session.idleTimeoutSeconds > 0 ? `args+=(--session-idle-timeout ${plan.session.idleTimeoutSeconds})\n` : ""}${plan.identity === "host-token" || plan.identity === "s2s-installation" ? "args+=(--no-auto-login)\n" : ""}exec "$COPILOT_RUNTIME_EXECUTABLE" "\${args[@]}"
 `,
         },
     ];

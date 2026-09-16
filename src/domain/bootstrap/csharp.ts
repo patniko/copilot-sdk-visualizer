@@ -9,6 +9,62 @@ const sdkRevision = "f45c46fd1812f8bed5b4cbc250f47177c83068f0";
 const json = (value: unknown) => JSON.stringify(value, null, 2) + "\n";
 const shellQuote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
 
+function renderCsharpSource(source: string, plan: HarnessPlan): string {
+    const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
+    if (!s2s)
+        return source
+            .replace(
+                /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+                "",
+            )
+            .replaceAll(/^\s*\/\/ __[A-Z_]+_(?:START|END)__\n/gm, "");
+    const runtimeEnvironment =
+        plan.target.runtime === "managed"
+            ? `            var token = Host.RequiredEnvironment("COPILOT_GITHUB_TOKEN");
+            var environment = System.Environment.GetEnvironmentVariables()
+                .Cast<DictionaryEntry>()
+                .ToDictionary(
+                    entry => (string)entry.Key,
+                    entry => entry.Value?.ToString() ?? "");
+            environment["COPILOT_GITHUB_TOKEN"] = token;
+            options.Environment = environment;
+`
+            : plan.target.runtime === "inprocess"
+              ? `            Host.RequiredEnvironment("COPILOT_GITHUB_TOKEN");
+`
+              : "";
+    const identityPreflight =
+        plan.target.runtime === "external"
+            ? `            if (settings.Identity != "s2s-installation")
+                problems.Add("- Unknown Copilot identity selection.");
+`
+            : `            if (settings.Identity == "s2s-installation")
+                Check(() => RequiredEnvironment("COPILOT_GITHUB_TOKEN"));
+            else
+                problems.Add("- Unknown Copilot identity selection.");
+`;
+    const rendered = source
+        .replace(
+            /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+            runtimeEnvironment,
+        )
+        .replace(
+            /[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_START__\n[\s\S]*?[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_END__\n?/g,
+            "",
+        )
+        .replace(
+            /[ \t]*\/\/ __COPILOT_IDENTITY_PREFLIGHT_START__\n[\s\S]*?[ \t]*\/\/ __COPILOT_IDENTITY_PREFLIGHT_END__\n?/g,
+            identityPreflight,
+        )
+        .replace(
+            /[ \t]*\/\/ __COPILOT_IDENTITY_BINDING_START__\n[\s\S]*?[ \t]*\/\/ __COPILOT_IDENTITY_BINDING_END__\n?/g,
+            "",
+        );
+    return source.includes("__GITHUB_TOKEN_PROVIDER_START__")
+        ? rendered.replace("using System.Globalization;\n", "")
+        : rendered;
+}
+
 function blockers(plan: HarnessPlan): BootstrapBlocker[] {
     const result: BootstrapBlocker[] = [];
     if (plan.target.runtime !== "managed" && plan.target.cliPath !== "")
@@ -86,8 +142,8 @@ export const csharpAdapter: LanguageAdapter = {
         return {
             files: [
                 { path: "HarnessAgent.csproj", language: "xml", content: projectSource },
-                { path: "Program.cs", language: "csharp", content: programSource },
-                { path: "Host.cs", language: "csharp", content: hostSource },
+                { path: "Program.cs", language: "csharp", content: renderCsharpSource(programSource, plan) },
+                { path: "Host.cs", language: "csharp", content: renderCsharpSource(hostSource, plan) },
                 { path: "setup-sdk.sh", language: "text", content: setupSource },
                 {
                     path: ".sdk-source/.gitignore",
@@ -125,10 +181,14 @@ export const csharpAdapter: LanguageAdapter = {
                     ? {
                           startRuntime: [
                               'test -n "$COPILOT_CONNECTION_TOKEN" &&',
+                              ...(plan.identity === "s2s-installation"
+                                  ? ['test -n "$COPILOT_GITHUB_TOKEN" &&']
+                                  : []),
                               ...(plan.session.storage === "local"
                                   ? [`COPILOT_HOME=${shellQuote(plan.session.baseDirectory)}`]
                                   : []),
                               `copilot-runtime --headless --no-auto-update --port ${endpoint.port}`,
+                              ...(plan.identity === "s2s-installation" ? ["--no-auto-login"] : []),
                               ...(plan.session.idleTimeoutSeconds > 0
                                   ? [`--session-idle-timeout ${plan.session.idleTimeoutSeconds}`]
                                   : []),
@@ -144,7 +204,13 @@ export const csharpAdapter: LanguageAdapter = {
                 "config/session.json contains SDK data only. Its prompt section keys and type-discriminated MCP configurations deserialize with the SDK's converters. Tools and host callbacks are bound separately before creation; all configuration files are embedded, so rebuild after editing them.",
                 "Each custom HostTool exposes the original JSON schema, not a reflected wrapper schema. CopilotTool.DefineTool supplies the SDK's exact override/terminal metadata, which the wrapper forwards unchanged. Register handlers in Host.ToolHandlers and validate authority and arguments before executing them. SkipPermission is never enabled.",
                 "Register selected pre/post hooks and SessionFilesystemFactory in Host.cs. Both --check and normal startup fail on missing host integrations; the invocation paths also throw rather than returning successful placeholder results. The default permission callback rejects every effect and must be reviewed separately.",
-                "Host-token identity uses the per-session GitHubTokenProvider with GITHUB_TOKEN and GITHUB_TOKEN_EXPIRES_AT (actual absolute UNIX seconds). Every acquisition recomputes remaining lifetime and rejects expiry. BYOK API keys use the selected credentialEnv; bearer callbacks read MODEL_BEARER_TOKEN on every request. Replace these environment adapters with scoped identity acquisition and caching where needed.",
+                plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+                    ? plan.target.runtime === "external"
+                        ? "GitHub App S2S identity is configured on the separately operated runtime with COPILOT_GITHUB_TOKEN and --no-auto-login. The connecting .NET client neither reads nor injects that token and does not install a per-session token callback."
+                        : plan.target.runtime === "inprocess"
+                          ? "GitHub App S2S identity requires COPILOT_GITHUB_TOKEN in the host environment before ForInProcess loads the runtime. UseLoggedInUser is false and no per-session token callback is generated."
+                          : "GitHub App S2S identity copies the trusted host's COPILOT_GITHUB_TOKEN into CopilotClientOptions.Environment for the managed child. UseLoggedInUser is false and no per-session token callback is generated."
+                    : "Host-token identity uses the per-session GitHubTokenProvider with GITHUB_TOKEN and GITHUB_TOKEN_EXPIRES_AT (actual absolute UNIX seconds). Every acquisition recomputes remaining lifetime and rejects expiry. BYOK API keys use the selected credentialEnv; bearer callbacks read MODEL_BEARER_TOKEN on every request. Replace these environment adapters with scoped identity acquisition and caching where needed.",
                 "For existing runtimes, the client never sets client-level GitHubToken or UseLoggedInUser. Server identity, process startup, base directory, idle policy, and shutdown remain server-owned. Apply the selected local base directory/nonzero idle timeout with the server command; zero keeps the runtime default. Session-scoped callbacks are still attached normally. The sample command is for loopback development; secure remote routing or a tunnel separately. A connection token does not add TLS or tenant authorization.",
                 "ForInProcess() uses COPILOT_CLI_PATH and a compatible copilot_runtime.dll, libcopilot_runtime.dylib, libcopilot_runtime.so, or runtime.node package. Native libraries are process-global and experimental; do not replace a loaded version. No client-level environment, working-directory, or telemetry override is emitted.",
                 "Virtual storage requires a SessionFsProvider subclass overriding ReadFileAsync, WriteFileAsync, AppendFileAsync, ExistsAsync, StatAsync, MakeDirectoryAsync, ReadDirectoryAsync, ReadDirectoryWithTypesAsync, RemoveAsync, and RenameAsync, then a session-scoped factory registration. POSIX logical paths use the selected workspace (or /) and baseDirectory (or /session-state). SQLite is not advertised; implement ISessionFsSqliteProvider/ISessionFsSqliteTransactionProvider before opting into SQL.",
@@ -260,6 +326,7 @@ printf 'Provisioned pinned SDK at %s\\n' "$destination"
 `;
 
 const programSource = String.raw`// Copyright (c) Microsoft Corporation. All rights reserved.
+using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using GitHub.Copilot;
@@ -333,6 +400,22 @@ internal static class Program
         if (settings.Runtime != "external")
         {
             options.UseLoggedInUser = config.Provider is null && settings.Identity == "developer";
+            // __S2S_RUNTIME_ENV_START__
+            if (config.Provider is null && settings.Identity == "s2s-installation")
+            {
+                var token = Host.RequiredEnvironment("COPILOT_GITHUB_TOKEN");
+                if (settings.Runtime == "managed")
+                {
+                    var environment = System.Environment.GetEnvironmentVariables()
+                        .Cast<DictionaryEntry>()
+                        .ToDictionary(
+                            entry => (string)entry.Key,
+                            entry => entry.Value?.ToString() ?? "");
+                    environment["COPILOT_GITHUB_TOKEN"] = token;
+                    options.Environment = environment;
+                }
+            }
+            // __S2S_RUNTIME_ENV_END__
             options.SessionIdleTimeoutSeconds = checked((int)settings.IdleTimeoutSeconds);
             if (settings.Storage == "local")
                 options.BaseDirectory = settings.BaseDirectory;
@@ -462,6 +545,7 @@ internal static class Host
         return value;
     }
 
+    // __GITHUB_TOKEN_PROVIDER_START__
     private static GitHubTokenProviderResult ReadGitHubToken()
     {
         var token = RequiredEnvironment("GITHUB_TOKEN");
@@ -482,6 +566,7 @@ internal static class Host
 
     private static Task<GitHubTokenProviderResult> AcquireGitHubToken(GitHubTokenProviderArgs _)
         => Task.FromResult(ReadGitHubToken());
+    // __GITHUB_TOKEN_PROVIDER_END__
 
     private static Task<string> AcquireBearerToken(ProviderTokenArgs _)
         // Replace with scoped managed-identity acquisition and caching for production.
@@ -624,10 +709,12 @@ internal static class Host
             Check(() => config.Model = RequiredEnvironment("COPILOT_MODEL").Trim());
         if (config.Provider is null)
         {
+            // __COPILOT_IDENTITY_PREFLIGHT_START__
             if (settings.Identity == "host-token")
                 Check(() => ReadGitHubToken());
             else if (settings.Identity != "developer")
                 problems.Add("- Unknown Copilot identity selection.");
+            // __COPILOT_IDENTITY_PREFLIGHT_END__
         }
         else if (settings.Credential == "api-key")
             Check(() => RequiredEnvironment(settings.CredentialEnv));
@@ -663,9 +750,11 @@ internal static class Host
             config.OnUserInputRequest = (request, _) => ReadConsole(request, cancellationToken);
         if (settings.Observer)
             config.OnEvent = evt => Console.Error.WriteLine("event=" + evt.Type);
+        // __COPILOT_IDENTITY_BINDING_START__
         if (config.Provider is null && settings.Identity == "host-token")
             config.GitHubTokenProvider = AcquireGitHubToken;
-        else if (config.Provider is not null)
+        // __COPILOT_IDENTITY_BINDING_END__
+        if (config.Provider is not null)
         {
             if (settings.Credential == "bearer-callback")
                 config.Provider.BearerTokenProvider = AcquireBearerToken;

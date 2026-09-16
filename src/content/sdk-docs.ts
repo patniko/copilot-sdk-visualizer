@@ -15,6 +15,8 @@ const base = `https://github.com/${SDK_REPO}/blob/${SDK_DOCS_BRANCH}`;
 
 export const SDK_DOCS_HOME = `${base}/docs/README.md`;
 export const SDK_GETTING_STARTED = `${base}/docs/getting-started.md`;
+export const S2S_AUTH_DOCS =
+    "https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens";
 
 export type SdkDocLink = { label: string; url: string; note: string };
 export type SdkDocGroup = { view: ViewId; title: string; summary: string; links: SdkDocLink[] };
@@ -158,6 +160,11 @@ export const SDK_DOC_MAP: SdkDocGroup[] = [
                 note: "GitHub OAuth, server-to-server auth, environment variables, BYOK.",
             },
             {
+                label: "Server-to-server authentication",
+                url: S2S_AUTH_DOCS,
+                note: "GitHub App installation eligibility, token minting, runtime environment, expiry, and billing attribution.",
+            },
+            {
                 label: "Azure managed identity",
                 url: doc("setup/azure-managed-identity.md"),
                 note: "BYOK with Microsoft Foundry, no API keys.",
@@ -198,6 +205,29 @@ export const SDK_DOC_MAP: SdkDocGroup[] = [
                 label: "Session persistence",
                 url: doc("features/session-persistence.md"),
                 note: "Resume sessions across restarts; manage storage.",
+            },
+        ],
+    },
+    {
+        view: "advanced",
+        title: "Advanced runtime surfaces",
+        summary:
+            "Documented and emerging controls for budgets, hooks, MCP, persistence, observability, and remote execution.",
+        links: [
+            {
+                label: "Session limits",
+                url: doc("features/session-limits.md"),
+                note: "Apply an AI-credit soft cap and observe budget events.",
+            },
+            {
+                label: "Hooks",
+                url: doc("features/hooks.md"),
+                note: "Inspect the full host callback lifecycle beyond pre- and post-tool hooks.",
+            },
+            {
+                label: "OpenTelemetry",
+                url: doc("observability/opentelemetry.md"),
+                note: "Configure trace export while treating content capture as sensitive.",
             },
         ],
     },

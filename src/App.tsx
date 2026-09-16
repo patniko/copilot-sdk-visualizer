@@ -16,6 +16,7 @@ import {
     Moon,
     PackageOpen,
     Redo2,
+    Settings2,
     ShieldCheck,
     SlidersHorizontal,
     Sun,
@@ -29,6 +30,7 @@ import { useHarness } from "./hooks/useHarness";
 import { PRESETS, SCENARIOS, applyScenario, changedAxes, createPreset } from "./domain/presets";
 import type { ScenarioId } from "./domain/presets";
 import type { HarnessPlan, PresetId } from "./domain/plan";
+import { AdvancedEditor } from "./components/AdvancedEditor";
 import { AgentsEditor } from "./components/AgentsEditor";
 import { BootstrapEditor } from "./components/BootstrapEditor";
 import { ContextEditor } from "./components/ContextEditor";
@@ -62,6 +64,7 @@ const navigation = [
         icon: SlidersHorizontal,
     },
     { id: "policy", label: "Policy & state", detail: "Permissions & lifecycle", icon: ShieldCheck },
+    { id: "advanced", label: "Advanced", detail: "Future runtime controls", icon: Settings2 },
     { id: "bootstrap", label: "Build & run", detail: "Language, files & host setup", icon: PackageOpen },
     { id: "reference", label: "Learn / reference", detail: "Source-backed boundaries", icon: BookOpen },
 ] as const;
@@ -109,14 +112,20 @@ const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description
         title: "Make the boundaries real.",
         description: "Keep permissions, persistence, observations, and your quality bar explicit.",
     },
+    advanced: {
+        eyebrow: "08 / Runtime depth",
+        title: "See what exists below.",
+        description:
+            "Explore source-backed controls that may become configurable after their contracts and safety boundaries mature.",
+    },
     bootstrap: {
-        eyebrow: "08 / Bring it to your host",
+        eyebrow: "09 / Bring it to your host",
         title: "Build the project. Wire the host.",
         description:
             "Configure behavior, choose runtime and language, install dependencies, integrate the host, then preflight and run locally.",
     },
     reference: {
-        eyebrow: "09 / Source-backed learning",
+        eyebrow: "10 / Source-backed learning",
         title: "Understand the seams.",
         description: "Look up the supported surface, the lifecycle, and the limits behind each decision.",
     },
@@ -442,6 +451,8 @@ export default function App() {
                     )}
                     {view === "reference" ? (
                         <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
+                    ) : view === "advanced" ? (
+                        <AdvancedEditor />
                     ) : (
                         <fieldset className="hb-editor-fields" disabled={blocked} key={`${view}-${revision}`}>
                             <legend className="hb-sr-only">

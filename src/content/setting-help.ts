@@ -538,10 +538,15 @@ export const valueHelp = {
                 value: "developer",
                 text: "Permit the future local runtime to use its developer login; an external service owns its own identity.",
             },
+            {
+                title: "GitHub App service identity",
+                value: "s2s-installation",
+                text: "For accounts GitHub has separately enabled for GitHub App installation authentication. The runtime receives a one-hour installation token through COPILOT_GITHUB_TOKEN with logged-in-user fallback disabled; there is no session callback refresh.",
+            },
         ],
-        "Use scoped session identity for a shared service rather than another user's ambient login.",
-        "The stored choice is inactive for the planner's BYOK inference route. It is not tenant authorization for tools, MCP, or other services.",
-        refs("sdk-auth", "sdk-default", "sdk-existing-runtime"),
+        "Use scoped session identity for a shared service, or the eligible GitHub App route when service-owned attribution is required.",
+        "The stored choice is inactive for the planner's BYOK inference route. Selection does not enable an account, approve billing, grant model access, promise rate limits, or authorize tools, MCP, and downstream services. Never store app keys, JWTs, installation tokens, or expiry here.",
+        refs("sdk-auth", "sdk-s2s-auth", "sdk-default", "sdk-existing-runtime"),
         "Host/session authentication; runtime process ownership still matters.",
     ),
     agentModel: setting(

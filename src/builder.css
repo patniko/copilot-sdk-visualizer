@@ -1669,6 +1669,8 @@
     display: flex;
     align-items: stretch;
     gap: 4px;
+    width: 100%;
+    min-width: 0;
     max-width: 100%;
     padding: 4px;
     overflow-x: auto;
@@ -1705,7 +1707,15 @@
 .hb-tab-content {
     display: grid;
     gap: 18px;
+    min-width: 0;
     margin-top: 22px;
+}
+
+.hb-reference-tabs {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .hb-tab-content[data-state="inactive"],
@@ -3803,6 +3813,25 @@
     font-weight: 500;
 }
 
+.hb-s2s-checklist {
+    display: grid;
+    gap: 7px;
+    margin: 10px 0 12px;
+    padding-left: 20px;
+    color: var(--cp-text-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.hb-setup-docs > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--cp-link);
+    font-size: 12px;
+    font-weight: 500;
+}
+
 /* Reference: Map to SDK docs */
 .hb-docmap-grid {
     display: grid;
@@ -3843,7 +3872,10 @@
 .hb-docmap-links a {
     display: inline-flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 5px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     color: var(--cp-link);
     font-weight: 500;
     font-size: 13px;
@@ -3857,7 +3889,8 @@
 
 @media (max-width: 720px) {
     .hb-primer-layers,
-    .hb-primer-steps ol {
+    .hb-primer-steps ol,
+    .hb-docmap-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 }

@@ -3,10 +3,12 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import type { Page } from "playwright";
+import { advancedControls } from "../src/content/advanced-controls";
 import { parsePlan } from "../src/domain/plan";
 import type { HarnessPlan } from "../src/domain/plan";
 import { createPreset } from "../src/domain/presets";
 import { STORAGE_KEY } from "../src/domain/storage";
+import { reference } from "../src/content/reference";
 import { startBrowserHarness } from "./browser-harness";
 import type { BrowserHarness } from "./browser-harness";
 
@@ -226,6 +228,44 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
     });
 });
 
+it("configures the eligible GitHub App S2S route without storing or exporting credentials", async () => {
+    await exercise("s2s-installation-auth", async (page) => {
+        await navigate(page, /^Models & identity\b/);
+        await page
+            .getByRole("group", { name: "GitHub credential ownership", exact: true })
+            .getByText("GitHub App service identity", { exact: true })
+            .click();
+        await expect.poll(async () => (await savedPlan(page)).identity).toBe("s2s-installation");
+        expect(
+            await page.getByText("Selection configures generation only", { exact: true }).isVisible(),
+        ).toBe(true);
+        const checklist = page.getByRole("note", { name: "GitHub App setup checklist" });
+        expect(await checklist.getByText(/Copilot Requests: Read & write/).isVisible()).toBe(true);
+        expect(await checklist.getByText(/All repositories/).isVisible()).toBe(true);
+        expect(await checklist.getByText(/repository_ids/).isVisible()).toBe(true);
+        expect(await checklist.getByText(/one hour/).isVisible()).toBe(true);
+        expect(
+            await checklist
+                .getByRole("link", { name: /server-to-server authentication guide/ })
+                .getAttribute("href"),
+        ).toBe("https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens");
+
+        await page.getByRole("button", { name: "Export", exact: true }).click();
+        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+        const code = await dialog
+            .getByRole("textbox", { name: "SDK TypeScript integration sketch" })
+            .inputValue();
+        expect(code).toContain("COPILOT_GITHUB_TOKEN");
+        expect(code).toContain("useLoggedInUser: false");
+        expect(code).not.toContain("gitHubTokenProvider");
+        expect(code).not.toContain("GITHUB_TOKEN_EXPIRES_AT");
+        await dialog.getByRole("tab", { name: "Plan JSON" }).click();
+        const output = await dialog.getByRole("textbox", { name: "Exported plan JSON" }).inputValue();
+        expect(parsePlan(output).identity).toBe("s2s-installation");
+        expect(output).not.toMatch(/privateKey|installationToken|jwt|expiresAt/i);
+    });
+});
+
 it("keeps editable identities stable across custom tools, MCP names, and agent renames", async () => {
     await exercise("tools-mcp-agents", async (page) => {
         await navigate(page, /^Tools\b/);
@@ -303,7 +343,9 @@ it("preserves corrupt data until explicit recovery and exposes searchable eviden
                 .getByRole("searchbox", { name: "Search configuration catalog", exact: true })
                 .fill("overridesBuiltInTool");
             await expect
-                .poll(() => page.getByText("1 of 53 controls", { exact: true }).isVisible())
+                .poll(() =>
+                    page.getByText(`1 of ${reference.controls.length} controls`, { exact: true }).isVisible(),
+                )
                 .toBe(true);
             const control = page.getByRole("button", { name: /^overridesBuiltInTool/ });
             await control.click();
@@ -323,6 +365,33 @@ it("preserves corrupt data until explicit recovery and exposes searchable eviden
     );
 });
 
+it("shows source-backed advanced controls without making runtime internals editable", async () => {
+    await exercise("advanced-controls", async (page) => {
+        await navigate(page, /^Advanced\b/);
+        expect(await page.getByRole("heading", { name: "See what exists below." }).isVisible()).toBe(true);
+        expect(await page.locator(".hb-advanced-summary strong").first().textContent()).toBe(
+            String(advancedControls.length),
+        );
+        expect(await page.getByRole("radio").count()).toBe(0);
+        expect(await page.getByRole("checkbox").count()).toBe(0);
+
+        await page
+            .getByRole("searchbox", { name: "Search advanced controls", exact: true })
+            .fill("autopilot continuation");
+        expect(
+            await page.getByRole("heading", { name: "Runtime-owned autopilot continuation" }).isVisible(),
+        ).toBe(true);
+        expect(await page.locator('a[href*="copilot-agent-runtime"]').count()).toBeGreaterThan(0);
+
+        await page.getByLabel("Support level", { exact: true }).selectOption("Documented SDK");
+        expect(await page.getByText("No matching advanced controls", { exact: true }).isVisible()).toBe(true);
+        await page.getByRole("searchbox", { name: "Search advanced controls", exact: true }).fill("");
+        expect(await page.getByRole("heading", { name: "Auto-model routing preference" }).isVisible()).toBe(
+            true,
+        );
+    });
+});
+
 it("keeps all editors and export dialogs usable on a narrow screen", async () => {
     await exercise("mobile", async (page) => {
         await page.setViewportSize({ width: 390, height: 844 });
@@ -335,6 +404,7 @@ it("keeps all editors and export dialogs usable on a narrow screen", async () =>
             /^Agents\b/,
             /^Models & identity\b/,
             /^Policy & state\b/,
+            /^Advanced\b/,
             /^Build & run\b/,
             /^Learn \/ reference\b/,
         ]) {

@@ -29,6 +29,12 @@ export function hostContracts(plan: HarnessPlan): string[] {
     if (!plan.model.id.trim()) required.push("Model selection");
     if (plan.model.provider === "copilot" && plan.identity === "host-token")
         required.push("GitHub token provider");
+    if (plan.model.provider === "copilot" && plan.identity === "s2s-installation")
+        required.push(
+            plan.target.runtime === "external"
+                ? "External runtime installation-token operations"
+                : "GitHub App installation-token runtime environment",
+        );
     if (plan.model.provider !== "copilot" && plan.model.credential === "bearer-callback")
         required.push("Provider token callback");
     if (plan.session.storage === "virtual") required.push("Session filesystem provider");
@@ -191,6 +197,19 @@ export function analyzePlan(plan: HarnessPlan): Decision[] {
             title: "The future host may use developer credentials",
             detail: "This can fit a local coding experience. Shared services should use explicit per-session identity and downstream authorization rather than inheriting a logged-in user's authority.",
             sources: ["sdk-default", "sdk-auth"],
+        });
+    if (plan.identity === "s2s-installation" && plan.model.provider === "copilot")
+        decisions.push({
+            id: "s2s-installation-identity",
+            kind: "host",
+            title: "Operate an eligible GitHub App installation identity",
+            detail:
+                plan.target.runtime === "external"
+                    ? "GitHub must separately enable the billing/attribution account. The independently operated runtime must receive COPILOT_GITHUB_TOKEN and disable logged-in-user fallback; this connecting client must not inject the installation token. Mint a replacement before the one-hour expiry, restart or reconfigure that runtime, and resume the session as appropriate."
+                    : plan.target.runtime === "inprocess"
+                      ? "GitHub must separately enable the billing/attribution account. Mint the installation token in trusted host code, set COPILOT_GITHUB_TOKEN before loading the in-process runtime, and disable logged-in-user fallback. Replace the token before its one-hour expiry by restarting the host runtime, then resume the session as appropriate."
+                      : "GitHub must separately enable the billing/attribution account. Mint the installation token in trusted host code, inject it into the managed child as COPILOT_GITHUB_TOKEN, and disable logged-in-user fallback. Replace the token before its one-hour expiry by restarting the SDK client with the new child environment, then resume the session as appropriate.",
+            sources: ["sdk-s2s-auth", "sdk-auth"],
         });
     return decisions;
 }

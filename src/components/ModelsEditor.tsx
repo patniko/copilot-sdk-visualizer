@@ -4,6 +4,8 @@ import type { EditorProps } from "./editor";
 import { Badge, Button, ChoiceField, Notice, Panel, SelectField, TextField } from "./ui";
 import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
+import { ExternalLink } from "lucide-react";
+import { S2S_AUTH_DOCS } from "../content/sdk-docs";
 
 const endpointExamples = {
     openai: "https://api.openai.com/v1",
@@ -158,6 +160,12 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                                 label: "Developer login",
                                 description: "Use the future local runtime's signed-in GitHub account.",
                             },
+                            {
+                                value: "s2s-installation",
+                                label: "GitHub App service identity",
+                                description:
+                                    "For eligible service-to-service or high-volume workloads using a short-lived installation token.",
+                            },
                         ]}
                         onValueChange={(value) =>
                             edit((draft) => {
@@ -165,11 +173,63 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                             })
                         }
                     />
-                    <Notice title="No token values belong in this plan">
-                        {plan.identity === "host-token"
-                            ? "The generated host requires a GitHub token provider. Use this route for explicit per-session identity, especially in shared services."
-                            : "The future local runtime uses its developer login. This is convenient for local development, not a substitute for tenant authorization in a shared service."}
-                    </Notice>
+                    {plan.identity === "s2s-installation" ? (
+                        <>
+                            <Notice title="Selection configures generation only" tone="accent">
+                                This option does not grant GitHub App installation authentication, billing
+                                approval, model access, or any fixed or higher rate limit. GitHub must enable
+                                the account or organization separately.
+                            </Notice>
+                            <div
+                                className="hb-setup-docs"
+                                role="note"
+                                aria-label="GitHub App setup checklist"
+                            >
+                                <p className="hb-small-label">Eligible GitHub App setup checklist</p>
+                                <ol className="hb-s2s-checklist">
+                                    <li>
+                                        Create a GitHub App with the repository permission{" "}
+                                        <strong>Copilot Requests: Read &amp; write</strong>.
+                                    </li>
+                                    <li>
+                                        Install it on the billing and attribution account. The account or
+                                        organization must be enabled for installation authentication, and the
+                                        current permission check requires <strong>All repositories</strong>.
+                                    </li>
+                                    <li>
+                                        In trusted host code, use the app private key and installation ID to
+                                        create an app JWT and mint an installation token. The mint request
+                                        must include at least one <code>repository_ids</code> entry and{" "}
+                                        <code>permissions.copilot_requests = write</code>.
+                                    </li>
+                                    <li>
+                                        Pass only the minted installation token to the runtime as{" "}
+                                        <code>COPILOT_GITHUB_TOKEN</code> and disable logged-in-user fallback.
+                                        Do not use the per-session GitHub token callback.
+                                    </li>
+                                    <li>
+                                        Installation tokens expire after one hour. Mint a replacement, restart
+                                        or reconfigure the runtime with the new environment, then resume the
+                                        session when appropriate; callback refresh is not supported.
+                                    </li>
+                                </ol>
+                                <a href={S2S_AUTH_DOCS} target="_blank" rel="noopener noreferrer">
+                                    Read GitHub’s server-to-server authentication guide
+                                    <ExternalLink size={12} aria-hidden="true" />
+                                </a>
+                            </div>
+                            <Notice title="Secrets stay outside this plan">
+                                Never put the app private key, app JWT, installation token, or token expiry in
+                                the browser, saved plan, or exported configuration.
+                            </Notice>
+                        </>
+                    ) : (
+                        <Notice title="No token values belong in this plan">
+                            {plan.identity === "host-token"
+                                ? "The generated host requires a GitHub token provider. Use this route for explicit per-session identity, especially in shared services."
+                                : "The future local runtime uses its developer login. This is convenient for local development, not a substitute for tenant authorization in a shared service."}
+                        </Notice>
+                    )}
                 </Panel>
             )}
 

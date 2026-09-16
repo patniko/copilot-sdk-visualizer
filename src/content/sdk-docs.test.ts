@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { describe, expect, it } from "vitest";
 import { reference } from "./reference";
-import { SDK_DOCS_HOME, SDK_DOC_MAP, SDK_GETTING_STARTED, sdkDocsForView } from "./sdk-docs";
+import { S2S_AUTH_DOCS, SDK_DOCS_HOME, SDK_DOC_MAP, SDK_GETTING_STARTED, sdkDocsForView } from "./sdk-docs";
 
 describe("reference source integrity", () => {
     it("resolves every control, axis, and gap source id", () => {
@@ -30,7 +30,9 @@ describe("SDK docs map", () => {
         for (const group of SDK_DOC_MAP) {
             expect(group.links.length).toBeGreaterThan(0);
             for (const link of group.links) {
-                expect(link.url, link.label).toMatch(/^https:\/\/github\.com\/github\/copilot-sdk\/blob\//);
+                expect(link.url, link.label).toMatch(
+                    /^https:\/\/(?:github\.com\/github\/copilot-sdk\/blob\/|docs\.github\.com\/)/,
+                );
                 expect(link.note.length).toBeGreaterThan(0);
             }
         }
@@ -39,6 +41,9 @@ describe("SDK docs map", () => {
     it("exposes home and getting-started entry points and a lookup helper", () => {
         expect(SDK_DOCS_HOME).toMatch(/^https:\/\//);
         expect(SDK_GETTING_STARTED).toMatch(/^https:\/\//);
+        expect(S2S_AUTH_DOCS).toBe(
+            "https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens",
+        );
         expect(sdkDocsForView("bootstrap")?.links.some((link) => /bundled-cli/.test(link.url))).toBe(true);
         expect(sdkDocsForView("overview")?.view).toBe("overview");
         expect(sdkDocsForView("base-profile")?.view).toBe("base-profile");

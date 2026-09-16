@@ -12,6 +12,47 @@ import {
 import { RUST_CONFIG, RUST_HOST, RUST_MAIN, RUST_SESSION_FS } from "./rust-templates";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 
+function renderRustSource(source: string, plan: HarnessPlan): string {
+    const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
+    if (!s2s)
+        return source
+            .replace(
+                /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+                "",
+            )
+            .replace(
+                /[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_START__\n[\s\S]*?[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_END__\n?/g,
+                "",
+            )
+            .replaceAll(/^\s*\/\/ __[A-Z_]+_(?:START|END)__\n/gm, "");
+    const runtimeEnvironment =
+        plan.target.runtime === "managed"
+            ? `            let token = required_env("COPILOT_GITHUB_TOKEN")?;
+            options = options.with_env([("COPILOT_GITHUB_TOKEN", token)]);
+`
+            : plan.target.runtime === "inprocess"
+              ? `            required_env("COPILOT_GITHUB_TOKEN")?;
+`
+              : "";
+    return source
+        .replace(
+            /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+            runtimeEnvironment,
+        )
+        .replace(
+            /[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_START__\n([\s\S]*?)[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_END__\n?/g,
+            plan.target.runtime === "external" ? "" : "$1",
+        )
+        .replace(
+            /[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_START__\n[\s\S]*?[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_END__\n?/g,
+            "",
+        )
+        .replace(
+            /[ \t]*\/\/ __COPILOT_IDENTITY_(?:PREFLIGHT|BINDING)_START__\n[\s\S]*?[ \t]*\/\/ __COPILOT_IDENTITY_(?:PREFLIGHT|BINDING)_END__\n?/g,
+            "",
+        );
+}
+
 function checkRust(plan: HarnessPlan): BootstrapBlocker[] {
     const blockers = javaRustChecks(plan, "rust");
     if (plan.session.storage === "virtual" && !plan.session.baseDirectory.trim()) {
@@ -110,10 +151,18 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "signa
                     content: JSON.stringify(javaRustConfiguration(plan), null, 2) + "\n",
                     language: "json",
                 },
-                { path: "src/main.rs", content: RUST_MAIN, language: "rust" },
-                { path: "src/config.rs", content: RUST_CONFIG, language: "rust" },
-                { path: "src/host.rs", content: RUST_HOST, language: "rust" },
-                { path: "src/session_fs.rs", content: RUST_SESSION_FS, language: "rust" },
+                { path: "src/main.rs", content: renderRustSource(RUST_MAIN, plan), language: "rust" },
+                {
+                    path: "src/config.rs",
+                    content: renderRustSource(RUST_CONFIG, plan),
+                    language: "rust",
+                },
+                { path: "src/host.rs", content: renderRustSource(RUST_HOST, plan), language: "rust" },
+                {
+                    path: "src/session_fs.rs",
+                    content: renderRustSource(RUST_SESSION_FS, plan),
+                    language: "rust",
+                },
                 ...javaRustServerFiles(plan),
             ],
             commands: {
@@ -129,7 +178,13 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "signa
                 "The Rust SDK source manifest is 0.0.0-dev; this project pins the inspected Git revision instead of inventing an exact published crate version. Rust 1.92 is too old. No Java installation or global toolchain changes are performed by the visualizer.",
                 "A strict host-owned DTO reads bootstrap-config.json, then src/config.rs explicitly assigns every selected field to SDK builders/default-constructed types. SessionConfig itself is not deserializable and many SDK structs are non-exhaustive.",
                 "The source JSON is embedded with include_str!; rebuild after editing it. Permissions deny by default, custom tool handlers retain schemas/override/terminal flags, and pending hooks/tools/SessionFs fail preflight rather than returning fake successes.",
-                "GITHUB_TOKEN_EXPIRES_AT is an absolute UNIX timestamp. Every Copilot token-provider call recomputes its remaining lifetime. BYOK uses the selected provider credential route; downstream services need separate host-owned authorization.",
+                plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+                    ? plan.target.runtime === "external"
+                        ? "GitHub App S2S identity is configured by start-runtime.sh on the separately operated runtime host. The Rust client does not receive or inject COPILOT_GITHUB_TOKEN and does not install a GitHub token provider."
+                        : plan.target.runtime === "inprocess"
+                          ? "GitHub App S2S identity requires COPILOT_GITHUB_TOKEN before the in-process runtime loads. Logged-in-user fallback is false and no GitHub token provider is generated."
+                          : "GitHub App S2S identity copies COPILOT_GITHUB_TOKEN into the managed child environment with ClientOptions::with_env. Logged-in-user fallback is false and no GitHub token provider is generated."
+                    : "GITHUB_TOKEN_EXPIRES_AT is an absolute UNIX timestamp. Every Copilot token-provider call recomputes its remaining lifetime. BYOK uses the selected provider credential route; downstream services need separate host-owned authorization.",
                 "When observation is selected, the client prepares the session and starts draining its subscription before startup. Logs contain event types only; lag or unexpected observer failure aborts the workload rather than silently losing observations.",
                 "Console input is serialized on a process-lifetime standard thread, not a Tokio blocking-pool task that can prevent shutdown while waiting for stdin. EOF or input errors signal the main task's abort path. Prompt/choice display is user interaction, not event logging.",
                 "The main task handles Ctrl-C and host callback failures, aborts a failed turn, detaches the session, joins the event observer, then stops the client. Cleanup failures are added to the primary error chain. No-message completion is reported explicitly; terminal tools need not produce a final assistant message.",

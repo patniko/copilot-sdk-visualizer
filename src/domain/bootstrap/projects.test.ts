@@ -66,6 +66,66 @@ describe("integrated language project contracts", () => {
         },
     );
 
+    it.each(["typescript", "python", "go", "csharp", "java", "rust"] as const)(
+        "keeps S2S secrets at the %s runtime boundary for every placement",
+        (language) => {
+            const clientFiles = {
+                typescript: "src/harness.ts",
+                python: "agent.py",
+                go: "main.go",
+                csharp: "Program.cs",
+                java: "src/main/java/harness/Configuration.java",
+                rust: "src/config.rs",
+            };
+            const managedInjection = {
+                typescript: "env:",
+                python: 'client_options["env"]',
+                go: "options.Env",
+                csharp: "options.Environment",
+                java: "options.setEnvironment",
+                rust: "options.with_env",
+            };
+            for (const runtime of RUNTIME_KINDS) {
+                const plan = createPreset("empty");
+                plan.identity = "s2s-installation";
+                plan.target.language = language;
+                plan.target.runtime = runtime;
+                const result = buildBootstrapProject(plan);
+                expect(result.ok, `${language}/${runtime}`).toBe(true);
+                if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+                const files = new Map(result.project.files.map((file) => [file.path, file.content]));
+                const all = result.project.files.map((file) => file.content).join("\n");
+                const code = result.project.files
+                    .filter((file) => /\.(?:ts|py|go|cs|java|rs)$/.test(file.path))
+                    .map((file) => file.content)
+                    .join("\n");
+                const client = files.get(clientFiles[language]) ?? "";
+                const env = files.get(".env.example") ?? "";
+                expect(all).not.toContain("GITHUB_TOKEN_EXPIRES_AT");
+                expect(code).not.toMatch(
+                    /gitHubTokenProvider|github_token_provider|GitHubTokenProvider|GitHubEnvironmentProvider|AcquireGitHubToken|acquireGitHubToken/,
+                );
+                expect(parsePlan(files.get("harness-plan.json") ?? "").identity).toBe("s2s-installation");
+                if (runtime === "managed") {
+                    expect(env).toContain("COPILOT_GITHUB_TOKEN=");
+                    expect(client).toContain("COPILOT_GITHUB_TOKEN");
+                    expect(client).toContain(managedInjection[language]);
+                } else if (runtime === "inprocess") {
+                    expect(env).toContain("COPILOT_GITHUB_TOKEN=");
+                    expect(client).toContain("COPILOT_GITHUB_TOKEN");
+                    expect(client).not.toContain(managedInjection[language]);
+                } else {
+                    expect(env).not.toContain("COPILOT_GITHUB_TOKEN=");
+                    expect(client).not.toContain(managedInjection[language]);
+                    expect(all).toContain("COPILOT_GITHUB_TOKEN");
+                    expect(files.get("README.md")).toContain("connecting client");
+                }
+                expect(all).toContain("one-hour");
+                expect(all).toContain("permissions.copilot_requests=write");
+            }
+        },
+    );
+
     it("preserves an inactive managed path without passing it to another transport", () => {
         const plan = createPreset("empty");
         plan.target.language = "go";

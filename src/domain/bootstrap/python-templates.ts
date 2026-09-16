@@ -25,6 +25,7 @@ def required_environment(name):
     return value
 
 
+# __GITHUB_TOKEN_PROVIDER_START__
 def github_remaining_lifetime():
     try:
         expires_at = float(required_environment("GITHUB_TOKEN_EXPIRES_AT"))
@@ -45,6 +46,7 @@ async def github_token_provider(args):
     """Starter only: production should acquire credentials for args['host']/['session_id']."""
     token = required_environment("GITHUB_TOKEN")
     return {"kind": "token", "accessToken": token, "expiresIn": github_remaining_lifetime()}
+# __GITHUB_TOKEN_PROVIDER_END__
 
 
 async def bearer_token_provider(args):
@@ -138,6 +140,10 @@ def environment_blockers(plan):
     if plan["model"]["provider"] == "copilot":
         if plan["identity"] == "host-token":
             names.append("GITHUB_TOKEN")
+        # __S2S_LOCAL_PREFLIGHT_START__
+        elif plan["identity"] == "s2s-installation":
+            names.append("COPILOT_GITHUB_TOKEN")
+        # __S2S_LOCAL_PREFLIGHT_END__
     else:
         names.append(
             plan["model"]["credentialEnv"]
@@ -150,11 +156,13 @@ def environment_blockers(plan):
             required_environment(name)
         except ValueError as error:
             blockers.append(str(error))
+    # __GITHUB_TOKEN_PROVIDER_START__
     if plan["model"]["provider"] == "copilot" and plan["identity"] == "host-token":
         try:
             github_remaining_lifetime()
         except ValueError as error:
             blockers.append(str(error))
+    # __GITHUB_TOKEN_PROVIDER_END__
     return blockers
 
 
@@ -252,7 +260,7 @@ def validate_plan(plan):
     idle_timeout = plan["session"]["idleTimeoutSeconds"]
     if type(idle_timeout) is not int or idle_timeout < 0:
         raise ValueError("idleTimeoutSeconds must be a non-negative integer.")
-    if plan["identity"] not in {"host-token", "developer"}:
+    if plan["identity"] not in {"host-token", "developer", "s2s-installation"}:
         raise ValueError("Unsupported identity selection.")
     if plan["model"]["provider"] not in {"copilot", "openai", "azure", "anthropic"}:
         raise ValueError("Unsupported model provider.")
@@ -465,8 +473,11 @@ def session_options(data):
     if plan["session"]["storage"] == "virtual":
         options["create_session_fs_handler"] = host.create_session_fs_handler
     if plan["model"]["provider"] == "copilot":
+        # __GITHUB_TOKEN_PROVIDER_START__
         if plan["identity"] == "host-token":
             options["github_token_provider"] = host.github_token_provider
+        # __GITHUB_TOKEN_PROVIDER_END__
+        pass
     elif plan["model"]["credential"] == "api-key":
         options["provider"]["api_key"] = host.required_environment(plan["model"]["credentialEnv"])
     else:
@@ -489,8 +500,19 @@ async def run_agent(data, prompt, timeout):
         path = runtime_entrypoint(plan)
         if kind == "managed":
             connection = RuntimeConnection.for_stdio(path=str(path))
+            # __S2S_MANAGED_ENV_START__
+            if plan["model"]["provider"] == "copilot" and plan["identity"] == "s2s-installation":
+                client_options["env"] = {
+                    **os.environ,
+                    "COPILOT_GITHUB_TOKEN": host.required_environment("COPILOT_GITHUB_TOKEN"),
+                }
+            # __S2S_MANAGED_ENV_END__
         else:
             os.environ["COPILOT_CLI_PATH"] = str(path)
+            # __S2S_INPROCESS_ENV_START__
+            if plan["model"]["provider"] == "copilot" and plan["identity"] == "s2s-installation":
+                host.required_environment("COPILOT_GITHUB_TOKEN")
+            # __S2S_INPROCESS_ENV_END__
             connection = RuntimeConnection.for_inprocess()
         client_options["session_idle_timeout_seconds"] = plan["session"]["idleTimeoutSeconds"]
         client_options["use_logged_in_user"] = (

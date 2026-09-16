@@ -12,6 +12,49 @@ import {
 import { JAVA_CONFIG, JAVA_HOST, JAVA_MAIN, javaSetupScript } from "./java-templates";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 
+function renderJavaSource(source: string, plan: HarnessPlan): string {
+    const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
+    if (!s2s)
+        return source
+            .replace(
+                /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+                "",
+            )
+            .replace(
+                /[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_START__\n[\s\S]*?[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_END__\n?/g,
+                "",
+            )
+            .replaceAll(/^\s*\/\/ __[A-Z_]+_(?:START|END)__\n/gm, "");
+    const runtimeEnvironment =
+        plan.target.runtime === "managed"
+            ? `            String token = HostExtensions.requiredEnv("COPILOT_GITHUB_TOKEN");
+            var environment = new HashMap<>(System.getenv());
+            environment.put("COPILOT_GITHUB_TOKEN", token);
+            options.setEnvironment(environment);
+`
+            : plan.target.runtime === "inprocess"
+              ? `            HostExtensions.requiredEnv("COPILOT_GITHUB_TOKEN");
+`
+              : "";
+    return source
+        .replace(
+            /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+            runtimeEnvironment,
+        )
+        .replace(
+            /[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_START__\n([\s\S]*?)[ \t]*\/\/ __S2S_LOCAL_PREFLIGHT_END__\n?/g,
+            plan.target.runtime === "external" ? "" : "$1",
+        )
+        .replace(
+            /[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_START__\n[\s\S]*?[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_END__\n?/g,
+            "",
+        )
+        .replace(
+            /[ \t]*\/\/ __COPILOT_IDENTITY_(?:PREFLIGHT|BINDING)_START__\n[\s\S]*?[ \t]*\/\/ __COPILOT_IDENTITY_(?:PREFLIGHT|BINDING)_END__\n?/g,
+            "",
+        );
+}
+
 function checkJava(plan: HarnessPlan): BootstrapBlocker[] {
     const blockers = javaRustChecks(plan, "java");
     if (plan.session.storage === "virtual") {
@@ -148,9 +191,21 @@ export const javaAdapter: LanguageAdapter = {
                         "\n",
                     language: "json",
                 },
-                { path: "src/main/java/harness/Main.java", content: JAVA_MAIN, language: "java" },
-                { path: "src/main/java/harness/Configuration.java", content: JAVA_CONFIG, language: "java" },
-                { path: "src/main/java/harness/HostExtensions.java", content: JAVA_HOST, language: "java" },
+                {
+                    path: "src/main/java/harness/Main.java",
+                    content: renderJavaSource(JAVA_MAIN, plan),
+                    language: "java",
+                },
+                {
+                    path: "src/main/java/harness/Configuration.java",
+                    content: renderJavaSource(JAVA_CONFIG, plan),
+                    language: "java",
+                },
+                {
+                    path: "src/main/java/harness/HostExtensions.java",
+                    content: renderJavaSource(JAVA_HOST, plan),
+                    language: "java",
+                },
                 ...javaRustServerFiles(plan),
             ],
             commands: {
@@ -165,7 +220,13 @@ export const javaAdapter: LanguageAdapter = {
             notes: [
                 "This project deliberately uses locally built 1.0.14-SNAPSHOT SDK artifacts, not release 1.0.13. Source API support does not prove Maven Central availability. setup-sdk.sh pins and checks the SDK commit before installing.",
                 "bootstrap-config.json is mapped field-by-field into Java SDK setters. It is not deserialized into SessionConfig: Jackson ignores several of that class's Boolean properties. Edit Configuration.java when adding a new configuration field.",
-                "GITHUB_TOKEN_EXPIRES_AT is a real UNIX expiry, not a duration. The planner's GitHub identity selection configures Copilot authentication; BYOK uses its selected provider credential route. Downstream services still need host-owned authorization.",
+                plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+                    ? plan.target.runtime === "external"
+                        ? "GitHub App S2S identity is configured by start-runtime.sh on the separately operated runtime host. The Java client does not receive or inject COPILOT_GITHUB_TOKEN and does not install a GitHub token provider."
+                        : plan.target.runtime === "inprocess"
+                          ? "GitHub App S2S identity requires COPILOT_GITHUB_TOKEN before the in-process runtime loads. Logged-in-user fallback is false and no GitHub token provider is generated."
+                          : "GitHub App S2S identity copies COPILOT_GITHUB_TOKEN into the managed child environment through CopilotClientOptions.setEnvironment. Logged-in-user fallback is false and no GitHub token provider is generated."
+                    : "GITHUB_TOKEN_EXPIRES_AT is a real UNIX expiry, not a duration. The planner's GitHub identity selection configures Copilot authentication; BYOK uses its selected provider credential route. Downstream services still need host-owned authorization.",
                 "The default permission handler rejects every effect. Tool overrides retain their names, schemas and terminal flags; selected host tools/hooks deliberately fail preflight until implemented in HostExtensions.java.",
                 "Console input is serialized on a daemon host thread; EOF, forbidden freeform answers, and unavailable input fail explicitly. Observers print event class names only, never prompts, arguments, tool results, or credentials. Streaming still reaches the SDK when selected.",
                 "Session close detaches before client shutdown. Explicit stop errors are retained as suppressed errors when a primary operation failed. A completed turn without an assistant message is reported explicitly, including terminal-tool turns.",

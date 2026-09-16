@@ -10,6 +10,7 @@ export const typescriptAdapter: LanguageAdapter = {
     label: "TypeScript / Node.js",
     check: () => [],
     generate(plan) {
+        const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
         const requiredTools = toolDefinitions(plan).map((tool) => tool.name);
         const integrationData = {
             env: environmentNames(plan),
@@ -24,6 +25,35 @@ export const typescriptAdapter: LanguageAdapter = {
                 plan.model.provider !== "copilot" && plan.model.credential === "bearer-callback",
             model: plan.model.id.trim(),
         };
+        const githubExtension = s2s ? "" : '    githubTokenProvider?: Callbacks["gitHubTokenProvider"];\n';
+        const githubCredential = s2s
+            ? ""
+            : `
+function githubCredential() {
+    const accessToken = env("GITHUB_TOKEN");
+    const expiresAt = Number(env("GITHUB_TOKEN_EXPIRES_AT"));
+    const expiresIn = Math.floor(expiresAt - Date.now() / 1000);
+    if (!Number.isFinite(expiresAt) || expiresIn <= 0) {
+        throw new Error("Supply the credential's real future expiry as UNIX seconds, or implement extensions.githubTokenProvider. Never reset a static token's TTL.");
+    }
+    return { kind: "token" as const, accessToken, expiresIn };
+}
+`;
+        const githubEnvironmentFilter = s2s
+            ? ""
+            : `
+        !(extensions.githubTokenProvider && ["GITHUB_TOKEN", "GITHUB_TOKEN_EXPIRES_AT"].includes(name)) &&`;
+        const githubPreflight = s2s
+            ? ""
+            : `
+    if (spec.githubProvider && !extensions.githubTokenProvider &&
+        process.env.GITHUB_TOKEN && process.env.GITHUB_TOKEN_EXPIRES_AT) {
+        try { githubCredential(); } catch (error) { issues.push(String(error)); }
+    }`;
+        const githubBinding = s2s
+            ? ""
+            : `
+    if (spec.githubProvider) callbacks.gitHubTokenProvider = extensions.githubTokenProvider ?? (async () => githubCredential());`;
         const host = `// Copyright (c) Microsoft Corporation. All rights reserved.
 import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
@@ -47,7 +77,7 @@ export const extensions: {
     preToolUse?: NonNullable<Callbacks["hooks"]>["onPreToolUse"];
     postToolUse?: NonNullable<Callbacks["hooks"]>["onPostToolUse"];
     sessionFs?: Callbacks["createSessionFsProvider"];
-    githubTokenProvider?: Callbacks["gitHubTokenProvider"];
+${githubExtension}\
     providerToken?: HostBindings["providerToken"];
 } = { tools: {} };
 
@@ -57,25 +87,14 @@ function env(name: string): string {
     return value;
 }
 
-function githubCredential() {
-    const accessToken = env("GITHUB_TOKEN");
-    const expiresAt = Number(env("GITHUB_TOKEN_EXPIRES_AT"));
-    const expiresIn = Math.floor(expiresAt - Date.now() / 1000);
-    if (!Number.isFinite(expiresAt) || expiresIn <= 0) {
-        throw new Error("Supply the credential's real future expiry as UNIX seconds, or implement extensions.githubTokenProvider. Never reset a static token's TTL.");
-    }
-    return { kind: "token" as const, accessToken, expiresIn };
-}
+${githubCredential}
 
 export function integrationIssues(): string[] {
     const requiredEnvironment = spec.env.filter(name =>
-        !(extensions.githubTokenProvider && ["GITHUB_TOKEN", "GITHUB_TOKEN_EXPIRES_AT"].includes(name)) &&
+${githubEnvironmentFilter}
         !(extensions.providerToken && name === "MODEL_BEARER_TOKEN"));
     const issues = requiredEnvironment.filter(name => !process.env[name]).map(name => \`Missing environment: \${name}\`);
-    if (spec.githubProvider && !extensions.githubTokenProvider &&
-        process.env.GITHUB_TOKEN && process.env.GITHUB_TOKEN_EXPIRES_AT) {
-        try { githubCredential(); } catch (error) { issues.push(String(error)); }
-    }
+${githubPreflight}
     for (const name of spec.tools) {
         if (!Object.hasOwn(extensions.tools, name) || typeof extensions.tools[name] !== "function") {
             issues.push(\`Implement src/host.ts extensions.tools[\${JSON.stringify(name)}]\`);
@@ -113,7 +132,7 @@ export function createHostBindings() {
             return { answer, wasFreeform: !isChoice };
         } finally { input.close(); release(); }
     };
-    if (spec.githubProvider) callbacks.gitHubTokenProvider = extensions.githubTokenProvider ?? (async () => githubCredential());
+${githubBinding}
     if (spec.virtualStorage) callbacks.createSessionFsProvider = extensions.sessionFs;
     if (spec.observeEvents) callbacks.onEvent = event => { console.error(\`[event] \${event.type}\`); };
     callbacks.hooks = {
@@ -256,12 +275,23 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                         "- `extensions.permissionPolicy`: default is reject. Supply your production authorization and approval rules before allowing effects.",
                         "- `extensions.preToolUse` / `postToolUse`: required only if selected; replace with real policy/result processing.",
                         "- `extensions.sessionFs`: return a real SDK SessionFsProvider when virtual storage is selected.",
-                        "- `extensions.githubTokenProvider`: replace the environment adapter with your actual token acquisition/refresh integration.",
+                        ...(s2s
+                            ? [
+                                  "- GitHub App S2S: mint the installation token outside this project. Managed children receive `COPILOT_GITHUB_TOKEN`; in-process hosts require it before runtime load; external runtimes are configured separately.",
+                                  "- GitHub App S2S has no per-session token callback. Replace the one-hour token by restarting or reconfiguring the runtime, then resume the session as appropriate.",
+                              ]
+                            : [
+                                  "- `extensions.githubTokenProvider`: replace the environment adapter with your actual token acquisition/refresh integration.",
+                              ]),
                         "- `extensions.providerToken`: replace the provider environment adapter with managed identity or your credential service if appropriate.",
                         "",
                         "SessionFsProvider requires async readFile, writeFile, appendFile, exists, stat, mkdir, readdir, readdirWithTypes, rm, and rename. The sketch does not advertise SQLite. Never substitute an empty/no-op implementation.",
                         "",
-                        "The environment GitHub adapter expects GITHUB_TOKEN_EXPIRES_AT as the token issuer's actual absolute UNIX expiry. It computes remaining lifetime, never resets a static token's expiry.",
+                        ...(s2s
+                            ? []
+                            : [
+                                  "The environment GitHub adapter expects GITHUB_TOKEN_EXPIRES_AT as the token issuer's actual absolute UNIX expiry. It computes remaining lifetime, never resets a static token's expiry.",
+                              ]),
                         "",
                         "The source SDK is pinned because this snapshot is newer than a verified published package. Setup provisions it locally under .sdk-source; the visualizer itself does not fetch or run it.",
                         "",
@@ -273,7 +303,14 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                 check: "npm run check",
                 run: 'npm start -- "Introduce yourself and explain your configured role."',
                 ...(plan.target.runtime === "external"
-                    ? { startRuntime: `copilot --headless --port ${runtimeEndpoint(plan.target).port}` }
+                    ? {
+                          startRuntime: [
+                              ...(s2s ? ['test -n "$COPILOT_GITHUB_TOKEN" &&'] : []),
+                              "copilot --headless",
+                              ...(s2s ? ["--no-auto-login"] : []),
+                              `--port ${runtimeEndpoint(plan.target).port}`,
+                          ].join(" "),
+                      }
                     : {}),
             },
             requirements,

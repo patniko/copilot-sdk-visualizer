@@ -123,8 +123,36 @@ function shellQuote(value: string): string {
     return `'${value.replaceAll("'", "'\\''")}'`;
 }
 
-function render(template: string): string {
-    return template
+function render(template: string, plan: HarnessPlan): string {
+    let rendered =
+        plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+            ? template.replace(
+                  /[ \t]*# __GITHUB_TOKEN_PROVIDER_START__\n[\s\S]*?[ \t]*# __GITHUB_TOKEN_PROVIDER_END__\n?/g,
+                  "",
+              )
+            : template
+                  .replace(/^[ \t]*# __GITHUB_TOKEN_PROVIDER_START__\n/gm, "")
+                  .replace(/^[ \t]*# __GITHUB_TOKEN_PROVIDER_END__\n/gm, "");
+    for (const placement of ["MANAGED", "INPROCESS"] as const) {
+        const keep =
+            plan.model.provider === "copilot" &&
+            plan.identity === "s2s-installation" &&
+            plan.target.runtime === placement.toLowerCase();
+        const pattern = new RegExp(
+            `[ \\t]*# __S2S_${placement}_ENV_START__\\n([\\s\\S]*?)[ \\t]*# __S2S_${placement}_ENV_END__\\n?`,
+            "g",
+        );
+        rendered = rendered.replace(pattern, keep ? "$1" : "");
+    }
+    rendered = rendered.replace(
+        /[ \t]*# __S2S_LOCAL_PREFLIGHT_START__\n([\s\S]*?)[ \t]*# __S2S_LOCAL_PREFLIGHT_END__\n?/g,
+        plan.model.provider === "copilot" &&
+            plan.identity === "s2s-installation" &&
+            plan.target.runtime !== "external"
+            ? "$1"
+            : "",
+    );
+    return rendered
         .replaceAll("__SDK_COMMIT__", SDK_COMMIT)
         .replaceAll("__RUNTIME_VERSION__", RUNTIME_VERSION)
         .replaceAll("__SESSION_FIELDS__", JSON.stringify(Object.values(SESSION_ALIASES)))
@@ -187,11 +215,13 @@ export const pythonAdapter = {
         ];
         const serverCommand = endpoint
             ? [
+                  ...(plan.identity === "s2s-installation" ? ['test -n "$COPILOT_GITHUB_TOKEN" &&'] : []),
                   ...(plan.session.storage === "local"
                       ? ["env", "--", `COPILOT_HOME=${shellQuote(plan.session.baseDirectory)}`]
                       : []),
                   shellQuote(plan.target.cliPath.trim() || "copilot"),
                   "--headless",
+                  ...(plan.identity === "s2s-installation" ? ["--no-auto-login"] : []),
                   "--port",
                   String(endpoint.port),
                   ...(plan.session.idleTimeoutSeconds
@@ -227,11 +257,15 @@ export const pythonAdapter = {
                         ) + "\n",
                     language: "json",
                 },
-                { path: "agent.py", content: render(pythonAgent), language: "python" },
-                { path: HOST_FILE, content: render(pythonHost), language: "python" },
-                { path: "provision_runtime.py", content: render(pythonProvision), language: "python" },
-                { path: "setup-sdk.sh", content: render(pythonSetup), language: "text" },
-                { path: "run-agent.sh", content: render(pythonRunner), language: "text" },
+                { path: "agent.py", content: render(pythonAgent, plan), language: "python" },
+                { path: HOST_FILE, content: render(pythonHost, plan), language: "python" },
+                {
+                    path: "provision_runtime.py",
+                    content: render(pythonProvision, plan),
+                    language: "python",
+                },
+                { path: "setup-sdk.sh", content: render(pythonSetup, plan), language: "text" },
+                { path: "run-agent.sh", content: render(pythonRunner, plan), language: "text" },
                 {
                     path: ".sdk-source/.gitignore",
                     content: "# Copyright (c) Microsoft Corporation. All rights reserved.\n*\n!.gitignore\n",
@@ -255,7 +289,13 @@ export const pythonAdapter = {
                 "Native preflight inspects file presence, not binary compatibility. A real start is still required to establish ABI/platform compatibility; the explicit setup download selects the host's runtime artifact and verifies its release checksum.",
                 "python-bootstrap.json contains explicit Python aliases and the active plan projection. It must agree with harness-plan.json after ignoring retained settings for inactive transports/providers; regenerate after changing active planner decisions. JSON Schema properties and prompt text are not case-converted.",
                 "Extend host.py: register tool handlers in TOOL_HANDLERS, assign selected PRE_TOOL_HOOK/POST_TOOL_HOOK/SESSION_FS_FACTORY integrations, and replace the default-deny permission function only after implementing real authority checks. No selected integration is satisfied by a success-shaped stub.",
-                "GitHub host-token mode reads GITHUB_TOKEN and GITHUB_TOKEN_EXPIRES_AT (absolute UNIX seconds). BYOK API keys use the plan's credentialEnv; bearer callbacks read MODEL_BEARER_TOKEN. These single-process environment adapters are starters, not production refresh or tenant identity services.",
+                plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+                    ? plan.target.runtime === "external"
+                        ? "GitHub App S2S identity is configured only on the separately operated runtime. This Python client does not read or inject COPILOT_GITHUB_TOKEN and does not register a session token callback."
+                        : plan.target.runtime === "inprocess"
+                          ? "GitHub App S2S identity requires COPILOT_GITHUB_TOKEN in the host environment before the in-process runtime loads. The client disables logged-in-user fallback and does not register a session token callback."
+                          : "GitHub App S2S identity reads COPILOT_GITHUB_TOKEN from the trusted host environment and injects it into the managed child runtime. The client disables logged-in-user fallback and does not register a session token callback."
+                    : "GitHub host-token mode reads GITHUB_TOKEN and GITHUB_TOKEN_EXPIRES_AT (absolute UNIX seconds). BYOK API keys use the plan's credentialEnv; bearer callbacks read MODEL_BEARER_TOKEN. These single-process environment adapters are starters, not production refresh or tenant identity services.",
                 "The console input handler honors choices and allowFreeform and returns answer/wasFreeform. Hook payloads also retain SDK camelCase keys even though Python registration names use snake_case.",
                 "Virtual session storage requires a real SessionFsProvider returned by create_session_fs_handler. The starter advertises no SQLite capability. Session storage is not universal host-filesystem virtualization; large-output handling and selected native tools retain their own behavior.",
                 "Cleanup preserves the primary failure, adds any cleanup errors as notes, and still attempts both session disconnect and client stop. Disconnect preserves durable state. An idle turn without a final assistant message prints an explicit completion notice, including the terminal-tool case.",

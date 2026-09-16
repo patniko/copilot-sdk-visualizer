@@ -125,6 +125,11 @@ export const reference = ReferenceSchema.parse({
             scope: "copilot-sdk · docs/features/client-info.md · declare application and integration identity for runtime telemetry attribution",
             url: `${sdkBase}/docs/features/client-info.md`,
         },
+        "sdk-s2s-auth": {
+            label: "GitHub App server-to-server authentication",
+            scope: "copilot-sdk · docs/auth/server-to-server-tokens.md · eligibility, installation token minting, runtime environment placement, expiry, and billing attribution",
+            url: `${sdkBase}/docs/auth/server-to-server-tokens.md`,
+        },
         "sdk-context-clearing": {
             label: "Context clearing",
             scope: "copilot-sdk · docs/features/context-management.md · replace conversation context safely with terminal tools",

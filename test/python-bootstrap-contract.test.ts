@@ -55,4 +55,38 @@ describe("complete Python bootstrap", () => {
             expect(expiry.stdout.trim()).toBe("True");
         },
     );
+
+    it.each(["managed", "external", "inprocess"] as const)(
+        "keeps S2S authentication at the %s runtime boundary",
+        async (runtime) => {
+            const plan = createPreset("empty");
+            plan.identity = "s2s-installation";
+            plan.target.language = "python";
+            plan.target.runtime = runtime;
+            const result = buildBootstrapProject(plan);
+            if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+            const files = new Map(result.project.files.map((file) => [file.path, file.content]));
+            const agent = files.get("agent.py") ?? "";
+            for (const file of result.project.files.filter((file) => file.path.endsWith(".py"))) {
+                const syntax = spawnSync("python3", ["-c", "import ast,sys; ast.parse(sys.stdin.read())"], {
+                    input: file.content,
+                    encoding: "utf8",
+                });
+                expect(syntax.status, `${file.path}: ${syntax.stderr}`).toBe(0);
+            }
+            expect(agent).not.toContain("github_token_provider");
+            expect(files.get("host.py")).not.toContain("GITHUB_TOKEN_EXPIRES_AT");
+            if (runtime === "managed") {
+                expect(agent).toContain('client_options["env"]');
+                expect(agent).toContain("COPILOT_GITHUB_TOKEN");
+            } else if (runtime === "inprocess") {
+                expect(agent).not.toContain('client_options["env"]');
+                expect(agent).toContain('required_environment("COPILOT_GITHUB_TOKEN")');
+            } else {
+                expect(agent).not.toContain("COPILOT_GITHUB_TOKEN");
+                expect(files.get(".env.example")).not.toContain("COPILOT_GITHUB_TOKEN=");
+                expect(result.project.commands.startRuntime).toContain("COPILOT_GITHUB_TOKEN");
+            }
+        },
+    );
 });

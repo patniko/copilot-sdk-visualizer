@@ -166,13 +166,16 @@ use serde::Deserialize;
 use serde_json::Value;
 
 use crate::host::{
-    self, Host, HostTool, GitHubEnvironmentProvider, ModelBearerProvider, required_env,
+    self, Host, HostTool, ModelBearerProvider, required_env,
 };
+// __GITHUB_TOKEN_PROVIDER_START__
+use crate::host::GitHubEnvironmentProvider;
+// __GITHUB_TOKEN_PROVIDER_END__
 use crate::session_fs::HostSessionFs;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
-enum Identity { HostToken, Developer }
+enum Identity { HostToken, Developer, S2sInstallation }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -316,9 +319,16 @@ impl Configuration {
         if self.session.model.is_none() {
             if let Err(error) = required_env("COPILOT_MODEL") { issues.push(error.to_string()); }
         }
+        // __COPILOT_IDENTITY_PREFLIGHT_START__
         if self.session.provider.is_none() && matches!(self.identity, Identity::HostToken) {
             if let Err(error) = host::github_environment_token() { issues.push(error.to_string()); }
         }
+        // __COPILOT_IDENTITY_PREFLIGHT_END__
+        // __S2S_LOCAL_PREFLIGHT_START__
+        if self.session.provider.is_none() && matches!(self.identity, Identity::S2sInstallation) {
+            if let Err(error) = required_env("COPILOT_GITHUB_TOKEN") { issues.push(error.to_string()); }
+        }
+        // __S2S_LOCAL_PREFLIGHT_END__
         if self.session.provider.is_some() {
             let result = match self.credential {
                 Credential::ApiKey => required_env(&self.credential_env),
@@ -378,6 +388,14 @@ impl Configuration {
         if !matches!(self.client.runtime, Runtime::External) {
             options.use_logged_in_user = Some(self.session.provider.is_none() && matches!(self.identity, Identity::Developer));
             options.session_idle_timeout_seconds = Some(self.client.idle_timeout_seconds);
+            // __S2S_RUNTIME_ENV_START__
+            if self.session.provider.is_none() && matches!(self.identity, Identity::S2sInstallation) {
+                let token = required_env("COPILOT_GITHUB_TOKEN")?;
+                if matches!(self.client.runtime, Runtime::Managed) {
+                    options = options.with_env([("COPILOT_GITHUB_TOKEN", token)]);
+                }
+            }
+            // __S2S_RUNTIME_ENV_END__
         }
         options.transport = match self.client.runtime {
             Runtime::Managed => {
@@ -489,9 +507,11 @@ impl Configuration {
         }
         config.tools = Some(tools);
         config = config.with_user_input_handler(Arc::new(host.clone()));
+        // __COPILOT_IDENTITY_BINDING_START__
         if self.session.provider.is_none() && matches!(self.identity, Identity::HostToken) {
             config = config.with_github_token_provider(Arc::new(GitHubEnvironmentProvider));
         }
+        // __COPILOT_IDENTITY_BINDING_END__
         if self.pre_tool_hook || self.post_tool_hook {
             config = config.with_hooks(Arc::new(host.hooks(self.pre_tool_hook, self.post_tool_hook)));
         }

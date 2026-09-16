@@ -20,6 +20,14 @@ describe("harness plan and presets", () => {
         expect(changedAxes(plan)).toEqual([]);
     });
 
+    it("accepts the S2S identity without a schema bump and defaults older missing identity safely", () => {
+        const plan = createPreset("minimal");
+        plan.identity = "s2s-installation";
+        expect(parsePlan(JSON.stringify(plan))).toEqual(plan);
+        const { identity: _identity, ...older } = createPreset("minimal");
+        expect(parsePlan(JSON.stringify(older)).identity).toBe("host-token");
+    });
+
     it("defines genuinely different configurations over the same available tools", () => {
         const empty = createPreset("empty");
         const minimal = createPreset("minimal");
@@ -123,6 +131,20 @@ describe("scenario decisions", () => {
         expect(analyzePlan(plan).map((decision) => decision.id)).not.toContain("workspace-tools");
         plan.session.largeOutput = true;
         expect(analyzePlan(plan).map((decision) => decision.id)).toContain("output-spill");
+    });
+
+    it("surfaces placement-specific S2S host operations without a session callback", () => {
+        const plan = createPreset("minimal");
+        plan.identity = "s2s-installation";
+        expect(hostContracts(plan)).toContain("GitHub App installation-token runtime environment");
+        const managed = analyzePlan(plan).find((decision) => decision.id === "s2s-installation-identity");
+        expect(managed?.detail).toContain("managed child");
+        expect(managed?.detail).toContain("one-hour expiry");
+        plan.target.runtime = "external";
+        expect(hostContracts(plan)).toContain("External runtime installation-token operations");
+        expect(
+            analyzePlan(plan).find((decision) => decision.id === "s2s-installation-identity")?.detail,
+        ).toContain("connecting client must not inject");
     });
 
     it("links every decision to a materialized independent source", () => {

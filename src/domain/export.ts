@@ -34,6 +34,7 @@ export function downloadName(plan: HarnessPlan, extension: string): string {
 
 export function generateSdkCode(input: HarnessPlan): string {
     const plan = HarnessPlanSchema.parse(input);
+    const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
     const overridden = BUILTIN_NAMES.filter((name) => plan.tools[name].action === "override");
     const unsupported = overridden.filter((name) => !BUILTIN_SPECS[name].overrideable);
     if (unsupported.length) {
@@ -83,6 +84,16 @@ export function generateSdkCode(input: HarnessPlan): string {
                   `        useLoggedInUser: ${plan.model.provider === "copilot" && plan.identity === "developer"},`,
                   `        sessionIdleTimeoutSeconds: ${plan.session.idleTimeoutSeconds},`,
               ]),
+        ...(plan.model.provider === "copilot" &&
+        plan.identity === "s2s-installation" &&
+        plan.target.runtime === "managed"
+            ? [
+                  "        env: {",
+                  "            ...process.env,",
+                  '            COPILOT_GITHUB_TOKEN: required(process.env.COPILOT_GITHUB_TOKEN, "GitHub App installation token in COPILOT_GITHUB_TOKEN"),',
+                  "        },",
+              ]
+            : []),
         ...(plan.session.storage === "local" && plan.target.runtime !== "external"
             ? [`        baseDirectory: resolve(${json(plan.session.baseDirectory)}),`]
             : plan.session.storage === "virtual"
@@ -214,11 +225,30 @@ export function generateSdkCode(input: HarnessPlan): string {
         "// Generated integration sketch. Supply host implementations; review before execution.",
         `// Source snapshot: SDK ${reference.revisions.sdk}; runtime ${reference.revisions.runtime}.`,
         "// Client modes configure new sessions. This is not a live configuration patch.",
+        ...(plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+            ? plan.target.runtime === "external"
+                ? [
+                      "// HOST TODO: operate the external runtime with COPILOT_GITHUB_TOKEN and useLoggedInUser=false.",
+                      "// The connecting client must not receive or inject the installation token.",
+                      "// Mint a replacement before the one-hour expiry, restart/reconfigure the runtime, then resume as appropriate.",
+                  ]
+                : plan.target.runtime === "inprocess"
+                  ? [
+                        "// HOST TODO: mint the GitHub App installation token in trusted host code.",
+                        "// Set COPILOT_GITHUB_TOKEN before the in-process runtime loads; do not install a per-session token callback.",
+                        "// Mint a replacement before the one-hour expiry, restart the host runtime, then resume as appropriate.",
+                    ]
+                  : [
+                        "// HOST TODO: mint the GitHub App installation token in trusted host code.",
+                        "// COPILOT_GITHUB_TOKEN is injected only into the managed child; do not install a per-session token callback.",
+                        "// Mint a replacement before the one-hour expiry, restart the SDK client, then resume as appropriate.",
+                    ]
+            : []),
         'import { resolve } from "node:path";',
         'import { CopilotClient, RuntimeConnection, defineTool, type SessionConfig, type Tool, type ProviderConfig } from "@github/copilot-sdk";',
         "",
         "export interface HostBindings {",
-        '    callbacks: Pick<SessionConfig, "onPermissionRequest" | "onUserInputRequest" | "gitHubTokenProvider" | "createSessionFsProvider" | "onEvent" | "hooks">;',
+        `    callbacks: Pick<SessionConfig, "onPermissionRequest" | "onUserInputRequest"${s2s ? "" : ' | "gitHubTokenProvider"'} | "createSessionFsProvider" | "onEvent" | "hooks">;`,
         '    toolHandlers: Record<string, NonNullable<Tool["handler"]>>;',
         "    model?: string;",
         '    providerToken?: ProviderConfig["bearerTokenProvider"];',
@@ -236,6 +266,13 @@ export function generateSdkCode(input: HarnessPlan): string {
         "}",
         "",
         "export async function createHarness(host: HostBindings) {",
+        ...(plan.model.provider === "copilot" &&
+        plan.identity === "s2s-installation" &&
+        plan.target.runtime === "inprocess"
+            ? [
+                  '    required(process.env.COPILOT_GITHUB_TOKEN, "GitHub App installation token in the host environment before runtime load");',
+              ]
+            : []),
         "    const tools: Tool[] = [",
         toolDefinitions,
         "    ];",

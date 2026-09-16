@@ -19,6 +19,7 @@ const viewLabels: Record<ViewId, string> = {
     agents: "Agents",
     models: "Models & identity",
     policy: "Policy & state",
+    advanced: "Advanced",
     bootstrap: "Build & run",
     reference: "Reference",
 };

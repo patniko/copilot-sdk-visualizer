@@ -107,6 +107,32 @@ describe("plan and SDK exports", () => {
         expect(generateSdkCode(plan)).not.toContain("process.env[");
     });
 
+    it.each(["managed", "inprocess", "external"] as const)(
+        "generates placement-correct S2S authentication for %s runtimes",
+        (runtime) => {
+            const plan = createPreset("minimal");
+            plan.identity = "s2s-installation";
+            plan.target.runtime = runtime;
+            const code = generateSdkCode(plan);
+            const fields = inspectConfiguration(code);
+            expect(code).not.toContain("GITHUB_TOKEN_EXPIRES_AT");
+            expect(code).not.toContain("gitHubTokenProvider");
+            expect(fields.session.has("gitHubTokenProvider")).toBe(false);
+            if (runtime === "managed") {
+                expect(fields.client.get("useLoggedInUser")).toBe("false");
+                expect(fields.client.get("env")).toContain("COPILOT_GITHUB_TOKEN");
+            } else if (runtime === "inprocess") {
+                expect(fields.client.get("useLoggedInUser")).toBe("false");
+                expect(fields.client.has("env")).toBe(false);
+                expect(code).toContain("before runtime load");
+            } else {
+                expect(fields.client.has("env")).toBe(false);
+                expect(fields.client.has("useLoggedInUser")).toBe(false);
+                expect(code).toContain("connecting client must not receive or inject");
+            }
+        },
+    );
+
     it("preserves unusual JSON keys without emitting prototype-setting object literals", () => {
         const plan = createPreset("empty");
         const tool = createCustomTool("tool", "constructor");

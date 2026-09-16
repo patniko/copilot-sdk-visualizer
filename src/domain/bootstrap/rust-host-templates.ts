@@ -4,7 +4,9 @@ export const RUST_HOST = String.raw`// Copyright (c) Microsoft Corporation. All 
 use std::io::{self, BufRead, Write};
 use std::sync::mpsc;
 use std::thread;
+// __GITHUB_TOKEN_PROVIDER_START__
 use std::time::{SystemTime, UNIX_EPOCH};
+// __GITHUB_TOKEN_PROVIDER_END__
 
 use anyhow::{Context, Result, anyhow, bail};
 use async_trait::async_trait;
@@ -15,10 +17,14 @@ use github_copilot_sdk::hooks::{
 };
 use github_copilot_sdk::tool::ToolHandler;
 use github_copilot_sdk::{
-    BearerTokenError, BearerTokenProvider, Error as SdkError, ErrorKind,
-    GitHubToken, GitHubTokenProvider, GitHubTokenProviderArgs, GitHubTokenProviderResult,
-    ProviderTokenArgs, SessionId, ToolInvocation, ToolResult,
+    BearerTokenError, BearerTokenProvider, ProviderTokenArgs, SessionId, ToolInvocation, ToolResult,
 };
+// __GITHUB_TOKEN_PROVIDER_START__
+use github_copilot_sdk::{
+    Error as SdkError, ErrorKind, GitHubToken, GitHubTokenProvider, GitHubTokenProviderArgs,
+    GitHubTokenProviderResult,
+};
+// __GITHUB_TOKEN_PROVIDER_END__
 use tokio::sync::{oneshot, watch};
 
 // Mark an integration ready only after replacing its failing implementation.
@@ -33,6 +39,7 @@ pub(crate) fn required_env(name: &str) -> Result<String> {
     Ok(value)
 }
 
+// __GITHUB_TOKEN_PROVIDER_START__
 pub(crate) fn github_environment_token() -> Result<GitHubTokenProviderResult> {
     let token = required_env("GITHUB_TOKEN")?;
     let expires_at: i64 = required_env("GITHUB_TOKEN_EXPIRES_AT")?
@@ -53,6 +60,7 @@ impl GitHubTokenProvider for GitHubEnvironmentProvider {
         github_environment_token().map_err(|error| SdkError::with_message(ErrorKind::InvalidConfig, error.to_string()))
     }
 }
+// __GITHUB_TOKEN_PROVIDER_END__
 
 pub(crate) fn raw_bearer_token() -> Result<String> {
     let token = required_env("MODEL_BEARER_TOKEN")?;

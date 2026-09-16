@@ -39,6 +39,12 @@ it("type-checks generated sketches against an explicitly supplied SDK checkout",
         plan.model.credential = provider === "azure" ? "bearer-callback" : "api-key";
         variants.push(plan);
     }
+    for (const runtime of ["managed", "external", "inprocess"] as const) {
+        const plan = createPreset("minimal");
+        plan.identity = "s2s-installation";
+        plan.target.runtime = runtime;
+        variants.push(plan);
+    }
     const files: string[] = [];
     for (let index = 0; index < variants.length; index++) {
         const plan = variants[index];

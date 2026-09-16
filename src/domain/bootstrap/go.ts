@@ -9,6 +9,65 @@ const sdkRevision = "f45c46fd1812f8bed5b4cbc250f47177c83068f0";
 const json = (value: unknown) => JSON.stringify(value, null, 2) + "\n";
 const shellQuote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
 
+function renderGoSource(source: string, plan: HarnessPlan): string {
+    const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
+    if (!s2s)
+        return source
+            .replace(
+                /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+                "",
+            )
+            .replaceAll(/^\s*\/\/ __[A-Z_]+_(?:START|END)__\n/gm, "");
+    const runtimeEnvironment =
+        plan.target.runtime === "managed"
+            ? `		token, err := requiredEnv("COPILOT_GITHUB_TOKEN")
+		if err != nil {
+			return nil, err
+		}
+		options.Env = append(os.Environ(), "COPILOT_GITHUB_TOKEN="+token)
+`
+            : plan.target.runtime === "inprocess"
+              ? `		if _, err := requiredEnv("COPILOT_GITHUB_TOKEN"); err != nil {
+			return nil, err
+		}
+`
+              : "";
+    const identityPreflight =
+        plan.target.runtime === "external"
+            ? `		switch settings.Identity {
+		case "s2s-installation":
+		default:
+			add(errors.New("unknown Copilot identity selection"))
+		}
+`
+            : `		switch settings.Identity {
+		case "s2s-installation":
+			_, err := requiredEnv("COPILOT_GITHUB_TOKEN")
+			add(err)
+		default:
+			add(errors.New("unknown Copilot identity selection"))
+		}
+`;
+    const rendered = source
+        .replace(
+            /[ \t]*\/\/ __S2S_RUNTIME_ENV_START__\n[\s\S]*?[ \t]*\/\/ __S2S_RUNTIME_ENV_END__\n?/g,
+            runtimeEnvironment,
+        )
+        .replace(
+            /[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_START__\n[\s\S]*?[ \t]*\/\/ __GITHUB_TOKEN_PROVIDER_END__\n?/g,
+            "",
+        )
+        .replace(
+            /[ \t]*\/\/ __COPILOT_IDENTITY_PREFLIGHT_START__\n[\s\S]*?[ \t]*\/\/ __COPILOT_IDENTITY_PREFLIGHT_END__\n?/g,
+            identityPreflight,
+        )
+        .replace(
+            /[ \t]*\/\/ __COPILOT_IDENTITY_BINDING_START__\n[\s\S]*?[ \t]*\/\/ __COPILOT_IDENTITY_BINDING_END__\n?/g,
+            "",
+        );
+    return source.includes("__GITHUB_TOKEN_PROVIDER_START__") ? rendered.replace('\t"time"\n', "") : rendered;
+}
+
 function blockers(plan: HarnessPlan): BootstrapBlocker[] {
     const result: BootstrapBlocker[] = [];
     if (plan.target.runtime !== "managed" && plan.target.cliPath !== "")
@@ -77,8 +136,8 @@ export const goAdapter: LanguageAdapter = {
                     content:
                         "// Copyright (c) Microsoft Corporation. All rights reserved.\nmodule example.com/copilot-harness\n\ngo 1.24.0\n",
                 },
-                { path: "main.go", language: "go", content: mainSource },
-                { path: "host.go", language: "go", content: hostSource },
+                { path: "main.go", language: "go", content: renderGoSource(mainSource, plan) },
+                { path: "host.go", language: "go", content: renderGoSource(hostSource, plan) },
                 {
                     path: "native_enabled.go",
                     language: "go",
@@ -122,10 +181,14 @@ export const goAdapter: LanguageAdapter = {
                     ? {
                           startRuntime: [
                               'test -n "$COPILOT_CONNECTION_TOKEN" &&',
+                              ...(plan.identity === "s2s-installation"
+                                  ? ['test -n "$COPILOT_GITHUB_TOKEN" &&']
+                                  : []),
                               ...(plan.session.storage === "local"
                                   ? [`COPILOT_HOME=${shellQuote(plan.session.baseDirectory)}`]
                                   : []),
                               `copilot-runtime --headless --no-auto-update --port ${endpoint.port}`,
+                              ...(plan.identity === "s2s-installation" ? ["--no-auto-login"] : []),
                               ...(plan.session.idleTimeoutSeconds > 0
                                   ? [`--session-idle-timeout ${plan.session.idleTimeoutSeconds}`]
                                   : []),
@@ -138,7 +201,13 @@ export const goAdapter: LanguageAdapter = {
                 `Requires Go 1.24+. The SDK source pin is ${sdkRevision}; the nearest published Go tag does not establish compatibility. The install command records the resolved pseudo-version and checksums in go.mod/go.sum.`,
                 "config/session.json preserves the selected SDK data. config/tools.json preserves arbitrary object schemas, override flags, and terminal flags. Go materializes the interface-typed MCP map explicitly, then attaches callbacks before creating the session. Configuration is embedded at build time; rebuild after editing it.",
                 "Register real tool handlers, selected pre/post hooks, and a session filesystem factory in host.go. Preflight and normal startup reject missing registrations. Permission requests are denied by default, even after a tool is implemented; review the permission function separately.",
-                "Host-token identity uses per-session GitHubTokenProvider, GITHUB_TOKEN, and GITHUB_TOKEN_EXPIRES_AT. Expiration must be the original absolute UNIX timestamp, never a freshly invented lifetime. Replace the environment acquisition adapter with your identity service when appropriate.",
+                plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+                    ? plan.target.runtime === "external"
+                        ? "GitHub App S2S identity is configured on the separately operated runtime with COPILOT_GITHUB_TOKEN and --no-auto-login. The connecting Go client neither reads nor injects that token and does not install a per-session token callback."
+                        : plan.target.runtime === "inprocess"
+                          ? "GitHub App S2S identity requires COPILOT_GITHUB_TOKEN in the host environment before InProcessConnection loads the runtime. Logged-in-user fallback is false and no per-session token callback is generated."
+                          : "GitHub App S2S identity copies the trusted host's COPILOT_GITHUB_TOKEN into ClientOptions.Env for the managed child. Logged-in-user fallback is false and no per-session token callback is generated."
+                    : "Host-token identity uses per-session GitHubTokenProvider, GITHUB_TOKEN, and GITHUB_TOKEN_EXPIRES_AT. Expiration must be the original absolute UNIX timestamp, never a freshly invented lifetime. Replace the environment acquisition adapter with your identity service when appropriate.",
                 "BYOK API keys use the selected credentialEnv; bearer callbacks acquire MODEL_BEARER_TOKEN on every request. Replace that environment adapter with scoped managed-identity acquisition and caching for production. GitHub identity settings apply only when the selected model provider is Copilot.",
                 "The --check path only parses embedded configuration, checks local files/environment, and reports missing host code. It never constructs a client, loads the native runtime, connects to the service, or sends a model request. Go compilation/dependency resolution is separate from that preflight.",
                 "Existing-runtime identity and process lifecycle belong to the server. The client never sets logged-in-user or client GitHub-token options for URI connections. Apply the selected local base directory and nonzero idle timeout with the separately run server command; zero leaves the runtime's idle default unchanged. The sample command runs on the server host and is for loopback development; secure remote routing or a tunnel separately. A connection token does not add TLS or tenant authorization.",
@@ -284,6 +353,17 @@ func clientOptions(settings HostSettings, config *copilot.SessionConfig) (*copil
 			options.Connection = copilot.StdioConnection{Path: path}
 		}
 		options.UseLoggedInUser = copilot.Bool(config.Provider == nil && settings.Identity == "developer")
+		// __S2S_RUNTIME_ENV_START__
+		if config.Provider == nil && settings.Identity == "s2s-installation" {
+			token, err := requiredEnv("COPILOT_GITHUB_TOKEN")
+			if err != nil {
+				return nil, err
+			}
+			if settings.Runtime == "managed" {
+				options.Env = append(os.Environ(), "COPILOT_GITHUB_TOKEN="+token)
+			}
+		}
+		// __S2S_RUNTIME_ENV_END__
 		options.SessionIdleTimeoutSeconds = int(settings.IdleTimeoutSeconds)
 		if settings.Storage == "local" {
 			options.BaseDirectory = settings.BaseDirectory
@@ -429,6 +509,7 @@ func requiredEnv(name string) (string, error) {
 	return value, nil
 }
 
+// __GITHUB_TOKEN_PROVIDER_START__
 func acquireGitHubToken(_ copilot.GitHubTokenProviderArgs) (*copilot.GitHubTokenProviderResult, error) {
 	token, err := requiredEnv("GITHUB_TOKEN")
 	if err != nil {
@@ -450,6 +531,7 @@ func acquireGitHubToken(_ copilot.GitHubTokenProviderArgs) (*copilot.GitHubToken
 		AccessToken: token, ExpiresIn: expiresAt - now,
 	}), nil
 }
+// __GITHUB_TOKEN_PROVIDER_END__
 
 func acquireBearerToken(_ copilot.ProviderTokenArgs) (string, error) {
 	// Replace with scoped managed-identity acquisition and caching when selected for production.
@@ -607,6 +689,7 @@ func preflight(settings HostSettings, config *copilot.SessionConfig, tools []cop
 		config.Model = strings.TrimSpace(model)
 	}
 	if config.Provider == nil {
+		// __COPILOT_IDENTITY_PREFLIGHT_START__
 		switch settings.Identity {
 		case "host-token":
 			_, err := acquireGitHubToken(copilot.GitHubTokenProviderArgs{})
@@ -615,6 +698,7 @@ func preflight(settings HostSettings, config *copilot.SessionConfig, tools []cop
 		default:
 			add(errors.New("unknown Copilot identity selection"))
 		}
+		// __COPILOT_IDENTITY_PREFLIGHT_END__
 	} else {
 		switch settings.Credential {
 		case "api-key":
@@ -660,9 +744,12 @@ func bindHost(settings HostSettings, config *copilot.SessionConfig, tools []copi
 			fmt.Fprintf(os.Stderr, "event=%s\n", event.Type())
 		}
 	}
+	// __COPILOT_IDENTITY_BINDING_START__
 	if config.Provider == nil && settings.Identity == "host-token" {
 		config.GitHubTokenProvider = acquireGitHubToken
-	} else if config.Provider != nil {
+	}
+	// __COPILOT_IDENTITY_BINDING_END__
+	if config.Provider != nil {
 		if settings.Credential == "bearer-callback" {
 			config.Provider.BearerTokenProvider = acquireBearerToken
 		} else {

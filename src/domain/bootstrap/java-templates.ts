@@ -63,6 +63,7 @@ import com.github.copilot.SystemMessageMode;
 import com.github.copilot.rpc.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -91,7 +92,7 @@ final class Configuration {
         if (!"local".equals(text(data, "storage"))) {
             throw new IllegalArgumentException("Java SessionFs is unsupported; regenerate for local storage or Rust");
         }
-        if (!Set.of("host-token", "developer").contains(text(data, "identity"))
+        if (!Set.of("host-token", "developer", "s2s-installation").contains(text(data, "identity"))
                 || !Set.of("api-key", "bearer-callback").contains(text(data, "credential"))
                 || !Set.of("empty", "copilot-cli").contains(text(client, "mode"))
                 || !Set.of("managed", "external", "inprocess").contains(text(client, "runtime"))) {
@@ -134,6 +135,16 @@ final class Configuration {
             options.setCopilotHome(text(client, "baseDirectory"))
                 .setSessionIdleTimeoutSeconds(Math.toIntExact(integer(client, "idleTimeoutSeconds")))
                 .setUseLoggedInUser(!session.has("provider") && "developer".equals(text(data, "identity")));
+            // __S2S_RUNTIME_ENV_START__
+            if (!session.has("provider") && "s2s-installation".equals(text(data, "identity"))) {
+                String token = HostExtensions.requiredEnv("COPILOT_GITHUB_TOKEN");
+                if ("managed".equals(text(client, "runtime"))) {
+                    var environment = new HashMap<>(System.getenv());
+                    environment.put("COPILOT_GITHUB_TOKEN", token);
+                    options.setEnvironment(environment);
+                }
+            }
+            // __S2S_RUNTIME_ENV_END__
         }
         return options;
     }
@@ -218,7 +229,9 @@ final class Configuration {
         config.setTools(tools);
         config.setOnPermissionRequest(host::permission);
         config.setOnUserInputRequest(host::userInput);
+        // __COPILOT_IDENTITY_BINDING_START__
         if (!session.has("provider") && "host-token".equals(text(data, "identity"))) config.setGitHubTokenProvider(host::githubToken);
+        // __COPILOT_IDENTITY_BINDING_END__
         if (flag(data, "observer")) config.setOnEvent(host::observe);
         if (flag(data, "preToolHook") || flag(data, "postToolHook")) {
             var hooks = new SessionHooks();
@@ -350,7 +363,14 @@ final class HostExtensions implements AutoCloseable {
         var client = configuration.client;
         var session = configuration.session;
         if (!session.has("model")) capture(issues, () -> requiredEnv("COPILOT_MODEL"));
+        // __COPILOT_IDENTITY_PREFLIGHT_START__
         if (!session.has("provider") && "host-token".equals(text(data, "identity"))) capture(issues, HostExtensions::tokenFromEnvironment);
+        // __COPILOT_IDENTITY_PREFLIGHT_END__
+        // __S2S_LOCAL_PREFLIGHT_START__
+        if (!session.has("provider") && "s2s-installation".equals(text(data, "identity"))) {
+            capture(issues, () -> requiredEnv("COPILOT_GITHUB_TOKEN"));
+        }
+        // __S2S_LOCAL_PREFLIGHT_END__
         if (session.has("provider")) {
             capture(issues, () -> "api-key".equals(text(data, "credential"))
                 ? requiredEnv(text(data, "credentialEnv")) : rawBearerToken());
@@ -414,6 +434,7 @@ final class HostExtensions implements AutoCloseable {
         System.err.println("[event] " + event.getClass().getSimpleName());
     }
 
+    // __GITHUB_TOKEN_PROVIDER_START__
     CompletableFuture<GitHubTokenProviderResult> githubToken(GitHubTokenProviderArgs _args) {
         return attempt(HostExtensions::tokenFromEnvironment);
     }
@@ -430,6 +451,7 @@ final class HostExtensions implements AutoCloseable {
         if (remaining <= 0) throw new IllegalStateException("GITHUB_TOKEN is expired; acquire a new token and its real expiry");
         return GitHubTokenProviderResult.token(token, remaining);
     }
+    // __GITHUB_TOKEN_PROVIDER_END__
 
     CompletableFuture<String> bearerToken(ProviderTokenArgs _args) {
         return attempt(HostExtensions::rawBearerToken);

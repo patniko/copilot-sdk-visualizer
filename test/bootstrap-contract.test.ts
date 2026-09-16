@@ -11,23 +11,26 @@ it("type-checks the full TypeScript bootstrap against the selected SDK source", 
     const sdk = process.env.COPILOT_SDK_SOURCE;
     if (!sdk) throw new Error("Set COPILOT_SDK_SOURCE for the optional contract checks.");
     const files: string[] = [];
-    for (const runtime of ["managed", "external", "inprocess"] as const) {
-        const plan = createPreset("minimal");
-        plan.target.runtime = runtime;
-        plan.tools.view.action = "override";
-        plan.policy.preToolHook = true;
-        plan.policy.postToolHook = true;
-        const result = buildBootstrapProject(plan);
-        if (!result.ok) throw new Error(JSON.stringify(result.blockers));
-        const root = path.resolve(".test-artifacts/bootstrap-contract", runtime);
-        for (const file of result.project.files) {
-            const target = path.join(root, file.path);
-            await mkdir(path.dirname(target), { recursive: true });
-            await writeFile(target, file.content);
-            if (file.path.endsWith(".ts")) files.push(target);
-            if (file.path.endsWith(".sh")) {
-                const syntax = spawnSync("bash", ["-n", target], { encoding: "utf8" });
-                expect(syntax.status, syntax.stderr).toBe(0);
+    for (const identity of ["host-token", "s2s-installation"] as const) {
+        for (const runtime of ["managed", "external", "inprocess"] as const) {
+            const plan = createPreset("minimal");
+            plan.identity = identity;
+            plan.target.runtime = runtime;
+            plan.tools.view.action = "override";
+            plan.policy.preToolHook = true;
+            plan.policy.postToolHook = true;
+            const result = buildBootstrapProject(plan);
+            if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+            const root = path.resolve(".test-artifacts/bootstrap-contract", identity, runtime);
+            for (const file of result.project.files) {
+                const target = path.join(root, file.path);
+                await mkdir(path.dirname(target), { recursive: true });
+                await writeFile(target, file.content);
+                if (file.path.endsWith(".ts")) files.push(target);
+                if (file.path.endsWith(".sh")) {
+                    const syntax = spawnSync("bash", ["-n", target], { encoding: "utf8" });
+                    expect(syntax.status, syntax.stderr).toBe(0);
+                }
             }
         }
     }

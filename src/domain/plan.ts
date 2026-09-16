@@ -44,6 +44,8 @@ const boundedText = z.string().max(12_000);
 const id = z.string().min(1).max(100);
 export const MAX_PLAN_BYTES = 1_000_000;
 export const ToolActionSchema = z.enum(["keep", "override", "remove"]);
+export const IdentityModeSchema = z.enum(["host-token", "developer", "s2s-installation"]);
+export type IdentityMode = z.infer<typeof IdentityModeSchema>;
 export const ToolSettingsSchema = z
     .object({
         action: ToolActionSchema,
@@ -223,7 +225,7 @@ export const HarnessPlanSchema = z
                 contextTier: z.enum(["default", "long_context"]),
             })
             .strict(),
-        identity: z.enum(["host-token", "developer"]),
+        identity: IdentityModeSchema,
         session: z
             .object({
                 storage: z.enum(["local", "virtual"]),
@@ -352,6 +354,14 @@ export function parsePlan(text: string): HarnessPlan {
     ) {
         if ("target" in parsed) throw new Error("A version 1 plan cannot contain version 2 target settings.");
         migrated = { ...parsed, schemaVersion: 2, target: defaultTarget() };
+    }
+    if (
+        typeof migrated === "object" &&
+        migrated !== null &&
+        !Array.isArray(migrated) &&
+        !("identity" in migrated)
+    ) {
+        migrated = { ...migrated, identity: "host-token" };
     }
     if (
         typeof migrated === "object" &&

@@ -124,6 +124,11 @@ export function environmentNames(plan: HarnessPlan): string[] {
         ...(plan.model.provider === "copilot" && plan.identity === "host-token"
             ? ["GITHUB_TOKEN", "GITHUB_TOKEN_EXPIRES_AT"]
             : []),
+        ...(plan.model.provider === "copilot" &&
+        plan.identity === "s2s-installation" &&
+        plan.target.runtime !== "external"
+            ? ["COPILOT_GITHUB_TOKEN"]
+            : []),
         ...(plan.model.provider !== "copilot"
             ? [plan.model.credential === "api-key" ? plan.model.credentialEnv : "MODEL_BEARER_TOKEN"]
             : []),
@@ -189,6 +194,37 @@ export function commonRequirements(plan: HarnessPlan, hostFile: string): Bootstr
             file: "README.md",
             kind: "runtime",
         });
+    if (plan.model.provider === "copilot" && plan.identity === "s2s-installation") {
+        items.push({
+            id: "s2s-token-operations",
+            title: "Implement GitHub App installation-token operations",
+            detail: "Use the app private key and installation ID only in trusted host infrastructure to mint an installation token. The request must include at least one repository_ids entry and permissions.copilot_requests=write. Never write the app private key, app JWT, token, or expiry into this project or plan.",
+            file: "README.md",
+            kind: "host-code",
+        });
+        items.push({
+            id: "s2s-eligibility",
+            title: "Confirm GitHub App Copilot eligibility and installation",
+            detail: "GitHub must separately enable the billing/attribution account or organization. Configure Copilot Requests read/write, install on that account, and currently select All repositories. This selection does not grant enablement, billing approval, model access, or a fixed higher rate limit.",
+            file: "README.md",
+            kind: "review",
+        });
+        items.push({
+            id: "s2s-refresh",
+            title: "Replace the one-hour installation token by restarting the runtime",
+            detail: "Mint a replacement before expiry, restart or reconfigure the runtime with the new COPILOT_GITHUB_TOKEN, then resume the session as appropriate. The per-session GitHub token callback is not supported for this mode.",
+            file: "README.md",
+            kind: "runtime",
+        });
+        if (plan.target.runtime === "external")
+            items.push({
+                id: "s2s-external-runtime",
+                title: "Configure S2S authentication on the external runtime host",
+                detail: "Set COPILOT_GITHUB_TOKEN and useLoggedInUser=false on the independently operated runtime. Do not expose or inject the installation token from this connecting client.",
+                file: "README.md",
+                kind: "runtime",
+            });
+    }
     if (plan.target.runtime === "inprocess")
         items.push({
             id: "native-runtime",
@@ -241,7 +277,22 @@ export function commonFiles(plan: HarnessPlan, project: Omit<BootstrapProject, "
         "## 2. Provide environment values and host integrations",
         "",
         "`.env.example` lists names only. Set them in your shell/process; this bootstrap does not automatically source an environment file. Never commit secret values.",
-        "If using the environment-backed GitHub token provider, `GITHUB_TOKEN_EXPIRES_AT` is the token issuer's actual future expiry as UNIX seconds, not a duration to reset on each request. Replace that starter adapter with your real acquisition/refresh service for production.",
+        ...(plan.model.provider === "copilot" && plan.identity === "host-token"
+            ? [
+                  "The environment-backed GitHub token provider uses `GITHUB_TOKEN_EXPIRES_AT` as the token issuer's actual future expiry in UNIX seconds, not a duration to reset on each request. Replace that starter adapter with your real acquisition/refresh service for production.",
+              ]
+            : []),
+        ...(plan.model.provider === "copilot" && plan.identity === "s2s-installation"
+            ? [
+                  plan.target.runtime === "external"
+                      ? "The connecting client does not accept or inject the installation token. Configure `COPILOT_GITHUB_TOKEN` and `useLoggedInUser=false` on the separately operated runtime host."
+                      : plan.target.runtime === "inprocess"
+                        ? "Set `COPILOT_GITHUB_TOKEN` in the host environment before the in-process runtime loads. The generated client disables logged-in-user fallback and does not install a session token callback."
+                        : "The host-side `COPILOT_GITHUB_TOKEN` value is injected into the managed child runtime. The generated client disables logged-in-user fallback and does not install a session token callback.",
+                  "Installation tokens expire after one hour. Mint a replacement in trusted host infrastructure, restart or reconfigure the runtime with the new environment, then resume the session when appropriate.",
+                  "Authoritative setup: https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens",
+              ]
+            : []),
         "",
         ...project.requirements.map((item) => `- **${item.title}** — \`${item.file}\`: ${item.detail}`),
         "",
