@@ -243,7 +243,8 @@ final class Configuration {
             var providerData = required(session, "provider");
             fields(providerData, Set.of("type", "baseUrl", "wireApi"));
             var provider = new ProviderConfig().setType(text(providerData, "type"))
-                .setBaseUrl(text(providerData, "baseUrl"));
+                .setBaseUrl(text(providerData, "baseUrl").isBlank()
+                    ? host.providerEndpoint() : text(providerData, "baseUrl"));
             if (providerData.has("wireApi")) provider.setWireApi(text(providerData, "wireApi"));
             switch (text(data, "credential")) {
                 case "api-key" -> provider.setApiKey(HostExtensions.requiredEnv(text(data, "credentialEnv")));
@@ -356,6 +357,15 @@ final class HostExtensions implements AutoCloseable {
     private Set<String> implementedTools() { return Set.of(); }
     private boolean preToolHookImplemented() { return false; }
     private boolean postToolHookImplemented() { return false; }
+
+    private static final String PROVIDER_ENDPOINT = "";
+
+    String providerEndpoint() {
+        if (PROVIDER_ENDPOINT.isBlank()) {
+            throw new IllegalStateException("Provide the provider endpoint string in HostExtensions.java PROVIDER_ENDPOINT.");
+        }
+        return PROVIDER_ENDPOINT.strip();
+    }
 
     List<String> preflight() {
         List<String> issues = new ArrayList<>();

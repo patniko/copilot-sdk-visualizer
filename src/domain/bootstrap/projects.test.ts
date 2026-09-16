@@ -8,6 +8,55 @@ import { createBootstrapArchive } from "./archive";
 import { unzipSync } from "fflate";
 
 describe("integrated language project contracts", () => {
+    it.each(LANGUAGE_IDS)(
+        "defers missing provider endpoints to %s host code, not an export blocker",
+        (language) => {
+            const bindings = {
+                typescript: { file: "src/host.ts", guard: "extensions.providerEndpoint?.trim()" },
+                python: { file: "host.py", guard: "not PROVIDER_ENDPOINT.strip()" },
+                go: { file: "host.go", guard: "strings.TrimSpace(ProviderEndpoint)" },
+                csharp: { file: "Host.cs", guard: "ProviderEndpoint?.Trim()" },
+                java: {
+                    file: "src/main/java/harness/HostExtensions.java",
+                    guard: "PROVIDER_ENDPOINT.isBlank()",
+                },
+                rust: { file: "src/host.rs", guard: "PROVIDER_ENDPOINT.trim()" },
+            };
+            for (const runtime of RUNTIME_KINDS)
+                for (const provider of ["openai", "azure", "anthropic"] as const)
+                    for (const endpoint of ["", " \t ", "https://inference.example.com/v1"]) {
+                        const plan = createPreset("empty");
+                        plan.target.language = language;
+                        plan.target.runtime = runtime;
+                        plan.model.provider = provider;
+                        plan.model.endpoint = endpoint;
+                        const result = buildBootstrapProject(plan);
+                        if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+                        const files = new Map(result.project.files.map((file) => [file.path, file.content]));
+                        const requirement = result.project.requirements.find(
+                            (item) => item.id === "provider-endpoint",
+                        );
+                        expect(Boolean(requirement)).toBe(!endpoint.trim());
+                        if (!endpoint.trim()) {
+                            expect(requirement).toMatchObject({
+                                kind: "host-code",
+                                file: bindings[language].file,
+                            });
+                            expect(files.get(bindings[language].file)).toContain(bindings[language].guard);
+                            expect(files.get(bindings[language].file)?.toLowerCase()).toContain(
+                                "provider endpoint string",
+                            );
+                        }
+                        expect(parsePlan(files.get("harness-plan.json") ?? "")).toEqual(plan);
+                    }
+            const copilot = createPreset("empty");
+            copilot.target.language = language;
+            const result = buildBootstrapProject(copilot);
+            if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+            expect(result.project.requirements.map((item) => item.id)).not.toContain("provider-endpoint");
+        },
+    );
+
     it("packages all eighteen language/runtime combinations for a supported local-state plan", () => {
         const manifests = {
             typescript: "package.json",

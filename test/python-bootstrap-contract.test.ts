@@ -8,6 +8,56 @@ import { createPreset } from "../src/domain/presets";
 import { buildBootstrapProject } from "../src/domain/bootstrap";
 
 describe("complete Python bootstrap", () => {
+    it("fails deferred endpoints until a host string is provided, without starting the SDK", async () => {
+        const plan = createPreset("empty");
+        plan.target.language = "python";
+        plan.model.provider = "openai";
+        plan.model.id = "fixture-model";
+        plan.model.endpoint = "";
+        const result = buildBootstrapProject(plan);
+        if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+        const root = path.resolve(".test-artifacts/python-bootstrap/deferred-endpoint");
+        for (const file of result.project.files) {
+            const target = path.join(root, file.path);
+            await mkdir(path.dirname(target), { recursive: true });
+            await writeFile(target, file.content);
+        }
+        const checked = spawnSync(
+            "python3",
+            [
+                "-c",
+                `
+import sys, types, agent, host
+tools = types.ModuleType("copilot.tools")
+tools.Tool = object
+sys.modules["copilot.tools"] = tools
+data = agent.load_configuration()
+for value in [None, "", "   "]:
+    host.PROVIDER_ENDPOINT = value
+    assert host.integration_blockers(data["plan"], data["tools"]) == [
+        "Provide the provider endpoint string in host.py PROVIDER_ENDPOINT."
+    ]
+    try:
+        agent.session_options(data)
+    except NotImplementedError as error:
+        assert "provider endpoint string" in str(error)
+    else:
+        raise AssertionError("Missing provider endpoint was accepted")
+host.PROVIDER_ENDPOINT = "https://inference.example.test/v1"
+assert host.integration_blockers(data["plan"], data["tools"]) == []
+assert agent.session_options(data)["provider"]["base_url"] == host.PROVIDER_ENDPOINT
+assert data["session"]["provider"]["base_url"] == ""
+`,
+            ],
+            {
+                cwd: root,
+                env: { PATH: process.env.PATH ?? "", MODEL_API_KEY: "endpoint-fixture-only" },
+                encoding: "utf8",
+            },
+        );
+        expect(checked.status, checked.stderr).toBe(0);
+    });
+
     it.each(["managed", "external", "inprocess"] as const)(
         "loads the complete %s configuration without an SDK or model call",
         async (runtime) => {

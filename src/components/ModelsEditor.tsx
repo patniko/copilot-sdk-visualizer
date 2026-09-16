@@ -6,6 +6,7 @@ import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
 import { ExternalLink } from "lucide-react";
 import { S2S_AUTH_DOCS } from "../content/sdk-docs";
+import { copilotModelCatalog, copilotModelOptions } from "../content/models";
 
 const endpointExamples = {
     openai: "https://api.openai.com/v1",
@@ -98,7 +99,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                             })
                         }
                         error={issueFor(issues, "model.endpoint")}
-                        hint="An HTTP(S) inference endpoint. Keep API keys and credential query parameters out of the URL."
+                        hint="Optional here. Leave blank to supply the endpoint string in host code; generated code will fail until it is provided. If entered, use HTTP(S) and keep credentials out of the URL."
                     />
                     <div className="hb-example-row">
                         <span>Examples are illustrative and are never contacted by this planner.</span>
@@ -297,31 +298,59 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                 action={<Badge>Step {byok ? 4 : 3}</Badge>}
             >
                 <div className="hb-field-grid">
-                    <TextField
-                        label="Model ID"
-                        help={
-                            <SettingHelp
-                                help={valueHelp.modelId}
-                                value={plan.model.id.trim() || "Host supplied"}
-                            />
-                        }
-                        value={plan.model.id}
-                        maxLength={120}
-                        placeholder={
-                            byok ? "Model exposed by your endpoint" : "Resolved by Copilot or your host"
-                        }
-                        onValueChange={(value) =>
-                            edit((draft) => {
-                                draft.model.id = value;
-                            })
-                        }
-                        error={issueFor(issues, "model.id")}
-                        hint={
-                            byok
-                                ? "Use the model identifier accepted by your provider endpoint."
-                                : "Leave blank to let the future host supply a model allowed for the Copilot account."
-                        }
-                    />
+                    {byok ? (
+                        <TextField
+                            label="Model ID"
+                            help={
+                                <SettingHelp
+                                    help={valueHelp.modelId}
+                                    value={plan.model.id.trim() || "Host supplied"}
+                                />
+                            }
+                            value={plan.model.id}
+                            maxLength={120}
+                            placeholder="Model exposed by your endpoint"
+                            onValueChange={(value) =>
+                                edit((draft) => {
+                                    draft.model.id = value;
+                                })
+                            }
+                            error={issueFor(issues, "model.id")}
+                            hint="Use the model identifier accepted by your provider endpoint."
+                        />
+                    ) : (
+                        <SelectField
+                            label="Model ID"
+                            help={
+                                <SettingHelp
+                                    help={valueHelp.modelId}
+                                    value={plan.model.id.trim() || "Host supplied"}
+                                />
+                            }
+                            value={plan.model.id}
+                            options={copilotModelOptions(plan.model.id)}
+                            onValueChange={(value) =>
+                                edit((draft) => {
+                                    draft.model.id = value;
+                                })
+                            }
+                            error={issueFor(issues, "model.id")}
+                            hint={
+                                <>
+                                    Choose from the{" "}
+                                    <a
+                                        href={copilotModelCatalog.sources.runtime}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        bundled public model catalog
+                                    </a>
+                                    , or leave model selection to the host. Account and organization policy
+                                    determine actual availability.
+                                </>
+                            }
+                        />
+                    )}
                     <SelectField
                         label="Reasoning effort"
                         help={<SettingHelp help={valueHelp.reasoning} value={plan.model.reasoningEffort} />}
@@ -356,8 +385,8 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     hint="Model availability, reasoning levels, and context tiers depend on the active account or provider."
                 />
                 <p className="hb-field-hint">
-                    This planner does not discover models, verify entitlements, test endpoint compatibility,
-                    or make inference requests.
+                    This planner does not discover live account models, verify entitlements, test endpoint
+                    compatibility, or make inference requests.
                 </p>
             </Panel>
 

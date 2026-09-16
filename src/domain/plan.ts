@@ -318,7 +318,7 @@ export const HarnessPlanSchema = z
         });
         if (plan.selectedAgent && !agents.has(plan.selectedAgent))
             issue(["selectedAgent"], "Choose a declared agent or the default agent.");
-        if (plan.model.provider !== "copilot" || plan.model.endpoint.trim()) {
+        if (plan.model.endpoint.trim()) {
             const error = endpointError(plan.model.endpoint);
             if (error) issue(["model", "endpoint"], error);
         }

@@ -15,6 +15,7 @@ TOOL_HANDLERS = {}
 PRE_TOOL_HOOK = None
 POST_TOOL_HOOK = None
 SESSION_FS_FACTORY = None
+PROVIDER_ENDPOINT = None
 _console_lock = asyncio.Lock()
 
 
@@ -23,6 +24,12 @@ def required_environment(name):
     if not value or not value.strip():
         raise ValueError(f"Set {name} in the process environment; no secret is stored in the plan.")
     return value
+
+
+def provider_endpoint():
+    if not isinstance(PROVIDER_ENDPOINT, str) or not PROVIDER_ENDPOINT.strip():
+        raise NotImplementedError("Provide the provider endpoint string in host.py PROVIDER_ENDPOINT.")
+    return PROVIDER_ENDPOINT.strip()
 
 
 # __GITHUB_TOKEN_PROVIDER_START__
@@ -177,6 +184,11 @@ def integration_blockers(plan, tools):
         blockers.append("Implement POST_TOOL_HOOK in host.py.")
     if plan["session"]["storage"] == "virtual" and not callable(SESSION_FS_FACTORY):
         blockers.append("Implement SESSION_FS_FACTORY in host.py.")
+    if plan["model"]["provider"] != "copilot" and not plan["model"]["endpoint"].strip():
+        try:
+            provider_endpoint()
+        except NotImplementedError as error:
+            blockers.append(str(error))
     return blockers
 `;
 
@@ -453,6 +465,8 @@ def session_options(data):
     options = json.loads(json.dumps(data["session"]))
     if "model" not in options:
         options["model"] = host.required_environment("COPILOT_MODEL")
+    if "provider" in options and not options["provider"]["base_url"].strip():
+        options["provider"]["base_url"] = host.provider_endpoint()
     from copilot.tools import Tool
     options["tools"] = [
         Tool(**definition, handler=host.make_tool_handler(definition["name"]))

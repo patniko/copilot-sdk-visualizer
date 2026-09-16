@@ -99,6 +99,23 @@ The inspected SDK source is newer than a verified package-release mapping. Boots
 
 An in-process runtime shares the application's address space, environment, and loaded native-library lifetime. A managed child gives a separate process boundary, not a sandbox. For an existing service, its operator—not the SDK client—owns server startup settings, authentication, networking, and shutdown.
 
+## Copilot model selection
+
+In **Models & identity**, selecting **GitHub Copilot account** makes **Model ID** a dropdown backed by `src/content/model-catalog.json`. It contains the public model IDs from the runtime checkout, in source preference order. **Host supplied** keeps the ID blank for the generated host to resolve. Existing imported or BYOK IDs outside the catalog remain visible and are not silently replaced. **Bring your own inference** keeps free-form model entry.
+
+The SDK's `client.listModels()` requests live models from the runtime; the SDK does not maintain its own fixed list. This standalone planner instead bundles the runtime's generated `HELP_VISIBLE_MODELS` list, with exact SDK/runtime source revisions. It is a reference catalog, **not** a live account entitlement check. Hidden and subagent-only models are not offered by that public list.
+
+Refresh intentionally from the latest committed revisions in local checkouts:
+
+```bash
+node script/capture-model-catalog.mjs --run /path/to/copilot-sdk /path/to/copilot-agent-runtime
+node script/capture-model-catalog.mjs --check /path/to/copilot-sdk /path/to/copilot-agent-runtime
+```
+
+The script reads Git objects only; it does not fetch repositories, start the SDK/runtime, authenticate, or call model services. Normal app use and builds do not require either checkout.
+
+The BYOK **Provider endpoint** is optional in the planner. Leaving it blank does not block saving or exporting: the TypeScript sketch requires `host.providerEndpoint`, and each bootstrap project exposes an endpoint string in its host integration file. Generated preflight and startup fail clearly until that string is supplied, just like an enabled callback without an implementation. Nonempty planner values still require a valid, credential-free HTTP(S) URL; illustrative endpoints are never used as silent defaults.
+
 ## Complete built-in tool visibility
 
 `src/content/tool-catalog.json` records **59 built-in descriptors** and **33 selection aliases** from the pinned runtime source. It includes registry factories, lookup-only/specialized descriptors, both shell families, leaf registrations, and fixed extension-management definitions. Dynamic MCP and third-party extension tools are separate.

@@ -107,6 +107,29 @@ describe("plan and SDK exports", () => {
         expect(generateSdkCode(plan)).not.toContain("process.env[");
     });
 
+    it.each(["openai", "azure", "anthropic"] as const)(
+        "requires a host endpoint string only when the %s endpoint is omitted",
+        (provider) => {
+            const plan = createPreset("empty");
+            plan.model.provider = provider;
+            for (const endpoint of ["", " \t "]) {
+                plan.model.endpoint = endpoint;
+                const code = generateSdkCode(plan);
+                expect(code).toContain("providerEndpoint?: string;");
+                expect(code).toContain(
+                    'baseUrl: required(host.providerEndpoint?.trim(), "provider endpoint")',
+                );
+                expect(parsePlan(exportPlan(plan))).toEqual(plan);
+            }
+            plan.model.endpoint = "https://inference.example.com/v1";
+            expect(generateSdkCode(plan)).toContain('baseUrl: "https://inference.example.com/v1"');
+            expect(generateSdkCode(plan)).not.toContain("required(host.providerEndpoint");
+            plan.model.provider = "copilot";
+            plan.model.endpoint = "";
+            expect(generateSdkCode(plan)).not.toContain("required(host.providerEndpoint");
+        },
+    );
+
     it.each(["managed", "inprocess", "external"] as const)(
         "generates placement-correct S2S authentication for %s runtimes",
         (runtime) => {
