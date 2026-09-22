@@ -145,9 +145,9 @@
             "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1737-L1798"
         },
         "sdk-permissions": {
-            "label": "Permissions and explicit pending-request resolution",
-            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:2609\u20132644 \u00b7 omission does not approve or automatically deny every request",
-            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L2609-L2644"
+            "label": "Permission callback and approve-all helper",
+            "scope": "copilot-sdk \u00b7 nodejs/src/types.ts:1211\u20131305 \u00b7 callback results, managed-policy guards, and approve-once behavior",
+            "url": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/types.ts#L1211-L1305"
         },
         "sdk-mcp": {
             "label": "MCP server configuration",

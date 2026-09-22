@@ -144,6 +144,27 @@ function setting(
 }
 
 export const valueHelp = {
+    permissionMode: setting(
+        "Permission handling",
+        "onPermissionRequest",
+        "Choose whether your application supplies approval logic or explicitly approves every ordinary request.",
+        [
+            {
+                title: "Host permission handler",
+                value: "host",
+                text: "Require application-owned callback code. Generated preflight fails until the host integration is implemented.",
+            },
+            {
+                title: "Explicit allow all",
+                value: "allow-all",
+                text: "Bind the SDK's built-in approve-all helper. It returns approve-once for each ordinary permission request rather than creating a persistent wildcard grant.",
+            },
+        ],
+        "Use a host handler for tenant/resource authorization; choose allow-all only for a deliberately unrestricted trusted workload.",
+        "Allow-all does not override managed policy, content exclusion, downstream service authorization, missing or invalid tools, or sandbox enablement. It can approve a sandbox-bypass request when bypass capability is enabled.",
+        refs("sdk-permissions", "override-permissions"),
+        hostScope,
+    ),
     storage: setting(
         "Session storage",
         "sessionFs / createSessionFsProvider / baseDirectory",

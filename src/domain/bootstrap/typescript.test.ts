@@ -51,4 +51,30 @@ describe("complete TypeScript bootstrap project", () => {
         expect(constructor).not.toContain("sessionIdleTimeoutSeconds");
         expect(result.project.notes.join("\n")).toContain("server-owned state");
     });
+
+    it("requires host permission code by default and emits explicit allow-all only when selected", () => {
+        const hostPlan = createPreset("empty");
+        const hostResult = buildBootstrapProject(hostPlan);
+        if (!hostResult.ok) throw new Error("Expected supported TypeScript.");
+        const hostFiles = new Map(hostResult.project.files.map((file) => [file.path, file.content]));
+        expect(hostFiles.get("src/host.ts")).toContain(
+            'spec.permissionMode === "host" && !extensions.permissionPolicy',
+        );
+        expect(hostResult.project.requirements.find((item) => item.id === "permission-policy")).toMatchObject(
+            {
+                kind: "host-code",
+            },
+        );
+
+        hostPlan.policy.permissionMode = "allow-all";
+        const allowResult = buildBootstrapProject(hostPlan);
+        if (!allowResult.ok) throw new Error("Expected supported TypeScript.");
+        const allowFiles = new Map(allowResult.project.files.map((file) => [file.path, file.content]));
+        expect(allowFiles.get("src/harness.ts")).toContain("onPermissionRequest: approveAll");
+        expect(
+            allowResult.project.requirements.find((item) => item.id === "permission-policy"),
+        ).toMatchObject({
+            kind: "review",
+        });
+    });
 });

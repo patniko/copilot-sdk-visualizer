@@ -15,6 +15,7 @@ export const typescriptAdapter: LanguageAdapter = {
         const integrationData = {
             env: environmentNames(plan),
             tools: requiredTools,
+            permissionMode: plan.policy.permissionMode,
             preToolHook: plan.policy.preToolHook,
             postToolHook: plan.policy.postToolHook,
             virtualStorage: plan.session.storage === "virtual",
@@ -62,6 +63,7 @@ import type { HostBindings } from "./harness.js";
 
 interface IntegrationSpec {
     env: string[]; tools: string[];
+    permissionMode: "host" | "allow-all";
     preToolHook: boolean; postToolHook: boolean; virtualStorage: boolean;
     userInput: boolean; observeEvents: boolean; githubProvider: boolean;
     providerCallback: boolean; providerEndpoint: boolean; model: string;
@@ -102,6 +104,7 @@ ${githubPreflight}
             issues.push(\`Implement src/host.ts extensions.tools[\${JSON.stringify(name)}]\`);
         }
     }
+    if (spec.permissionMode === "host" && !extensions.permissionPolicy) issues.push("Implement src/host.ts extensions.permissionPolicy");
     if (spec.preToolHook && !extensions.preToolUse) issues.push("Implement src/host.ts extensions.preToolUse");
     if (spec.postToolHook && !extensions.postToolUse) issues.push("Implement src/host.ts extensions.postToolUse");
     if (spec.virtualStorage && !extensions.sessionFs) issues.push("Implement src/host.ts extensions.sessionFs (real SessionFsProvider)");
@@ -112,11 +115,8 @@ ${githubPreflight}
 export function createHostBindings() {
     const abort = new AbortController();
     let inputTail = Promise.resolve();
-    const callbacks: Callbacks = {
-        onPermissionRequest: async (request, invocation) => extensions.permissionPolicy
-            ? extensions.permissionPolicy(request, invocation)
-            : { kind: "reject", feedback: "Default host policy denies tool effects. Implement your authorization policy in src/host.ts." },
-    };
+    const callbacks: Callbacks = {};
+    if (spec.permissionMode === "host") callbacks.onPermissionRequest = extensions.permissionPolicy;
     if (spec.userInput) callbacks.onUserInputRequest = async request => {
         const previous = inputTail;
         let release: () => void = () => {};
@@ -163,7 +163,7 @@ async function main() {
         return;
     }
     if (process.argv.includes("--check")) {
-        console.log("Local preflight passed. No runtime or model was started. Review the default-deny policy before allowing effects.");
+        console.log("Local preflight passed. No runtime or model was started. Review the selected permission policy before allowing effects.");
         return;
     }
     const prompt = process.argv.slice(2).join(" ").trim();
@@ -276,7 +276,7 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                         "Edit `src/host.ts` rather than rewriting SDK plumbing.",
                         "",
                         "- `extensions.tools`: implement each selected custom/override handler. Validate arguments and tenant/resource authority.",
-                        "- `extensions.permissionPolicy`: default is reject. Supply your production authorization and approval rules before allowing effects.",
+                        "- `extensions.permissionPolicy`: required when the plan selects host permission handling. Supply production authorization and approval rules before allowing effects.",
                         "- `extensions.providerEndpoint`: supply the endpoint string when it was left blank in the planner. Preflight and startup fail until it is provided.",
                         "- `extensions.preToolUse` / `postToolUse`: required only if selected; replace with real policy/result processing.",
                         "- `extensions.sessionFs`: return a real SDK SessionFsProvider when virtual storage is selected.",
@@ -327,7 +327,9 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                       ? `The client connects to ${plan.target.serverUrl}. Configure server-owned state directory (${plan.session.baseDirectory}) and idle policy (${plan.session.idleTimeoutSeconds}s) on that server; they are not passed as client process options. COPILOT_CONNECTION_TOKEN can supply a connection credential.`
                       : "RuntimeConnection.forStdio explicitly selects a managed subprocess; SDK cleanup owns that child. A separate process is not an OS or tenant sandbox.",
                 "Credential values are never exported. Environment references are starter adapters, not a production credential-refresh service.",
-                "The default permission callback rejects effects. Selected host tools/hooks/storage remain explicit integration requirements; --check fails until they are supplied.",
+                plan.policy.permissionMode === "host"
+                    ? "Host permission handling is an explicit integration requirement; --check fails until extensions.permissionPolicy is supplied. Selected host tools/hooks/storage behave the same way."
+                    : "The generated harness explicitly binds the SDK approveAll helper. It approves ordinary requests once and does not override managed policy, content exclusion, downstream authorization, tool validity, or sandbox enablement; enabled sandbox bypass can also be approved.",
             ],
             sources: [
                 "sdk-inprocess-guide",

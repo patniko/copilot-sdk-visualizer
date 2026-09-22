@@ -12,6 +12,7 @@ import time
 
 # Register real handlers here: name -> callable(ToolInvocation) -> ToolResult/awaitable.
 TOOL_HANDLERS = {}
+PERMISSION_HANDLER = None
 PRE_TOOL_HOOK = None
 POST_TOOL_HOOK = None
 SESSION_FS_FACTORY = None
@@ -61,10 +62,12 @@ async def bearer_token_provider(args):
     return required_environment("MODEL_BEARER_TOKEN")
 
 
-def on_permission_request(request, invocation):
-    """Default-deny. Replace only after implementing identity/resource/approval policy."""
-    from copilot.generated.rpc import PermissionDecisionReject
-    return PermissionDecisionReject(feedback="Denied by the bootstrap's default host policy.")
+async def on_permission_request(request, invocation):
+    """Dispatch to application-owned permission policy when host mode is selected."""
+    if not callable(PERMISSION_HANDLER):
+        raise NotImplementedError("Implement PERMISSION_HANDLER in host.py.")
+    result = PERMISSION_HANDLER(request, invocation)
+    return await result if inspect.isawaitable(result) else result
 
 
 async def console_user_input(request, invocation):
@@ -178,6 +181,8 @@ def integration_blockers(plan, tools):
         f"Implement TOOL_HANDLERS[{tool['name']!r}] in host.py."
         for tool in tools if not callable(TOOL_HANDLERS.get(tool["name"]))
     ]
+    if plan["policy"]["permissionMode"] == "host" and not callable(PERMISSION_HANDLER):
+        blockers.append("Implement PERMISSION_HANDLER in host.py.")
     if plan["policy"]["preToolHook"] and not callable(PRE_TOOL_HOOK):
         blockers.append("Implement PRE_TOOL_HOOK in host.py.")
     if plan["policy"]["postToolHook"] and not callable(POST_TOOL_HOOK):
@@ -233,7 +238,7 @@ def validate_plan(plan):
         "target": {"language", "runtime", "serverUrl", "cliPath"},
         "prompt": {"mode", "content", "sections"},
         "context": {"workspace", "discovery", "skills", "fileHooks", "hostGit", "skillDirectories", "pluginDirectories"},
-        "policy": {"preToolHook", "postToolHook"},
+        "policy": {"permissionMode", "preToolHook", "postToolHook"},
         "model": {"id", "provider", "endpoint", "wireApi", "credential", "credentialEnv", "reasoningEffort", "contextTier"},
         "session": {"storage", "baseDirectory", "idleTimeoutSeconds", "infinite", "largeOutput"},
         "events": {"streaming", "observer"},
@@ -254,6 +259,8 @@ def validate_plan(plan):
         raise ValueError("Unsupported client mode.")
     if plan["inventory"] not in {"explicit", "coding-defaults"}:
         raise ValueError("Unsupported tool inventory.")
+    if plan["policy"]["permissionMode"] not in {"host", "allow-all"}:
+        raise ValueError("Unsupported permission mode.")
     if plan["clientMode"] == "empty" and plan["inventory"] != "explicit":
         raise ValueError("Empty mode requires an explicit tool inventory.")
     if plan["session"]["storage"] not in {"local", "virtual"}:
@@ -472,7 +479,11 @@ def session_options(data):
         Tool(**definition, handler=host.make_tool_handler(definition["name"]))
         for definition in data["tools"]
     ]
-    options["on_permission_request"] = host.on_permission_request
+    if plan["policy"]["permissionMode"] == "host":
+        options["on_permission_request"] = host.on_permission_request
+    else:
+        from copilot import PermissionHandler
+        options["on_permission_request"] = PermissionHandler.approve_all
     if plan["tools"]["ask_user"]["action"] == "keep":
         options["on_user_input_request"] = host.console_user_input
     hooks = {}

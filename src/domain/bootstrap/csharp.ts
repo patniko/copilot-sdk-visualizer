@@ -163,6 +163,7 @@ export const csharpAdapter: LanguageAdapter = {
                         identity: plan.identity,
                         credential: plan.model.credential,
                         credentialEnv: plan.model.credentialEnv,
+                        permissionMode: plan.policy.permissionMode,
                         storage: plan.session.storage,
                         baseDirectory: plan.session.baseDirectory,
                         idleTimeoutSeconds: plan.session.idleTimeoutSeconds,
@@ -203,7 +204,9 @@ export const csharpAdapter: LanguageAdapter = {
                 "HarnessAgent.csproj targets net10.0, explicitly opts into experimental GHCP001 APIs, excludes SDK checkout sources from the app's compile glob, and disables automatic runtime downloads on the ProjectReference. The generated app requires an explicitly provisioned compatible runtime; the visualizer itself has no SDK/runtime dependency.",
                 "config/session.json contains SDK data only. Its prompt section keys and type-discriminated MCP configurations deserialize with the SDK's converters. Tools and host callbacks are bound separately before creation; all configuration files are embedded, so rebuild after editing them.",
                 "Each custom HostTool exposes the original JSON schema, not a reflected wrapper schema. CopilotTool.DefineTool supplies the SDK's exact override/terminal metadata, which the wrapper forwards unchanged. Register handlers in Host.ToolHandlers and validate authority and arguments before executing them. SkipPermission is never enabled.",
-                "Register selected pre/post hooks and SessionFilesystemFactory in Host.cs. Both --check and normal startup fail on missing host integrations; the invocation paths also throw rather than returning successful placeholder results. The default permission callback rejects every effect and must be reviewed separately.",
+                plan.policy.permissionMode === "host"
+                    ? "Register PermissionPolicy, selected pre/post hooks, and SessionFilesystemFactory in Host.cs. Both --check and normal startup fail on missing host integrations; invocation paths throw rather than returning successful placeholders."
+                    : "The generated host explicitly binds PermissionHandler.ApproveAll. It approves ordinary requests once; managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement still apply, while enabled sandbox bypass can also be approved.",
                 plan.model.provider === "copilot" && plan.identity === "s2s-installation"
                     ? plan.target.runtime === "external"
                         ? "GitHub App S2S identity is configured on the separately operated runtime with COPILOT_GITHUB_TOKEN and --no-auto-login. The connecting .NET client neither reads nor injects that token and does not install a per-session token callback."
@@ -343,6 +346,7 @@ internal sealed class HostSettings
     public string Identity { get; init; } = "";
     public string Credential { get; init; } = "";
     public string CredentialEnv { get; init; } = "";
+    public string PermissionMode { get; init; } = "";
     public string Storage { get; init; } = "";
     public string BaseDirectory { get; init; } = "";
     public long IdleTimeoutSeconds { get; init; }
@@ -532,6 +536,7 @@ internal static class Host
     // Register real implementations before starting the client. Preflight rejects missing bindings.
     public static readonly Dictionary<string, Func<AIFunctionArguments, CancellationToken, ValueTask<object?>>>
         ToolHandlers = new(StringComparer.Ordinal);
+    public static Func<PermissionRequest, PermissionInvocation, Task<PermissionDecision>>? PermissionPolicy { get; set; }
     public static Func<PreToolUseHookInput, HookInvocation, Task<PreToolUseHookOutput?>>? PreToolHook { get; set; }
     public static Func<PostToolUseHookInput, HookInvocation, Task<PostToolUseHookOutput?>>? PostToolHook { get; set; }
     public static Func<CopilotSession, SessionFsProvider>? SessionFilesystemFactory { get; set; }
@@ -580,9 +585,6 @@ internal static class Host
     private static Task<string> AcquireBearerToken(ProviderTokenArgs _)
         // Replace with scoped managed-identity acquisition and caching for production.
         => Task.FromResult(RequiredEnvironment("MODEL_BEARER_TOKEN"));
-
-    private static Task<PermissionDecision> DenyPermission(PermissionRequest _, PermissionInvocation __)
-        => Task.FromResult(PermissionDecision.Reject("Denied by the host's default permission policy."));
 
     private static async Task<UserInputResponse> ReadConsole(
         UserInputRequest request, CancellationToken cancellationToken)
@@ -689,6 +691,10 @@ internal static class Host
             problems.Add("- Unknown client mode.");
         if (settings.Storage is not ("local" or "virtual"))
             problems.Add("- Unknown storage selection.");
+        if (settings.PermissionMode == "host" && PermissionPolicy is null)
+            problems.Add("- Implement and register PermissionPolicy in Host.cs.");
+        else if (settings.PermissionMode is not ("host" or "allow-all"))
+            problems.Add("- Unknown permission mode.");
         if (settings.Storage == "local" && string.IsNullOrWhiteSpace(settings.BaseDirectory))
             problems.Add("- Local storage requires baseDirectory.");
         if (settings.IdleTimeoutSeconds < 0
@@ -756,7 +762,9 @@ internal static class Host
     public static void Bind(
         HostSettings settings, SessionConfig config, ToolDefinition[] tools, CancellationToken cancellationToken)
     {
-        config.OnPermissionRequest = DenyPermission;
+        config.OnPermissionRequest = settings.PermissionMode == "host"
+            ? PermissionPolicy ?? throw new NotImplementedException("Selected host permission policy is not implemented.")
+            : PermissionHandler.ApproveAll;
         if (settings.UserInput)
             config.OnUserInputRequest = (request, _) => ReadConsole(request, cancellationToken);
         if (settings.Observer)

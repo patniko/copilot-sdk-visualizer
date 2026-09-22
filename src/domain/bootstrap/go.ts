@@ -163,6 +163,7 @@ export const goAdapter: LanguageAdapter = {
                         identity: plan.identity,
                         credential: plan.model.credential,
                         credentialEnv: plan.model.credentialEnv,
+                        permissionMode: plan.policy.permissionMode,
                         storage: plan.session.storage,
                         baseDirectory: plan.session.baseDirectory,
                         idleTimeoutSeconds: plan.session.idleTimeoutSeconds,
@@ -200,7 +201,9 @@ export const goAdapter: LanguageAdapter = {
             notes: [
                 `Requires Go 1.24+. The SDK source pin is ${sdkRevision}; the nearest published Go tag does not establish compatibility. The install command records the resolved pseudo-version and checksums in go.mod/go.sum.`,
                 "config/session.json preserves the selected SDK data. config/tools.json preserves arbitrary object schemas, override flags, and terminal flags. Go materializes the interface-typed MCP map explicitly, then attaches callbacks before creating the session. Configuration is embedded at build time; rebuild after editing it.",
-                "Register real tool handlers, selected pre/post hooks, and a session filesystem factory in host.go. Preflight and normal startup reject missing registrations. Permission requests are denied by default, even after a tool is implemented; review the permission function separately.",
+                plan.policy.permissionMode === "host"
+                    ? "Register PermissionPolicy, real tool handlers, selected pre/post hooks, and a session filesystem factory in host.go. Preflight and normal startup reject missing registrations."
+                    : "The generated host explicitly binds copilot.PermissionHandler.ApproveAll. It approves ordinary requests once; managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement still apply, while enabled sandbox bypass can also be approved.",
                 plan.model.provider === "copilot" && plan.identity === "s2s-installation"
                     ? plan.target.runtime === "external"
                         ? "GitHub App S2S identity is configured on the separately operated runtime with COPILOT_GITHUB_TOKEN and --no-auto-login. The connecting Go client neither reads nor injects that token and does not install a per-session token callback."
@@ -212,7 +215,7 @@ export const goAdapter: LanguageAdapter = {
                 "The --check path only parses embedded configuration, checks local files/environment, and reports missing host code. It never constructs a client, loads the native runtime, connects to the service, or sends a model request. Go compilation/dependency resolution is separate from that preflight.",
                 "Existing-runtime identity and process lifecycle belong to the server. The client never sets logged-in-user or client GitHub-token options for URI connections. Apply the selected local base directory and nonzero idle timeout with the separately run server command; zero leaves the runtime's idle default unchanged. The sample command runs on the server host and is for loopback development; secure remote routing or a tunnel separately. A connection token does not add TLS or tenant authorization.",
                 "Native hosting uses InProcessConnection{} and -tags copilot_inprocess on a supported OS/architecture. Set COPILOT_CLI_PATH to a compatible package entrypoint with copilot_runtime.dll, libcopilot_runtime.dylib, libcopilot_runtime.so, or the matching runtime.node. Per-client environment/cwd/telemetry overrides are not used. One native runtime version may be loaded per process.",
-                "Session working directories, skills, plugins, discovered configuration, file hooks, and Git context refer to the runtime host's filesystem. A subprocess, an SDK mode, default-deny callbacks, and session storage are not an OS or tenant sandbox.",
+                "Session working directories, skills, plugins, discovered configuration, file hooks, and Git context refer to the runtime host's filesystem. A subprocess, an SDK mode, permission callbacks, and session storage are not an OS or tenant sandbox.",
                 "Virtual storage requires copilot.SessionFSProvider: ReadFile, WriteFile, AppendFile, Exists, Stat, MakeDirectory, ReadDirectory, ReadDirectoryWithTypes, Remove, and Rename. The factory is session-scoped; POSIX virtual paths use the selected workspace (or /) and baseDirectory (or /session-state). SQLite is not advertised; implement SessionFSSqliteProvider and SessionFSSqliteTransactionProvider before opting into SQL capabilities.",
                 "The observer logs event types only, never prompts, tool arguments/results, credentials, or assistant content. The final assistant content is printed once as the application result; an idle turn without an assistant message is explicitly reported, including terminal-tool completion.",
                 `Language API anchors: copilot-sdk@${sdkRevision}/go/types.go:116,1053,1218,1320,1707,2224; go/github_token_provider.go:24; go/session.go:494; go/session_fs_provider.go:20.`,
@@ -261,7 +264,8 @@ var configuration embed.FS
 
 type HostSettings struct {
 	Runtime, ServerAddress, CliPath, ClientMode, Identity string
-	Credential, CredentialEnv, Storage, BaseDirectory     string
+	Credential, CredentialEnv, PermissionMode             string
+	Storage, BaseDirectory                                string
 	IdleTimeoutSeconds                                    int64
 	UserInput, Observer, PreToolHook, PostToolHook        bool
 }
@@ -497,6 +501,7 @@ import (
 
 // Register implementations here before starting the client. Missing bindings fail preflight.
 var ToolHandlers = map[string]copilot.ToolHandler{}
+var PermissionPolicy func(copilot.PermissionRequest, copilot.PermissionInvocation) (rpc.PermissionDecision, error)
 var PreToolHook copilot.PreToolUseHandler
 var PostToolHook copilot.PostToolUseHandler
 var SessionFilesystemFactory func(*copilot.Session) copilot.SessionFSProvider
@@ -545,10 +550,6 @@ func acquireGitHubToken(_ copilot.GitHubTokenProviderArgs) (*copilot.GitHubToken
 func acquireBearerToken(_ copilot.ProviderTokenArgs) (string, error) {
 	// Replace with scoped managed-identity acquisition and caching when selected for production.
 	return requiredEnv("MODEL_BEARER_TOKEN")
-}
-
-func denyPermission(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (rpc.PermissionDecision, error) {
-	return &rpc.PermissionDecisionReject{Feedback: copilot.String("Denied by the host's default permission policy.")}, nil
 }
 
 var consoleLock sync.Mutex
@@ -665,6 +666,11 @@ func preflight(settings HostSettings, config *copilot.SessionConfig, tools []cop
 	if settings.Storage != "local" && settings.Storage != "virtual" {
 		add(errors.New("unknown storage selection"))
 	}
+	if settings.PermissionMode == "host" && PermissionPolicy == nil {
+		add(errors.New("implement and register PermissionPolicy in host.go"))
+	} else if settings.PermissionMode != "host" && settings.PermissionMode != "allow-all" {
+		add(errors.New("unknown permission mode"))
+	}
 	if settings.Storage == "local" && strings.TrimSpace(settings.BaseDirectory) == "" {
 		add(errors.New("local storage requires baseDirectory"))
 	}
@@ -748,7 +754,14 @@ func preflight(settings HostSettings, config *copilot.SessionConfig, tools []cop
 }
 
 func bindHost(settings HostSettings, config *copilot.SessionConfig, tools []copilot.Tool) error {
-	config.OnPermissionRequest = denyPermission
+	if settings.PermissionMode == "host" {
+		if PermissionPolicy == nil {
+			return errors.New("selected host permission policy is not implemented")
+		}
+		config.OnPermissionRequest = PermissionPolicy
+	} else {
+		config.OnPermissionRequest = copilot.PermissionHandler.ApproveAll
+	}
 	if settings.UserInput {
 		config.OnUserInputRequest = consoleUserInput
 	}

@@ -84,9 +84,9 @@ Invalid edits retain the last valid saved draft. Unknown/corrupt saved data is n
 
 ### Configuration is not executable host integration
 
-A JSON declaration cannot contain a real permission handler, token broker, tool implementation, or session-storage adapter.
+A JSON declaration cannot contain a real host permission policy, token broker, tool implementation, or session-storage adapter. It can explicitly select the SDK's built-in allow-all permission helper.
 
-Generated projects leave those requirements explicit. Missing selected integrations fail clearly; no success-shaped tool or no-op filesystem is supplied to make a demo appear complete. Permission policy defaults to denying effects until the host integrates its actual authority rules.
+Generated projects leave those requirements explicit. Missing selected integrations fail clearly; no success-shaped tool or no-op filesystem is supplied to make a demo appear complete. Permission handling defaults to a required host callback. Explicit allow-all is an opt-in that approves ordinary requests once without overriding managed policy, content exclusion, downstream authorization, tool validity, or sandbox enablement; it can approve an enabled sandbox-bypass request.
 
 Default-deny is not a substitute for validating resource access inside the effectful service.
 

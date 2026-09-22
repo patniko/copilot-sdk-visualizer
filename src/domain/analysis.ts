@@ -25,7 +25,7 @@ export function toolSummary(plan: HarnessPlan) {
 }
 
 export function hostContracts(plan: HarnessPlan): string[] {
-    const required = ["Permission policy"];
+    const required = plan.policy.permissionMode === "host" ? ["Permission policy"] : [];
     if (!plan.model.id.trim()) required.push("Model selection");
     if (plan.model.provider !== "copilot" && !plan.model.endpoint.trim()) required.push("Provider endpoint");
     if (plan.model.provider === "copilot" && plan.identity === "host-token")
@@ -53,6 +53,14 @@ export function hostContracts(plan: HarnessPlan): string[] {
 export function analyzePlan(plan: HarnessPlan): Decision[] {
     const summary = toolSummary(plan);
     const decisions: Decision[] = [];
+    if (plan.policy.permissionMode === "allow-all")
+        decisions.push({
+            id: "allow-all-permissions",
+            kind: "review",
+            title: "Every ordinary runtime permission prompt is approved once",
+            detail: "The generated host explicitly installs the SDK approve-all helper. Managed policy, content exclusion, service authorization, missing or invalid tools, and sandbox enablement still apply. If sandbox bypass capability is enabled, this policy can approve a sandbox-bypass request.",
+            sources: ["sdk-permissions", "override-permissions"],
+        });
     const unverifiedOverrides = summary.overridden.filter((name) => !BUILTIN_SPECS[name].overrideable);
     if (unverifiedOverrides.length)
         decisions.push({

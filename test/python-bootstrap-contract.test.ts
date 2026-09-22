@@ -32,6 +32,7 @@ tools = types.ModuleType("copilot.tools")
 tools.Tool = object
 sys.modules["copilot.tools"] = tools
 data = agent.load_configuration()
+host.PERMISSION_HANDLER = lambda request, invocation: None
 for value in [None, "", "   "]:
     host.PROVIDER_ENDPOINT = value
     assert host.integration_blockers(data["plan"], data["tools"]) == [

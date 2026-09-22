@@ -71,7 +71,7 @@ export function createPreset(preset: PresetId): HarnessPlan {
             skillDirectories: [],
             pluginDirectories: [],
         },
-        policy: { preToolHook: false, postToolHook: false },
+        policy: { permissionMode: "host", preToolHook: false, postToolHook: false },
         model: {
             id: "",
             provider: "copilot",

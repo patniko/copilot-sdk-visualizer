@@ -3,7 +3,7 @@ import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { createCustomTool, createMcpServer, parsePlan } from "./plan";
 import { createPreset } from "./presets";
-import { downloadName, exportPlan, generateSdkCode } from "./export";
+import { downloadName, exportPlan, generateCopilotCliInstructions, generateSdkCode } from "./export";
 
 function inspectConfiguration(code: string) {
     const file = ts.createSourceFile("harness.ts", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
@@ -53,6 +53,9 @@ describe("plan and SDK exports", () => {
             expect(fields.client.get("mode")).toBe(JSON.stringify(plan.clientMode));
             expect(fields.session.has("mode")).toBe(false);
             expect(fields.session.has("onPermissionRequest")).toBe(true);
+            expect(fields.session.get("onPermissionRequest")).toContain(
+                'required(host.callbacks.onPermissionRequest, "permission policy")',
+            );
             expect(parsePlan(exportPlan(plan))).toEqual(plan);
         },
     );
@@ -64,6 +67,15 @@ describe("plan and SDK exports", () => {
         expect(
             inspectConfiguration(generateSdkCode(createPreset("copilot"))).session.has("availableTools"),
         ).toBe(false);
+    });
+
+    it("binds the SDK approve-all helper only after explicit selection", () => {
+        const plan = createPreset("minimal");
+        plan.policy.permissionMode = "allow-all";
+        const code = generateSdkCode(plan);
+        expect(code).toContain("defineTool, approveAll");
+        expect(inspectConfiguration(code).session.get("onPermissionRequest")).toBe("approveAll");
+        expect(code).not.toContain('required(host.callbacks.onPermissionRequest, "permission policy")');
     });
 
     it("replaces the implementation with an explicit marker and source-independent filter", () => {
@@ -165,6 +177,27 @@ describe("plan and SDK exports", () => {
         expect(code).toContain('["__proto__"]:');
         expect(code).toContain("Object.hasOwn(host.toolHandlers, name)");
         expect(code).toContain('typeof handler !== "function"');
+    });
+
+    it("generates a paste-ready Copilot CLI task for the selected target and host boundaries", () => {
+        const plan = createPreset("minimal");
+        plan.name = "Tenant evidence harness";
+        plan.target.language = "python";
+        plan.target.runtime = "external";
+        plan.target.serverUrl = "127.0.0.1:4321";
+        plan.tools.view.action = "override";
+        plan.tools.view.description = "Read only tenant-authorized documents.";
+        const instructions = generateCopilotCliInstructions(plan);
+
+        expect(instructions).toContain("repository currently open in this Copilot CLI session");
+        expect(instructions).toContain("SDK language: Python");
+        expect(instructions).toContain("Existing runtime service");
+        expect(instructions).toContain("127.0.0.1:4321");
+        expect(instructions).toContain("view: Read only tenant-authorized documents.");
+        expect(instructions).toContain("Permission policy.");
+        expect(instructions).toContain("do not substitute allow-all");
+        expect(instructions).toContain("Keep secrets out of source");
+        expect(instructions).not.toContain("MODEL_API_KEY=");
     });
 
     it("fails invalid exports and produces safe filenames", () => {

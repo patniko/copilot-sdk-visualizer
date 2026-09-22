@@ -67,6 +67,7 @@ it("type-checks the full TypeScript bootstrap against the selected SDK source", 
 
 it("runs bootstrap preflight without constructing a runtime or invoking a model", async () => {
     const plan = createPreset("empty");
+    plan.policy.permissionMode = "allow-all";
     const result = buildBootstrapProject(plan);
     if (!result.ok) throw new Error("Expected TypeScript project.");
     const root = path.resolve(".test-artifacts/bootstrap-preflight");
@@ -90,7 +91,7 @@ it("runs bootstrap preflight without constructing a runtime or invoking a model"
     await writeFile(path.join(stub, "package.json"), '{"type":"module","exports":"./index.js"}');
     await writeFile(
         path.join(stub, "index.js"),
-        'export class CopilotClient { constructor() { throw new Error("Preflight must not construct a runtime."); } } export const RuntimeConnection = {}; export function defineTool() { throw new Error("No tool registration during preflight."); }',
+        'export class CopilotClient { constructor() { throw new Error("Preflight must not construct a runtime."); } } export const RuntimeConnection = {}; export const approveAll = () => ({ kind: "approve-once" }); export function defineTool() { throw new Error("No tool registration during preflight."); }',
     );
     const env = {
         PATH: process.env.PATH ?? "",
@@ -119,6 +120,7 @@ it.each(["openai", "azure", "anthropic"] as const)(
     "fails deferred %s endpoint preflight and startup until the host supplies its string",
     async (provider) => {
         const plan = createPreset("empty");
+        plan.policy.permissionMode = "allow-all";
         plan.model.provider = provider;
         plan.model.id = "fixture-model";
         plan.model.endpoint = "";
@@ -145,7 +147,7 @@ it.each(["openai", "azure", "anthropic"] as const)(
         await writeFile(path.join(stub, "package.json"), '{"type":"module","exports":"./index.js"}');
         await writeFile(
             path.join(stub, "index.js"),
-            "export class CopilotClient { async createSession(config) { return config; } async stop() {} } export const RuntimeConnection = { forStdio() {} }; export function defineTool() { throw new Error('No tools expected'); }",
+            "export class CopilotClient { async createSession(config) { return config; } async stop() {} } export const RuntimeConnection = { forStdio() {} }; export const approveAll = () => ({ kind: 'approve-once' }); export function defineTool() { throw new Error('No tools expected'); }",
         );
         const checked = spawnSync(
             process.execPath,

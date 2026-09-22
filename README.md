@@ -76,7 +76,7 @@ no GitHub Actions workflow or committed `dist/` directory is required.
 - Save one draft in browser storage, undo/redo edits, and import/export the versioned planner format.
 - Choose an SDK-managed child process, an existing TCP runtime service, or experimental in-process hosting.
 - Generate language-specific bootstrap projects with dependency setup, an entrypoint, host extension points, local preflight, and run instructions.
-- Keep the TypeScript integration sketch and reversible planner JSON available as smaller exports.
+- Keep the TypeScript integration sketch, paste-ready Copilot CLI task, and reversible planner JSON available as smaller exports.
 - Explore a materialized SDK control catalog, six scenario gaps, built-in prompt references, and commit-pinned evidence.
 
 The reference catalog documents additional SDK controls that are not all editable in the builder.
@@ -215,9 +215,11 @@ The draft store writes only validated plans. Payload version 2 adds runtime/lang
 
 Plan JSON is this application's planner format, **not** serialized SDK `SessionConfig`. It includes design intent and evaluation notes as well as configuration.
 
-The TypeScript export defines `createHarness(host)`. The host must supply real permission handlers, tool implementations, credential callbacks, model choices, event observers, and a session filesystem provider where selected. The caller must stop the returned client when finished. No no-op permission or storage implementation is generated.
+The TypeScript export defines `createHarness(host)`. Permission handling is explicit: choose a required host callback or deliberately bind the SDK's approve-all helper. The host must still supply selected tool implementations, credential callbacks, model choices, event observers, and session filesystem providers. The caller must stop the returned client when finished; no no-op storage or success-shaped host integration is generated.
 
-Bootstrap projects add the runnable entrypoint, dependency manifest/setup, host module, configuration data, environment-name reference, and exact next steps. A generated scaffold is not a completed production integration: default policies deny effects, and selected custom tools, hooks, or virtual storage can remain explicit failing integration points until implemented.
+The Copilot CLI export is a paste-ready implementation task for a CLI session opened in an existing repository. It carries the selected language, runtime placement, harness behavior, host contracts, boundaries, and verification requirements while instructing Copilot to inspect and preserve the application's architecture. It contains credential references, never credential values.
+
+Bootstrap projects add the runnable entrypoint, dependency manifest/setup, host module, configuration data, environment-name reference, and exact next steps. A generated scaffold is not a completed production integration: host permission mode fails preflight until implemented, while explicit allow-all approves each ordinary request once and can approve enabled sandbox-bypass prompts. Managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement remain separate boundaries. Selected custom tools, hooks, or virtual storage remain explicit failing integration points until implemented.
 
 Only environment-variable names and callback references are used for provider credentials. Do not put secrets in prompts, names, endpoint URLs, or imported plans: browser draft storage is not an encrypted secret vault.
 

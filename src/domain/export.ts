@@ -2,7 +2,8 @@
 import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema } from "./plan";
 import type { HarnessPlan } from "./plan";
 import { reference } from "../content/reference";
-import { runtimeEndpoint } from "./target";
+import { analyzePlan, hostContracts, toolSummary } from "./analysis";
+import { LANGUAGES, RUNTIME_OPTIONS, runtimeEndpoint } from "./target";
 
 function json(value: unknown): string {
     if (Array.isArray(value)) return `[${value.map(json).join(", ")}]`;
@@ -32,8 +33,146 @@ export function downloadName(plan: HarnessPlan, extension: string): string {
     return `${name}.${extension}`;
 }
 
+function markdownList(items: string[], empty: string): string {
+    return items.length ? items.map((item) => `- ${item}`).join("\n") : `- ${empty}`;
+}
+
+function quoted(value: string): string {
+    return JSON.stringify(value);
+}
+
+export function generateCopilotCliInstructions(input: HarnessPlan): string {
+    const plan = HarnessPlanSchema.parse(input);
+    const language =
+        LANGUAGES.find((option) => option.id === plan.target.language)?.label ?? plan.target.language;
+    const runtime =
+        RUNTIME_OPTIONS.find((option) => option.id === plan.target.runtime)?.title ?? plan.target.runtime;
+    const tools = toolSummary(plan);
+    const contracts = hostContracts(plan);
+    const decisions = analyzePlan(plan);
+    const selectedBuiltIns = [...tools.kept, ...tools.overridden];
+    const runtimeDetail =
+        plan.target.runtime === "external"
+            ? `Connect to the existing runtime at ${runtimeEndpoint(plan.target).address}. Do not make the SDK client responsible for starting or stopping that shared service.`
+            : plan.target.runtime === "inprocess"
+              ? "Use the SDK's experimental in-process runtime path and document the required native bundle/version compatibility."
+              : plan.target.cliPath.trim()
+                ? `Use the SDK-managed child process with the configured runtime executable path ${quoted(plan.target.cliPath.trim())}.`
+                : "Use the SDK-managed child process and the SDK's default runtime distribution.";
+    const inventoryDetail =
+        plan.inventory === "explicit"
+            ? `Use an explicit inventory containing only: ${selectedBuiltIns.length ? selectedBuiltIns.join(", ") : "(no built-in tools)"}.`
+            : `Keep the runtime's coding-oriented default selection and exclude: ${
+                  tools.removed.length ? tools.removed.join(", ") : "(no built-in exclusions)"
+              }. Do not interpret this as enabling every compiled tool.`;
+    const overrideDetails = tools.overridden.map((name) => {
+        const setting = plan.tools[name];
+        return `${name}: ${setting.description}; parameters: ${setting.parameters}`;
+    });
+    const customToolDetails = plan.customTools.map(
+        (tool) =>
+            `${tool.name}${tool.terminal ? " (terminal)" : ""}: ${tool.description}; parameters: ${tool.parameters}`,
+    );
+    const mcpDetails = plan.mcpServers.map(
+        (server) =>
+            `${server.name} at ${server.url}; expose ${server.tools
+                .map((tool) => `${tool.name} as ${tool.wireName}`)
+                .join(", ")}`,
+    );
+    const agentDetails = plan.agents.map(
+        (agent) =>
+            `${agent.name}: ${agent.description}; model: ${agent.model.trim() || "inherit session model"}; tools: ${
+                agent.tools.length ? agent.tools.join(", ") : "none"
+            }; instructions: ${quoted(agent.prompt)}`,
+    );
+    const modelDetail =
+        plan.model.provider === "copilot"
+            ? `GitHub Copilot provider; model: ${plan.model.id.trim() || "resolve explicitly in host code"}; identity: ${plan.identity}.`
+            : `${plan.model.provider} provider using ${plan.model.wireApi}; model: ${
+                  plan.model.id.trim() || "resolve explicitly in host code"
+              }; endpoint: ${plan.model.endpoint.trim() || "require a host-supplied endpoint"}; credential: ${
+                  plan.model.credential === "api-key"
+                      ? `read only from environment variable ${plan.model.credentialEnv}`
+                      : "use a host bearer-token callback"
+              }.`;
+
+    return [
+        `Integrate the GitHub Copilot SDK into the repository currently open in this Copilot CLI session for the ${quoted(plan.name)} harness.`,
+        "",
+        "Work in the existing application rather than replacing it with a separate demo. First inspect the repository's architecture, package manager, entrypoints, configuration conventions, tests, and shutdown lifecycle. Then make the smallest coherent integration that follows those patterns.",
+        "",
+        "## Fixed implementation choices",
+        `- SDK language: ${language}.`,
+        `- Runtime placement: ${runtime}. ${runtimeDetail}`,
+        `- Client baseline: ${plan.clientMode}.`,
+        `- Tool inventory: ${inventoryDetail}`,
+        `- Prompt mode: ${plan.prompt.mode}. Harness instructions: ${quoted(plan.prompt.content)}`,
+        `- Model and identity: ${modelDetail}`,
+        `- Reasoning effort: ${plan.model.reasoningEffort}; context tier: ${plan.model.contextTier}.`,
+        `- Working directory: ${plan.context.workspace.trim() ? quoted(plan.context.workspace.trim()) : "none configured"}.`,
+        `- Context switches: config discovery=${plan.context.discovery}, skills=${plan.context.skills}, file hooks=${plan.context.fileHooks}, host Git operations=${plan.context.hostGit}.`,
+        `- Skill directories: ${plan.context.skillDirectories.length ? plan.context.skillDirectories.map(quoted).join(", ") : "none"}.`,
+        `- Plugin directories: ${plan.context.pluginDirectories.length ? plan.context.pluginDirectories.map(quoted).join(", ") : "none"}.`,
+        `- Session storage: ${plan.session.storage}${
+            plan.session.storage === "local"
+                ? ` at ${quoted(plan.session.baseDirectory)}`
+                : " through a host provider"
+        }; idle timeout=${plan.session.idleTimeoutSeconds}s; infinite sessions=${plan.session.infinite}; large-output handling=${plan.session.largeOutput}.`,
+        `- Events: streaming=${plan.events.streaming}; observer=${plan.events.observer}.`,
+        `- Permission handling: ${
+            plan.policy.permissionMode === "allow-all"
+                ? "deliberately use the SDK approve-all helper for ordinary runtime permission requests"
+                : "bind a real host permission callback; do not substitute allow-all"
+        }.`,
+        `- Hooks: pre-tool=${plan.policy.preToolHook}; post-tool=${plan.policy.postToolHook}.`,
+        "",
+        "## Tool and agent integrations",
+        "Built-in overrides:",
+        markdownList(overrideDetails, "None."),
+        "",
+        "Custom tools:",
+        markdownList(customToolDetails, "None."),
+        "",
+        "MCP servers:",
+        markdownList(mcpDetails, "None."),
+        "",
+        "Custom agents:",
+        markdownList(agentDetails, "None."),
+        `- Selected agent: ${plan.selectedAgent || "default/root agent"}.`,
+        `- Root-agent exclusions: ${plan.rootExcludedTools.length ? plan.rootExcludedTools.join(", ") : "none"}.`,
+        "",
+        "## Required host work",
+        markdownList(
+            contracts.map((contract) => `${contract}.`),
+            "No additional callback contract is selected, but still preserve application lifecycle and authorization boundaries.",
+        ),
+        "",
+        "Implement selected tool handlers against the application's real service layer and authorization model. Tool visibility is not authorization. Do not add mock success responses, no-op persistence, placeholder credentials, or silent fallbacks. If a required host implementation cannot be derived from this repository, add a typed, clearly failing boundary and document exactly what the application owner must provide.",
+        "",
+        "## Important boundaries to preserve",
+        markdownList(
+            decisions.map((decision) => `${decision.title}: ${decision.detail}`),
+            "No additional plan-specific boundaries were reported.",
+        ),
+        "",
+        "## Delivery requirements",
+        "- Use the SDK APIs supported by the repository's selected dependency/version; inspect authoritative SDK documentation or installed types instead of inventing APIs.",
+        "- Keep secrets out of source, generated configuration, logs, prompts, and tests. Add only environment-variable names and documented setup instructions.",
+        "- Put client/session creation at the application's composition root, propagate failures, and stop SDK-owned resources during normal shutdown and failed startup.",
+        "- Preserve existing behavior outside the integration. Add or update focused tests for configuration mapping, required host bindings, failure behavior, and cleanup.",
+        "- Update the repository's existing setup documentation with install, environment, preflight, and run steps.",
+        `- Use this evaluation goal when designing tests: ${quoted(plan.evaluation)}`,
+        "- Run the smallest relevant formatter, linter, type-check/build, and tests. Fix failures caused by this integration.",
+        "- At completion, summarize changed files, the runtime boundary, host-owned TODOs, and the exact commands run.",
+        "",
+        `Configuration provenance: Harness Builder plan schema v${plan.schemaVersion}; SDK source snapshot ${reference.revisions.sdk}; runtime source snapshot ${reference.revisions.runtime}. Reconcile differences with the dependency actually used by this repository.`,
+        "",
+    ].join("\n");
+}
+
 export function generateSdkCode(input: HarnessPlan): string {
     const plan = HarnessPlanSchema.parse(input);
+    const allowAllPermissions = plan.policy.permissionMode === "allow-all";
     const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
     const overridden = BUILTIN_NAMES.filter((name) => plan.tools[name].action === "override");
     const unsupported = overridden.filter((name) => !BUILTIN_SPECS[name].overrideable);
@@ -186,7 +325,9 @@ export function generateSdkCode(input: HarnessPlan): string {
         ...(plan.rootExcludedTools.length
             ? [`            defaultAgent: { excludedTools: ${json(plan.rootExcludedTools)} },`]
             : []),
-        '            onPermissionRequest: required(host.callbacks.onPermissionRequest, "permission policy"),',
+        allowAllPermissions
+            ? "            onPermissionRequest: approveAll,"
+            : '            onPermissionRequest: required(host.callbacks.onPermissionRequest, "permission policy"),',
         ...(plan.tools.ask_user.action === "keep"
             ? [
                   '            onUserInputRequest: required(host.callbacks.onUserInputRequest, "user-input handler"),',
@@ -245,7 +386,7 @@ export function generateSdkCode(input: HarnessPlan): string {
                     ]
             : []),
         'import { resolve } from "node:path";',
-        'import { CopilotClient, RuntimeConnection, defineTool, type SessionConfig, type Tool, type ProviderConfig } from "@github/copilot-sdk";',
+        `import { CopilotClient, RuntimeConnection, defineTool${allowAllPermissions ? ", approveAll" : ""}, type SessionConfig, type Tool, type ProviderConfig } from "@github/copilot-sdk";`,
         "",
         "export interface HostBindings {",
         `    callbacks: Pick<SessionConfig, "onPermissionRequest" | "onUserInputRequest"${s2s ? "" : ' | "gitHubTokenProvider"'} | "createSessionFsProvider" | "onEvent" | "hooks">;`,

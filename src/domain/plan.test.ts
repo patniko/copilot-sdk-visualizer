@@ -28,6 +28,23 @@ describe("harness plan and presets", () => {
         expect(parsePlan(JSON.stringify(older)).identity).toBe("host-token");
     });
 
+    it("migrates older plans to host permission handling without broadening authority", () => {
+        const plan = createPreset("minimal");
+        const { permissionMode: _permissionMode, ...olderPolicy } = plan.policy;
+        const migrated = parsePlan(JSON.stringify({ ...plan, policy: olderPolicy }));
+        expect(migrated.policy.permissionMode).toBe("host");
+        expect(hostContracts(migrated)).toContain("Permission policy");
+    });
+
+    it("surfaces explicit allow-all without claiming it replaces other policy boundaries", () => {
+        const plan = createPreset("minimal");
+        plan.policy.permissionMode = "allow-all";
+        expect(hostContracts(plan)).not.toContain("Permission policy");
+        expect(analyzePlan(plan).find((decision) => decision.id === "allow-all-permissions")).toMatchObject({
+            kind: "review",
+        });
+    });
+
     it("defines genuinely different configurations over the same available tools", () => {
         const empty = createPreset("empty");
         const minimal = createPreset("minimal");

@@ -82,7 +82,7 @@ function selectedPlan(adapter: LanguageAdapter): HarnessPlan {
         skillDirectories: ["/skills/with spaces"],
         pluginDirectories: ["/plugins/selected"],
     };
-    plan.policy = { preToolHook: true, postToolHook: true };
+    plan.policy = { permissionMode: "host", preToolHook: true, postToolHook: true };
     plan.session = {
         storage: "virtual",
         baseDirectory: "/logical/state",
@@ -228,9 +228,10 @@ describe.each(adapters)("$label bootstrap", (adapter) => {
         expect(host).toContain("GITHUB_TOKEN_EXPIRES_AT");
         expect(host).toMatch(/expiresAt <= now/);
         expect(host).toMatch(/ExpiresIn\s*[:=]\s*expiresAt - now/);
-        expect(host).not.toContain("ApproveAll");
         expect(host).toContain(
-            adapter.language === "go" ? "PermissionDecisionReject" : "PermissionDecision.Reject",
+            adapter.language === "go"
+                ? "implement and register PermissionPolicy in host.go"
+                : "Implement and register PermissionPolicy in Host.cs.",
         );
     });
 

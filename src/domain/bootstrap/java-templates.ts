@@ -81,7 +81,7 @@ final class Configuration {
         this.client = required(data, "client");
         this.session = required(data, "session");
         fields(data, Set.of("client", "session", "tools", "storage", "identity", "credential",
-            "credentialEnv", "observer", "preToolHook", "postToolHook", "bundledRuntime"));
+            "credentialEnv", "permissionMode", "observer", "preToolHook", "postToolHook", "bundledRuntime"));
         fields(client, Set.of("runtime", "mode", "cliPath", "host", "port", "address",
             "baseDirectory", "idleTimeoutSeconds"));
         fields(session, Set.of("model", "reasoningEffort", "contextTier", "systemMessage",
@@ -227,7 +227,10 @@ final class Configuration {
                 false, null, Map.of(), flag(tool, "isTerminal")));
         }
         config.setTools(tools);
-        config.setOnPermissionRequest(host::permission);
+        String permissionMode = text(data, "permissionMode");
+        if ("host".equals(permissionMode)) config.setOnPermissionRequest(host::permission);
+        else if ("allow-all".equals(permissionMode)) config.setOnPermissionRequest(PermissionHandler.APPROVE_ALL);
+        else throw new IllegalArgumentException("Unknown permission mode");
         config.setOnUserInputRequest(host::userInput);
         // __COPILOT_IDENTITY_BINDING_START__
         if (!session.has("provider") && "host-token".equals(text(data, "identity"))) config.setGitHubTokenProvider(host::githubToken);
@@ -355,6 +358,7 @@ final class HostExtensions implements AutoCloseable {
 
     // Mark an integration ready only after replacing its failing implementation below.
     private Set<String> implementedTools() { return Set.of(); }
+    private boolean permissionPolicyImplemented() { return false; }
     private boolean preToolHookImplemented() { return false; }
     private boolean postToolHookImplemented() { return false; }
 
@@ -413,6 +417,9 @@ final class HostExtensions implements AutoCloseable {
             String name = text(tool, "name");
             if (!implementedTools().contains(name)) issues.add("HOST TODO: implement tool " + name + " in HostExtensions.invokeTool");
         }
+        if ("host".equals(text(data, "permissionMode")) && !permissionPolicyImplemented()) {
+            issues.add("HOST TODO: implement HostExtensions.permission");
+        }
         if (flag(data, "preToolHook") && !preToolHookImplemented()) {
             issues.add("HOST TODO: implement HostExtensions.preToolUse");
         }
@@ -424,7 +431,8 @@ final class HostExtensions implements AutoCloseable {
     }
 
     CompletableFuture<PermissionRequestResult> permission(PermissionRequest _request, PermissionInvocation _context) {
-        return CompletableFuture.completedFuture(PermissionRequestResult.reject("Denied by the host's default policy"));
+        return CompletableFuture.failedFuture(
+            new UnsupportedOperationException("HOST TODO: implement the selected host permission policy"));
     }
 
     CompletableFuture<Object> invokeTool(ToolInvocation invocation) {

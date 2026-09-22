@@ -10,14 +10,17 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, anyhow, bail};
 use async_trait::async_trait;
-use github_copilot_sdk::handler::{UserInputHandler, UserInputResponse};
+use github_copilot_sdk::handler::{
+    PermissionHandler, PermissionResult, UserInputHandler, UserInputResponse,
+};
 use github_copilot_sdk::hooks::{
     HookContext, PostToolUseInput, PostToolUseOutput, PreToolUseInput, PreToolUseOutput,
     SessionHooks,
 };
 use github_copilot_sdk::tool::ToolHandler;
 use github_copilot_sdk::{
-    BearerTokenError, BearerTokenProvider, ProviderTokenArgs, SessionId, ToolInvocation, ToolResult,
+    BearerTokenError, BearerTokenProvider, PermissionRequestData, ProviderTokenArgs, RequestId,
+    SessionId, ToolInvocation, ToolResult,
 };
 // __GITHUB_TOKEN_PROVIDER_START__
 use github_copilot_sdk::{
@@ -29,10 +32,28 @@ use tokio::sync::{oneshot, watch};
 
 // Mark an integration ready only after replacing its failing implementation.
 pub(crate) fn implemented_tools() -> &'static [&'static str] { &[] }
+pub(crate) const PERMISSION_POLICY_IMPLEMENTED: bool = false;
 pub(crate) const PRE_TOOL_IMPLEMENTED: bool = false;
 pub(crate) const POST_TOOL_IMPLEMENTED: bool = false;
 pub(crate) const SESSION_FS_IMPLEMENTED: bool = false;
 pub(crate) const PROVIDER_ENDPOINT: &str = "";
+
+pub(crate) struct HostPermissionHandler {
+    host: Host,
+}
+
+#[async_trait]
+impl PermissionHandler for HostPermissionHandler {
+    async fn handle(
+        &self,
+        _session_id: SessionId,
+        _request_id: RequestId,
+        _data: PermissionRequestData,
+    ) -> PermissionResult {
+        self.host.fail("HOST TODO: implement the selected host permission policy".into());
+        PermissionResult::user_not_available()
+    }
+}
 
 pub(crate) fn provider_endpoint() -> Result<String> {
     let value = PROVIDER_ENDPOINT.trim();
@@ -102,6 +123,10 @@ pub(crate) struct Host {
 }
 
 impl Host {
+    pub(crate) fn permission_handler(&self) -> HostPermissionHandler {
+        HostPermissionHandler { host: self.clone() }
+    }
+
     pub(crate) fn new() -> Result<Self> {
         let (console, requests) = mpsc::channel::<ConsoleRequest>();
         // Stdin cannot be cancelled portably. This serialized thread lives until process exit

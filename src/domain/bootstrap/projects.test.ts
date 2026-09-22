@@ -9,6 +9,48 @@ import { unzipSync } from "fflate";
 
 describe("integrated language project contracts", () => {
     it.each(LANGUAGE_IDS)(
+        "generates safe host and explicit allow-all permission modes for %s",
+        (language) => {
+            const primitives = {
+                typescript: "onPermissionRequest: approveAll",
+                python: "PermissionHandler.approve_all",
+                go: "copilot.PermissionHandler.ApproveAll",
+                csharp: "PermissionHandler.ApproveAll",
+                java: "PermissionHandler.APPROVE_ALL",
+                rust: "SessionConfig::default().approve_all_permissions()",
+            };
+            const hostMarkers = {
+                typescript: "Implement src/host.ts extensions.permissionPolicy",
+                python: "Implement PERMISSION_HANDLER in host.py.",
+                go: "implement and register PermissionPolicy in host.go",
+                csharp: "Implement and register PermissionPolicy in Host.cs.",
+                java: "HOST TODO: implement HostExtensions.permission",
+                rust: "HOST TODO: implement the permission policy in src/host.rs",
+            };
+            const plan = createPreset("empty");
+            plan.target.language = language;
+            const host = buildBootstrapProject(plan);
+            if (!host.ok) throw new Error(JSON.stringify(host.blockers));
+            expect(host.project.files.map((file) => file.content).join("\n")).toContain(
+                hostMarkers[language],
+            );
+            expect(host.project.requirements.find((item) => item.id === "permission-policy")).toMatchObject({
+                kind: "host-code",
+            });
+
+            plan.policy.permissionMode = "allow-all";
+            const allow = buildBootstrapProject(plan);
+            if (!allow.ok) throw new Error(JSON.stringify(allow.blockers));
+            expect(allow.project.files.map((file) => file.content).join("\n")).toContain(
+                primitives[language],
+            );
+            expect(allow.project.requirements.find((item) => item.id === "permission-policy")).toMatchObject({
+                kind: "review",
+            });
+        },
+    );
+
+    it.each(LANGUAGE_IDS)(
         "defers missing provider endpoints to %s host code, not an export blocker",
         (language) => {
             const bindings = {

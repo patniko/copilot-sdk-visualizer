@@ -14,11 +14,41 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 description="Connect real host decisions, not permission-shaped prompt text."
                 action={<ShieldCheck size={20} aria-hidden="true" />}
             >
-                <Notice title="Permission handler required" tone="accent">
-                    Every sketch requires <code>host.callbacks.onPermissionRequest</code>. Implement an
-                    explicit approval policy in the host; the builder never assumes approval or supplies an
-                    allow-all handler.
-                </Notice>
+                <ChoiceField
+                    label="Permission handling"
+                    help={<SettingHelp help={valueHelp.permissionMode} value={plan.policy.permissionMode} />}
+                    value={plan.policy.permissionMode}
+                    options={[
+                        {
+                            value: "host",
+                            label: "Host permission handler",
+                            description: "Require application-owned approval code",
+                        },
+                        {
+                            value: "allow-all",
+                            label: "Explicit allow all",
+                            description: "Approve each ordinary request once",
+                        },
+                    ]}
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.policy.permissionMode = value;
+                        })
+                    }
+                />
+                {plan.policy.permissionMode === "host" ? (
+                    <Notice title="Host permission handler required" tone="accent">
+                        Generated projects fail preflight until you implement the permission callback. Put
+                        identity, tenant, resource, and approval rules in host code.
+                    </Notice>
+                ) : (
+                    <Notice title="Every runtime permission prompt will be approved" tone="accent">
+                        The generated host explicitly installs the SDK&apos;s approve-all helper, which
+                        returns approve-once for ordinary requests. Managed policy, content exclusion,
+                        downstream authorization, tool validity, and sandbox enablement still apply. If
+                        sandbox bypass is enabled, this can approve a bypass request.
+                    </Notice>
+                )}
                 <div className="hb-toggle-list">
                     <ToggleField
                         label="Pre-tool policy hook"

@@ -95,13 +95,20 @@ it("edits a real override, preserves invalid drafts, exports it, and restores it
             .toBe(true);
 
         await page.getByRole("button", { name: "Export", exact: true }).click();
-        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+        const dialog = page.getByRole("dialog", { name: "Export plan, code & CLI instructions" });
         const code = await dialog
             .getByRole("textbox", { name: "SDK TypeScript integration sketch" })
             .inputValue();
         expect(code).toContain("overridesBuiltInTool: true");
         expect(code).toContain('toolHandler(host, "view")');
         expect(code).not.toContain("approveAll");
+        await dialog.getByRole("tab", { name: "Copilot CLI" }).click();
+        const instructions = await dialog
+            .getByRole("textbox", { name: "Copilot CLI integration instructions" })
+            .inputValue();
+        expect(instructions).toContain("repository currently open in this Copilot CLI session");
+        expect(instructions).toContain("Tenant evidence harness");
+        expect(instructions).toContain("view: Read authorized tenant documents.");
         await dialog.getByRole("tab", { name: "Plan JSON" }).click();
         const output = await dialog.getByRole("textbox", { name: "Exported plan JSON" }).inputValue();
         expect(parsePlan(output)).toEqual(prior);
@@ -186,7 +193,7 @@ it("selects Copilot catalog models and preserves the choice through undo, reload
             expect(await model.inputValue()).toBe("gpt-6-astra");
 
             await page.getByRole("button", { name: "Export", exact: true }).click();
-            const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+            const dialog = page.getByRole("dialog", { name: "Export plan, code & CLI instructions" });
             expect(
                 await dialog.getByRole("textbox", { name: "SDK TypeScript integration sketch" }).inputValue(),
             ).toContain('model: "gpt-6-astra"');
@@ -251,7 +258,7 @@ it("allows blank provider endpoints while preserving save, reload, and export", 
         expect(await endpoint.inputValue()).toBe("");
         expect(await endpoint.getAttribute("aria-invalid")).toBe("false");
         await page.getByRole("button", { name: "Export", exact: true }).click();
-        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+        const dialog = page.getByRole("dialog", { name: "Export plan, code & CLI instructions" });
         expect(
             await dialog.getByRole("textbox", { name: "SDK TypeScript integration sketch" }).inputValue(),
         ).toContain('baseUrl: required(host.providerEndpoint?.trim(), "provider endpoint")');
@@ -319,6 +326,10 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
         await expect.poll(async () => (await savedPlan(page)).model.credential).toBe("bearer-callback");
 
         await navigate(page, /^Policy & state\b/);
+        await page
+            .getByRole("group", { name: "Permission handling", exact: true })
+            .getByText("Explicit allow all", { exact: true })
+            .click();
         await page.getByText("Pre-tool policy hook", { exact: true }).click();
         await page.getByText("Large-output handling", { exact: true }).click();
         await page
@@ -329,6 +340,10 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
             .fill("Every answer cites an authorized document.");
         await expect.poll(async () => (await savedPlan(page)).session.idleTimeoutSeconds).toBe(172800);
         const plan = await savedPlan(page);
+        expect(plan.policy.permissionMode).toBe("allow-all");
+        expect(
+            await page.getByText("Every runtime permission prompt will be approved", { exact: true }).count(),
+        ).toBe(1);
         expect(plan.policy.preToolHook).toBe(true);
         expect(plan.session.largeOutput).toBe(true);
         expect(plan.evaluation).toBe("Every answer cites an authorized document.");
@@ -361,7 +376,7 @@ it("configures the eligible GitHub App S2S route without storing or exporting cr
         ).toBe("https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens");
 
         await page.getByRole("button", { name: "Export", exact: true }).click();
-        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+        const dialog = page.getByRole("dialog", { name: "Export plan, code & CLI instructions" });
         const code = await dialog
             .getByRole("textbox", { name: "SDK TypeScript integration sketch" })
             .inputValue();
@@ -544,7 +559,7 @@ it("keeps all editors and export dialogs usable on a narrow screen", async () =>
         await page.getByRole("button", { name: "Switch to dark theme", exact: true }).click();
         expect(await page.locator("html").getAttribute("data-theme")).toBe("dark");
         await page.getByRole("button", { name: "Export", exact: true }).click();
-        const dialog = page.getByRole("dialog", { name: "Export plan & TypeScript sketch" });
+        const dialog = page.getByRole("dialog", { name: "Export plan, code & CLI instructions" });
         expect(await dialog.isVisible()).toBe(true);
         expect(
             await page.getByRole("textbox", { name: "SDK TypeScript integration sketch" }).isVisible(),

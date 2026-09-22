@@ -86,7 +86,7 @@ describe.each(adapters)("$adapter.label bootstrap adapter", ({ adapter, dataPath
         plan.rootExcludedTools = ["bash", "documents-search"];
         plan.context.skillDirectories = ["/future-host/skills"];
         plan.context.pluginDirectories = ["/future-host/plugins"];
-        plan.policy = { preToolHook: true, postToolHook: true };
+        plan.policy = { permissionMode: "host", preToolHook: true, postToolHook: true };
         plan.model = {
             ...plan.model,
             provider: "openai",
@@ -257,7 +257,7 @@ describe("language-specific bootstrap contracts", () => {
         }
         const host = generatedFile(project, "src/main/java/harness/HostExtensions.java");
         expect(host).toContain("Math.subtractExact(expiresAt, Instant.now().getEpochSecond())");
-        expect(host).toContain("PermissionRequestResult.reject");
+        expect(host).toContain("CompletableFuture.failedFuture");
         expect(host).toContain("getAllowFreeform().orElse(true)");
         expect(host).not.toContain("APPROVE_ALL");
     });
@@ -279,7 +279,7 @@ describe("language-specific bootstrap contracts", () => {
         expect(main).toContain("with_cleanup");
         const configuration = generatedFile(project, "src/config.rs");
         expect(configuration).toContain("deny_unknown_fields");
-        expect(configuration).toContain("SessionConfig::default().deny_all_permissions()");
+        expect(configuration).toContain("with_permission_handler");
         expect(configuration).toContain(".with_parameters(serde_json::to_value(&tool.parameters)?)");
         expect(configuration).toContain("with_session_fs_provider");
         const host = generatedFile(project, "src/host.rs");

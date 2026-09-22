@@ -207,6 +207,7 @@ export const HarnessPlanSchema = z
             .strict(),
         policy: z
             .object({
+                permissionMode: z.enum(["host", "allow-all"]),
                 preToolHook: z.boolean(),
                 postToolHook: z.boolean(),
             })
@@ -362,6 +363,21 @@ export function parsePlan(text: string): HarnessPlan {
         !("identity" in migrated)
     ) {
         migrated = { ...migrated, identity: "host-token" };
+    }
+    if (
+        typeof migrated === "object" &&
+        migrated !== null &&
+        !Array.isArray(migrated) &&
+        "policy" in migrated &&
+        typeof migrated.policy === "object" &&
+        migrated.policy !== null &&
+        !Array.isArray(migrated.policy) &&
+        !("permissionMode" in migrated.policy)
+    ) {
+        migrated = {
+            ...migrated,
+            policy: { ...migrated.policy, permissionMode: "host" },
+        };
     }
     if (
         typeof migrated === "object" &&

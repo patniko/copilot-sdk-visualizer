@@ -137,13 +137,21 @@ export function environmentNames(plan: HarnessPlan): string[] {
 
 export function commonRequirements(plan: HarnessPlan, hostFile: string): BootstrapRequirement[] {
     const items: BootstrapRequirement[] = [
-        {
-            id: "permission-policy",
-            title: "Review the safe default permission policy",
-            detail: "The bootstrap must not approve effects by default. Integrate your identity, tenant, resource, and approval rules before allowing tools.",
-            file: hostFile,
-            kind: "review",
-        },
+        plan.policy.permissionMode === "host"
+            ? {
+                  id: "permission-policy",
+                  title: "Implement the host permission policy",
+                  detail: "Preflight fails until the permission callback is registered. Enforce identity, tenant, resource, and approval rules before allowing effects.",
+                  file: hostFile,
+                  kind: "host-code",
+              }
+            : {
+                  id: "permission-policy",
+                  title: "Review the explicit allow-all permission policy",
+                  detail: "The SDK helper approves each ordinary request once. Managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement still apply; enabled sandbox bypass can also be approved.",
+                  file: hostFile,
+                  kind: "review",
+              },
     ];
     if (plan.model.provider !== "copilot" && !plan.model.endpoint.trim())
         items.push({

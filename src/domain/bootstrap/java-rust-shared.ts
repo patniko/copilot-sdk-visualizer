@@ -74,6 +74,7 @@ export function javaRustConfiguration(plan: HarnessPlan) {
         identity: plan.identity,
         credential: plan.model.credential,
         credentialEnv: plan.model.credentialEnv,
+        permissionMode: plan.policy.permissionMode,
         observer: plan.events.observer,
         preToolHook: plan.policy.preToolHook,
         postToolHook: plan.policy.postToolHook,

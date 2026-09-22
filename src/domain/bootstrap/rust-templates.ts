@@ -301,11 +301,19 @@ pub(crate) struct Configuration {
     identity: Identity,
     credential: Credential,
     credential_env: String,
+    permission_mode: PermissionMode,
     pub(crate) observer: bool,
     pre_tool_hook: bool,
     post_tool_hook: bool,
     session: SessionData,
     tools: Vec<ToolData>,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+enum PermissionMode {
+    Host,
+    AllowAll,
 }
 
 impl Configuration {
@@ -372,6 +380,9 @@ impl Configuration {
             if !host::implemented_tools().contains(&tool.name.as_str()) {
                 issues.push(format!("HOST TODO: implement tool {} in src/host.rs", tool.name));
             }
+            if matches!(self.permission_mode, PermissionMode::Host) && !host::PERMISSION_POLICY_IMPLEMENTED {
+                issues.push("HOST TODO: implement the permission policy in src/host.rs".into());
+            }
         }
         if self.pre_tool_hook && !host::PRE_TOOL_IMPLEMENTED {
             issues.push("HOST TODO: implement the pre-tool policy hook in src/host.rs".into());
@@ -435,7 +446,11 @@ impl Configuration {
 
     pub(crate) fn session_config(&self, host: &Host) -> Result<SessionConfig> {
         let data = &self.session;
-        let mut config = SessionConfig::default().deny_all_permissions();
+        let mut config = match self.permission_mode {
+            PermissionMode::Host => SessionConfig::default()
+                .with_permission_handler(Arc::new(host.permission_handler())),
+            PermissionMode::AllowAll => SessionConfig::default().approve_all_permissions(),
+        };
         config.model = Some(match &data.model {
             Some(model) => model.clone(),
             None => required_env("COPILOT_MODEL")?,

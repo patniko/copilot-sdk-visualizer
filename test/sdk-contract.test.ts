@@ -29,9 +29,17 @@ it("type-checks generated sketches against an explicitly supplied SDK checkout",
         content: "Host guidance",
         sections: [{ name: "tone", action: "replace", content: "Be direct." }],
     };
-    varied.policy = { preToolHook: true, postToolHook: true };
+    varied.policy = { permissionMode: "host", preToolHook: true, postToolHook: true };
+    const allowAll = createPreset("minimal");
+    allowAll.policy.permissionMode = "allow-all";
 
-    const variants = [createPreset("empty"), createPreset("minimal"), createPreset("copilot"), varied];
+    const variants = [
+        createPreset("empty"),
+        createPreset("minimal"),
+        createPreset("copilot"),
+        varied,
+        allowAll,
+    ];
     for (const provider of ["openai", "azure", "anthropic"] as const) {
         const plan = createPreset("minimal");
         plan.model.provider = provider;

@@ -177,7 +177,9 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "signa
             notes: [
                 "The Rust SDK source manifest is 0.0.0-dev; this project pins the inspected Git revision instead of inventing an exact published crate version. Rust 1.92 is too old. No Java installation or global toolchain changes are performed by the visualizer.",
                 "A strict host-owned DTO reads bootstrap-config.json, then src/config.rs explicitly assigns every selected field to SDK builders/default-constructed types. SessionConfig itself is not deserializable and many SDK structs are non-exhaustive.",
-                "The source JSON is embedded with include_str!; rebuild after editing it. Permissions deny by default, custom tool handlers retain schemas/override/terminal flags, and pending hooks/tools/SessionFs fail preflight rather than returning fake successes.",
+                plan.policy.permissionMode === "host"
+                    ? "The source JSON is embedded with include_str!; rebuild after editing it. Host permission handling, custom tools, hooks, and SessionFs fail preflight until their real integrations are implemented."
+                    : "The source JSON is embedded with include_str!; rebuild after editing it. SessionConfig::approve_all_permissions() approves ordinary requests once; managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement remain authoritative, while enabled sandbox bypass can also be approved.",
                 plan.model.provider === "copilot" && plan.identity === "s2s-installation"
                     ? plan.target.runtime === "external"
                         ? "GitHub App S2S identity is configured by start-runtime.sh on the separately operated runtime host. The Rust client does not receive or inject COPILOT_GITHUB_TOKEN and does not install a GitHub token provider."
