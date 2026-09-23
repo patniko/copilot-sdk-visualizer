@@ -1,13 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import {
-    Activity,
-    ArrowDown,
-    ArrowUpRight,
-    Braces,
-    ChevronRight,
-    Layers3,
-    PanelRightClose,
-} from "lucide-react";
+import { Activity, ArrowDown, Download, Braces, ChevronRight, Layers3, PanelRightClose } from "lucide-react";
 import { analyzePlan, hostContracts, toolSummary } from "../domain/analysis";
 import type { Decision } from "../domain/analysis";
 import type { HarnessPlan } from "../domain/plan";
@@ -29,14 +21,12 @@ const decisionLabels = { host: "Host work", review: "Choice", gap: "Boundary" };
 export function PlanInspector({
     plan,
     onEvidence,
-    onBuild,
     onExport,
     onCollapse,
     exportDisabled,
 }: {
     plan: HarnessPlan;
     onEvidence: (evidence: Evidence) => void;
-    onBuild: () => void;
     onExport: () => void;
     onCollapse: () => void;
     exportDisabled: boolean;
@@ -239,11 +229,13 @@ export function PlanInspector({
                 </section>
             </details>
             <div className="hb-inspector-footer">
-                <Button variant="primary" onClick={onBuild}>
-                    Build &amp; run
-                    <ArrowUpRight size={15} aria-hidden="true" />
-                </Button>
-                <Button variant="ghost" size="small" onClick={onExport} disabled={exportDisabled}>
+                <Button
+                    variant="primary"
+                    onClick={onExport}
+                    disabled={exportDisabled}
+                    title={exportDisabled ? "Resolve draft issues before exporting" : undefined}
+                >
+                    <Download size={15} aria-hidden="true" />
                     Export plan
                 </Button>
             </div>

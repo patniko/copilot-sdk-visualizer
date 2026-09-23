@@ -553,7 +553,6 @@ export default function App() {
                     <PlanInspector
                         plan={plan}
                         onEvidence={setEvidence}
-                        onBuild={() => navigate("bootstrap")}
                         onExport={() => setExportOpen(true)}
                         onCollapse={togglePlan}
                         exportDisabled={exportDisabled}
