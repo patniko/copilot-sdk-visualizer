@@ -17,6 +17,7 @@ import {
     PackageOpen,
     PanelLeftClose,
     PanelLeftOpen,
+    PanelRightOpen,
     Redo2,
     ShieldCheck,
     SlidersHorizontal,
@@ -71,6 +72,7 @@ const navigation = [
 ] as const;
 
 const SIDEBAR_STORAGE_KEY = "harness-builder:sidebar-collapsed";
+const PLAN_STORAGE_KEY = "harness-builder:plan-collapsed";
 
 const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description: string }> = {
     overview: {
@@ -80,7 +82,7 @@ const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description
     },
     runtime: {
         eyebrow: "Meet the runtime",
-        title: "Your harness. A whole engine underneath.",
+        title: "Meet the engine behind your harness.",
         description:
             "Explore the shared machinery, the configuration seams, and the authority your host keeps.",
     },
@@ -163,6 +165,13 @@ export default function App() {
             return false;
         }
     });
+    const [planCollapsed, setPlanCollapsed] = useState(() => {
+        try {
+            return globalThis.localStorage?.getItem(PLAN_STORAGE_KEY) === "1";
+        } catch {
+            return false;
+        }
+    });
     useEffect(() => {
         const onHashChange = () => {
             if (window.location.hash && !navigation.some((entry) => `#${entry.id}` === window.location.hash))
@@ -215,6 +224,18 @@ export default function App() {
             const next = !current;
             try {
                 globalThis.localStorage?.setItem(SIDEBAR_STORAGE_KEY, next ? "1" : "0");
+            } catch {
+                /* storage is best-effort */
+            }
+            return next;
+        });
+    }
+
+    function togglePlan() {
+        setPlanCollapsed((current) => {
+            const next = !current;
+            try {
+                globalThis.localStorage?.setItem(PLAN_STORAGE_KEY, next ? "1" : "0");
             } catch {
                 /* storage is best-effort */
             }
@@ -388,7 +409,11 @@ export default function App() {
                     </div>
                 </div>
             )}
-            <div className={`hb-workspace${sidebarCollapsed ? " hb-sidebar-collapsed" : ""}`}>
+            <div
+                className={`hb-workspace${sidebarCollapsed ? " hb-sidebar-collapsed" : ""}${
+                    planCollapsed && view !== "runtime" ? " hb-plan-collapsed" : ""
+                }`}
+            >
                 <div className="hb-sidebar">
                     <div className="hb-sidebar-header">
                         <p className="hb-nav-label">Compose your harness</p>
@@ -510,7 +535,7 @@ export default function App() {
                         </div>
                     )}
                     {view === "runtime" ? (
-                        <RuntimeExplorer onNavigate={navigate} onEvidence={setEvidence} />
+                        <RuntimeExplorer onNavigate={navigate} />
                     ) : view === "reference" ? (
                         <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
                     ) : (
@@ -538,19 +563,36 @@ export default function App() {
                             )}
                         </fieldset>
                     )}
-                    <footer className="hb-editor-footer">
-                        <LockKeyhole size={13} aria-hidden="true" />
-                        Browser-local planning. Exported paths and bindings refer to your future host.
-                    </footer>
+                    {view !== "runtime" && (
+                        <footer className="hb-editor-footer">
+                            <LockKeyhole size={13} aria-hidden="true" />
+                            Browser-local planning. Exported paths and bindings refer to your future host.
+                        </footer>
+                    )}
                 </main>
-                {view !== "runtime" && (
+                {view !== "runtime" && !planCollapsed && (
                     <PlanInspector
                         plan={plan}
                         onEvidence={setEvidence}
                         onBuild={() => navigate("bootstrap")}
                         onExport={() => setExportOpen(true)}
+                        onCollapse={togglePlan}
                         exportDisabled={exportDisabled}
                     />
+                )}
+                {view !== "runtime" && planCollapsed && (
+                    <aside className="hb-inspector-rail" aria-label="Live plan is collapsed">
+                        <button
+                            type="button"
+                            className="hb-inspector-toggle"
+                            aria-label="Expand live plan"
+                            title="Expand live plan"
+                            onClick={togglePlan}
+                        >
+                            <PanelRightOpen size={18} aria-hidden="true" />
+                        </button>
+                        <span>Live plan</span>
+                    </aside>
                 )}
             </div>
             {pending && (

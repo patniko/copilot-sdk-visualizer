@@ -219,7 +219,6 @@ export const csharpAdapter: LanguageAdapter = {
                 "Virtual storage requires a SessionFsProvider subclass overriding ReadFileAsync, WriteFileAsync, AppendFileAsync, ExistsAsync, StatAsync, MakeDirectoryAsync, ReadDirectoryAsync, ReadDirectoryWithTypesAsync, RemoveAsync, and RenameAsync, then a session-scoped factory registration. POSIX logical paths use the selected workspace (or /) and baseDirectory (or /session-state). SQLite is not advertised; implement ISessionFsSqliteProvider/ISessionFsSqliteTransactionProvider before opting into SQL.",
                 "Local preflight never constructs a client, connects, loads a native runtime, or calls a model. Source provisioning and NuGet/build work are separate setup steps. The observer emits event types only; assistant content is printed only as the final application result. Idle completion without an assistant message is explicitly reported.",
                 "Working-directory, skills, plugins, discovery, file-hook, and Git controls address the runtime host's filesystem. A subprocess and a session filesystem provider are not general filesystem, network, or tenant sandboxes.",
-                `Language API anchors: copilot-sdk@${sdkRevision}/dotnet/src/Types.cs:116,580,2041,2341,2364,3268; CopilotTool.cs:43,143; GitHubTokenProvider.cs:21; Session.cs:375; SessionFsProvider.cs:129.`,
             ],
             sources: [
                 plan.target.runtime === "managed"

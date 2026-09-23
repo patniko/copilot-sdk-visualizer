@@ -21,9 +21,8 @@ import type {
     BootstrapProject,
     BootstrapRequirement,
 } from "../domain/bootstrap/types";
-import { reference } from "../content/reference";
 import { BootstrapFileTree } from "./BootstrapFileTree";
-import { BootstrapSources, CopyTextButton } from "./BootstrapPrimitives";
+import { CopyTextButton } from "./BootstrapPrimitives";
 import { Badge, Button, Notice, Panel } from "./ui";
 
 const requirementIcons = { environment: KeyRound, "host-code": Code2, runtime: Server, review: ShieldCheck };
@@ -36,6 +35,10 @@ const requirementLabels = {
 
 function firstFile(files: BootstrapFile[]) {
     return files.find((file) => /(^|\/)readme(?:\.[^/]+)?$/i.test(file.path)) ?? files[0];
+}
+
+function publicProjectNotes(notes: string[]) {
+    return notes.map((note) => note.replace(/\b[a-f0-9]{40}\b/gi, "the pinned SDK revision"));
 }
 
 export function BootstrapProjectPanel({ project }: { project: BootstrapProject }) {
@@ -51,6 +54,7 @@ export function BootstrapProjectPanel({ project }: { project: BootstrapProject }
     const filePreviewId = useId();
     const file = project.files.find((entry) => entry.path === selectedPath) ?? firstFile(project.files);
     const feedback = downloadFeedback?.project === project ? downloadFeedback : null;
+    const notes = publicProjectNotes(project.notes);
 
     function selectFile(path: string) {
         setSelectedPath(path);
@@ -218,33 +222,17 @@ export function BootstrapProjectPanel({ project }: { project: BootstrapProject }
             <details className="hb-project-notes">
                 <summary>
                     <BookOpen size={16} aria-hidden="true" />
-                    Version, native packaging &amp; source notes
+                    Version &amp; native packaging notes
                 </summary>
                 <div className="hb-editor-stack">
                     <ul className="hb-project-note-list">
-                        {project.notes.map((note, index) => (
+                        {notes.map((note, index) => (
                             <li key={index}>{note}</li>
                         ))}
                     </ul>
-                    <div className="hb-source-revisions">
-                        <span>Snapshot {reference.asOf}</span>
-                        <span>
-                            SDK{" "}
-                            <code title={reference.revisions.sdk}>{reference.revisions.sdk.slice(0, 7)}</code>
-                        </span>
-                        <span>
-                            Runtime{" "}
-                            <code title={reference.revisions.runtime}>
-                                {reference.revisions.runtime.slice(0, 7)}
-                            </code>
-                        </span>
-                    </div>
                     <p className="hb-field-hint">
                         Use the adapter&apos;s dependency and native-package notes for version compatibility.
-                        Repository revisions are evidence, not interchangeable package versions. Links may
-                        require organization access.
                     </p>
-                    <BootstrapSources sources={project.sources} />
                 </div>
             </details>
         </Panel>

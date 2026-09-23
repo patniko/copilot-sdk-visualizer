@@ -6,8 +6,9 @@
     "license": "UNLICENSED",
     "type": "module",
     "scripts": {
-        "dev": "vite --host 127.0.0.1",
-        "build": "tsc -b && vite build",
+        "content:public": "node script/generate-public-content.mjs",
+        "dev": "pnpm run content:public && vite --host 127.0.0.1",
+        "build": "pnpm run content:public && tsc -b && vite build",
         "lint": "oxlint --deny-warnings",
         "format": "oxfmt .",
         "format:check": "oxfmt --check .",

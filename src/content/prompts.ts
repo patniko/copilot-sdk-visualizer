@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { z } from "zod";
-import snapshot from "./builtin-prompts.json";
+import snapshot from "./builtin-prompts.public.json";
 import { SECTION_NAMES } from "../domain/plan";
 import type { HarnessPlan, SectionName } from "../domain/plan";
 import { readablePromptReference } from "./prompt-inputs";

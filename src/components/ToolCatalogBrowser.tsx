@@ -7,7 +7,6 @@ import { BUILTIN_NAMES, BUILTIN_SPECS, DEFAULT_STATUS_LABELS, toolCatalog } from
 import type { BuiltinDefaultStatus, BuiltinName, BuiltinSpec } from "../content/builtin-tools";
 import type { EditorProps } from "./editor";
 import { BuiltinToolDetail } from "./BuiltinToolDetail";
-import { ToolCatalogSources } from "./ToolCatalogSources";
 import {
     REFERENCE_DEFAULT_STATUSES,
     referenceBaselineNames,
@@ -342,11 +341,8 @@ function ReferenceProfile({
                     </div>
                 </dl>
                 <p className="hb-field-hint">
-                    Static repository snapshot{" "}
-                    <code title={toolCatalog.revision}>{toolCatalog.revision.slice(0, 7)}</code>, not live
-                    discovery or authenticated session inspection.
+                    Static planning catalog, not live discovery or authenticated session inspection.
                 </p>
-                <ToolCatalogSources sources={toolCatalog.context.sources} />
             </details>
         </section>
     );
@@ -434,10 +430,6 @@ function AliasBrowser({
                                 );
                             })}
                         </div>
-                        <details className="hb-tool-evidence">
-                            <summary>Pinned alias source</summary>
-                            <ToolCatalogSources sources={alias.sources} />
-                        </details>
                     </article>
                 ))}
             </div>

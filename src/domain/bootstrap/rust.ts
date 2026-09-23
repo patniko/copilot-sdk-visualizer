@@ -193,7 +193,6 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "signa
                 "The POSIX SessionFs interface is host code, not an OS sandbox or complete virtualization of shell/git/network effects. Its default functions deliberately fail, and it declares no SQLite capability.",
                 "For in-process hosting, bundled-in-process is enabled and no process-only ClientOptions are set. COPILOT_CLI_PATH must select a matching package before startup; the loader finds the platform-native library, adjacent runtime.node, or prebuilds/<platform-arch>/runtime.node.",
                 "External server settings are applied by start-runtime.sh on the server host, not by mutating an existing server through the client. Paths refer to that future host; --check neither starts nor contacts it.",
-                `Rust API evidence at SDK ${JAVA_RUST_SDK_REVISION}: rust/Cargo.toml:1-34; rust/src/lib.rs:145-185,1118-1157,1230-1270; types.rs:1940-2298,4719-4777; session.rs:590-637,788-802; session_fs.rs:64-120,391-551; github_token.rs:31-114; provider_token.rs:27-110.`,
             ],
             sources: javaRustSources(plan),
         };

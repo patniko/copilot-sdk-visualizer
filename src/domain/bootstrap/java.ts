@@ -234,7 +234,6 @@ export const javaAdapter: LanguageAdapter = {
                 "Session close detaches before client shutdown. Explicit stop errors are retained as suppressed errors when a primary operation failed. A completed turn without an assistant message is reported explicitly, including terminal-tool turns.",
                 "For in-process hosting, set process-global settings before application startup. COPILOT_CLI_PATH can select a compatible package with adjacent runtime.node or prebuilds/<classifier>/runtime.node; it is not a bare-library argument. No mode or permission filter provides OS-level sandboxing.",
                 "Paths are interpreted on the future runtime host. For external services, start-runtime.sh applies server-owned COPILOT_HOME, idle timeout, and login policy there; --check does not probe or reconfigure the server.",
-                `Java API evidence at SDK ${JAVA_RUST_SDK_REVISION}: java/README.md (JDK/dependencies); java/sdk/src/main/java/com/github/copilot/rpc/RuntimeConnection.java:42-93; CopilotSession.java:598-635,2522-2561; rpc/SessionConfig.java:43-123,1438-1626; rpc/ToolDefinition.java:65-95; ffi/NativeRuntimeLoader.java:324-343.`,
             ],
             sources: javaRustSources(plan),
         };

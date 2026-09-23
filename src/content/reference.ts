@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { z } from "zod";
-import snapshot from "./reference.json";
+import snapshot from "./reference.public.json";
 
 const SourceSchema = z.object({ label: z.string(), scope: z.string(), url: z.string().optional() });
 const ControlSchema = z.object({
@@ -40,7 +40,7 @@ const ReferenceSchema = z.object({
     gaps: z.array(GapSchema),
 });
 
-const sdkBase = `https://github.com/github/copilot-sdk/blob/${snapshot.revisions.sdk}`;
+const sdkBase = "https://github.com/github/copilot-sdk/blob/main";
 export const reference = ReferenceSchema.parse({
     ...snapshot,
     sources: {

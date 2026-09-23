@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { getSource, reference } from "./reference";
 import type { HelpSource, ToggleHelp, ValueHelp } from "./help-types";
-import { copilotModelCatalog } from "./models";
 
 const sessionScope =
     "A new-session configuration choice. Editing this planner does not change a running agent.";
@@ -443,8 +442,8 @@ export const valueHelp = {
         "Keep model selection in an enterprise policy service rather than hardcoding it in each harness.",
         "The builder does not validate live availability or quality. A recognizable ID is not proof that an account or provider can use it.",
         refs("sdk-model-change", "sdk-providers").concat([
-            { label: "SDK live model discovery", url: copilotModelCatalog.sources.sdk },
-            { label: "Runtime public model catalog", url: copilotModelCatalog.sources.runtime },
+            { label: "SDK live model discovery" },
+            { label: "Runtime public model catalog" },
         ]),
     ),
     providerEndpoint: setting(

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { z } from "zod";
-import snapshot from "./tool-catalog.json";
+import snapshot from "./tool-catalog.public.json";
 
 export const BUILTIN_NAMES = [
     "apply_patch",

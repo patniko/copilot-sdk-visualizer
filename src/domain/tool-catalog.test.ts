@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { describe, expect, it } from "vitest";
 import { BUILTIN_NAMES, BUILTIN_SPECS, TOOL_CATALOG_REVISION, toolCatalog } from "../content/builtin-tools";
+import privateToolCatalog from "../content/tool-catalog.json";
 import { parsePlan } from "./plan";
 import { createPreset } from "./presets";
 import { exportPlan, generateSdkCode } from "./export";
@@ -33,7 +34,9 @@ describe("complete built-in catalog and draft migration", () => {
         expect(BUILTIN_SPECS.tool_search_tool.overrideable).toBe(true);
         for (const tool of toolCatalog.tools) {
             expect(tool.defaultReason.length).toBeGreaterThan(20);
-            expect(tool.sources.length).toBeGreaterThan(0);
+            expect(
+                privateToolCatalog.tools.find((entry) => entry.name === tool.name)?.sources.length,
+            ).toBeGreaterThan(0);
             expect(JSON.parse(tool.parameters).type).toBe("object");
         }
     });

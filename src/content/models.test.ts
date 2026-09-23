@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { describe, expect, it } from "vitest";
 import { copilotModelCatalog, copilotModelOptions } from "./models";
+import privateModelCatalog from "./model-catalog.json";
 import { exportPlan, generateSdkCode } from "../domain/export";
 import { sessionData } from "../domain/bootstrap/common";
 import { parsePlan } from "../domain/plan";
@@ -8,7 +9,8 @@ import { createPreset } from "../domain/presets";
 
 describe("Copilot model catalog", () => {
     it("records pinned SDK discovery and runtime public-list sources", () => {
-        const { sources, revisions, modelIds } = copilotModelCatalog;
+        const { sources, revisions } = privateModelCatalog;
+        const { modelIds } = copilotModelCatalog;
         expect(sources.sdk).toBe(
             `https://github.com/github/copilot-sdk/blob/${revisions.sdk}/nodejs/src/client.ts`,
         );

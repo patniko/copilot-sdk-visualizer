@@ -1,0 +1,1157 @@
+{
+    "revision": "private",
+    "context": {
+        "copyright": "Copyright (c) Microsoft Corporation. All rights reserved.",
+        "repository": "github/copilot-agent-runtime",
+        "method": "Static extraction from pinned Git objects: native descriptor constructors and function factories, registry lookup-only tools, both immutable shell configurations, fixed extension-management definitions, memory and LSP/Dreaming leaf registrations, plus model-facing rg. Dynamic descriptions use explicitly source-backed summaries.",
+        "nativeAddonInvoked": false,
+        "sessionsCreated": false,
+        "networkRequests": false,
+        "sourceFileCount": 52,
+        "referenceProfile": {
+            "label": "Illustrative online, local, top-level coding baseline; not a universal product default",
+            "platform": "macOS/Linux (Windows descriptors are included separately)",
+            "editingStyle": "split: non-OpenAI/default model branch",
+            "agentMode": "interactive, no prior armed plan/autopilot mode",
+            "requestedTools": [
+                "*"
+            ],
+            "availableTools": "unset",
+            "excludedTools": "unset",
+            "customAgent": "none",
+            "optionalCapabilitiesAndExperiments": "not assumed; conditional entries explain their own gates",
+            "scope": "Pre-permission advertised native selection. Execution permissions, sandboxing, model eligibility, feature policy, and host registrations remain authoritative."
+        },
+        "defaultStatusDefinitions": {
+            "baseline-enabled": "The literal composition gate includes the tool under the stated profile, before later tool/agent filters. Not a promise across hosts or models.",
+            "conditional": "Requires model, capability, service, policy, experiment, agent request, or mode conditions; compiled does not mean default-on.",
+            "platform-specific": "One platform's shell family; baseline on its corresponding platform, not all platforms simultaneously.",
+            "internal": "Shipped descriptor for a literal/internal/specialized context, not an ordinary coding default."
+        },
+        "inheritedCoding": "Leave runtime selection intact: do not turn this inventory into an availableTools allowlist and do not force every catalog member on. Keeping a tool means preserving the runtime's own model/platform/capability/experiment choices.",
+        "parametersSemantics": "Every parameters string is an intentionally small JSON object schema for an ILLUSTRATIVE CUSTOM OVERRIDE. It is not the native input signature, including for grammar-based tools. No native schemas are claimed by these examples.",
+        "inputKindDefinitions": {
+            "json-object": "The extracted native descriptor uses a function-style input; the exact schema can vary by session.",
+            "custom-grammar": "The extracted native descriptor uses custom/grammar input rather than a JSON function signature.",
+            "specialized-json": "Tool-search has specialized composition/dispatch despite JSON-shaped callback input; it is overrideable."
+        },
+        "workspaceSemantics": "True marks direct native project/host file-shell operations or conservatively flagged delegated/opaque host effects for workspace-free warnings. False does not mean no network, storage, permission checks, or incidental filesystem I/O. Session-owned state is distinguished from arbitrary project/host-file access. Per-tool defaultReason explains conservative or storage-only cases.",
+        "overrideSemantics": "True requires positive membership in the native built-in override recognizer (including its specialized tool-search path), except explicitly reserved catalog_search. It does not enable a disabled tool or bypass permissions. False for other fixed leaf/management surfaces is conservative: this snapshot does not infer support from name-collision acceptance alone.",
+        "aliases": [
+            {
+                "name": "execute",
+                "targets": [
+                    "bash",
+                    "read_bash",
+                    "stop_bash",
+                    "list_bash",
+                    "powershell",
+                    "read_powershell",
+                    "stop_powershell",
+                    "list_powershell"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "shell",
+                "targets": [
+                    "bash",
+                    "read_bash",
+                    "stop_bash",
+                    "list_bash",
+                    "powershell",
+                    "read_powershell",
+                    "stop_powershell",
+                    "list_powershell"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "bash",
+                "targets": [
+                    "bash",
+                    "read_bash",
+                    "stop_bash",
+                    "list_bash"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "powershell",
+                "targets": [
+                    "powershell",
+                    "read_powershell",
+                    "stop_powershell",
+                    "list_powershell"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "read",
+                "targets": [
+                    "view"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "notebookread",
+                "targets": [
+                    "view"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "edit",
+                "targets": [
+                    "apply_patch",
+                    "str_replace_editor",
+                    "create",
+                    "edit"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "multiedit",
+                "targets": [
+                    "apply_patch",
+                    "str_replace_editor",
+                    "create",
+                    "edit"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "write",
+                "targets": [
+                    "apply_patch",
+                    "str_replace_editor",
+                    "create",
+                    "edit"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "notebookedit",
+                "targets": [
+                    "apply_patch",
+                    "str_replace_editor",
+                    "create",
+                    "edit"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "search",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "grep",
+                "targets": [
+                    "grep",
+                    "rg",
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "glob",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "custom-agent",
+                "targets": [
+                    "task"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "agent",
+                "targets": [
+                    "task"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "task",
+                "targets": [
+                    "task"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "runcommands",
+                "targets": [
+                    "bash",
+                    "read_bash",
+                    "stop_bash",
+                    "list_bash",
+                    "powershell",
+                    "read_powershell",
+                    "stop_powershell",
+                    "list_powershell"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "runcommands-runinterminal",
+                "targets": [
+                    "bash",
+                    "read_bash",
+                    "stop_bash",
+                    "list_bash",
+                    "powershell",
+                    "read_powershell",
+                    "stop_powershell",
+                    "list_powershell"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "runinterminal",
+                "targets": [
+                    "bash",
+                    "read_bash",
+                    "stop_bash",
+                    "list_bash",
+                    "powershell",
+                    "read_powershell",
+                    "stop_powershell",
+                    "list_powershell"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "edit-editfiles",
+                "targets": [
+                    "str_replace_editor",
+                    "edit"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "editfiles",
+                "targets": [
+                    "str_replace_editor",
+                    "edit"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "create-createfile",
+                "targets": [
+                    "str_replace_editor",
+                    "create"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "createfile",
+                "targets": [
+                    "str_replace_editor",
+                    "create"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "createdirectory",
+                "targets": [
+                    "str_replace_editor",
+                    "create"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "search-codebase",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "codebase",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "search-filesearch",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "filesearch",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "search-textsearch",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "textsearch",
+                "targets": [
+                    "search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "search-readfile",
+                "targets": [
+                    "view"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "readfile",
+                "targets": [
+                    "view"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            },
+            {
+                "name": "github-mcp-server-web_search",
+                "targets": [
+                    "web_search"
+                ],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": []
+            }
+        ],
+        "aliasSemantics": "Selection aliases are not extra native descriptors. Targets match only tools actually available; duplicate alias definitions are last-wins. Historical targets such as search and the projected MCP web_search name do not manufacture new built-in catalog members.",
+        "variants": [
+            "ask_user_2 is a structured schema/description variant under canonical ask_user, not an additional model-facing tool name.",
+            "grep and rg share the content-search implementation; editing style determines the offered name.",
+            "generic_tool_search is a compiled internal descriptor variant; tool_search_tool is the specialized model-facing/client-override surface.",
+            "SQL, session history, task/agent, memory, shell, and skill descriptions/schemas are specialized from session facts."
+        ],
+        "excludedSurfaces": [
+            "Dynamic MCP tools, including GitHub MCP/provider-projected web_search; they are not enumerated as static native descriptors.",
+            "Dynamically contributed extension/plugin tools, custom external tools, and custom-agent registrations.",
+            "Provider/transport orchestration envelopes with no native descriptor constructor in the pinned registry surfaces.",
+            "Selection aliases are preserved in context.aliases, not duplicated as invented tool descriptors."
+        ],
+        "limitations": [
+            "A static reference profile cannot prove a particular authenticated host's live enabled set. No sessions, authentication, experiments, or model/network calls were used.",
+            "Both platform shell families and linked leaf descriptors are included; membership is source-backed, not a claim that every build links every leaf.",
+            "Native dynamic descriptions are summarized rather than evaluating session services. Illustrative override inputs intentionally do not reproduce native schemas.",
+            "update_todo is in the core registry but not a dedicated operation of the legacy tool_assembly_plan; it remains conditional rather than advertised as a universal default.",
+            "The source-bound capture reader evaluates only static Rust expressions. It fails on new descriptor names lacking policy or unresolved descriptions rather than silently curating a smaller catalog."
+        ],
+        "sources": []
+    },
+    "tools": [
+        {
+            "name": "apply_patch",
+            "label": "Apply Patch",
+            "description": "Use the `apply_patch` tool to edit files. This is a FREEFORM tool, so do not wrap the patch in JSON.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for apply_patch; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "custom-grammar",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Model-dependent editing/search alternative, not an additional always-on editor. Apply-patch style selects rg and apply_patch; replace style selects str_replace_editor and omits standalone view/create/edit.",
+            "sources": []
+        },
+        {
+            "name": "ask_user",
+            "label": "Asking user",
+            "description": "Ask the user a question and wait for their response. Use this tool when you need to ask the user questions during execution. This allows you to: 1. Gather user preferences or requirements 2. Clarify ambiguous instructions 3. Get decisions on implementation choices as you work 4. Offer choices to the user about what direction to take",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for ask_user; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires ask-user capability plus a structured ask-user surface or user-input listener. The ask_user_2 implementation changes the schema under the same canonical ask_user name.",
+            "sources": []
+        },
+        {
+            "name": "bash",
+            "label": "Run Bash commands",
+            "description": "Runs a Bash command on the host; supports foreground and background command sessions.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for bash; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
+            "sources": []
+        },
+        {
+            "name": "catalog_search",
+            "label": "Discovering resources",
+            "description": "Search for agentic resources through the runtime's bounded discovery API. Use only after loading the discover-resources skill.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for catalog_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires a trusted discovery skill in the model-invocable catalog. Reserved: external tools are explicitly forbidden from defining or overriding catalog_search.",
+            "sources": []
+        },
+        {
+            "name": "context_board",
+            "label": "Context Board",
+            "description": "Manage the dynamic context board. Supports four commands: - \"get\": Retrieve the full content of a context item. Requires `src` and `name`. - \"add\": Add or update an item on the board. Requires `name`, `description`, and `context`. - \"prune\": Remove an agent-created item from the board. Requires `name`. - \"get_board\": List all items on the board with their metadata. No additional parameters required.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for context_board; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Requires dynamic-context availability and a literal agent-definition request; not a wildcard-enabled coding tool.",
+            "sources": []
+        },
+        {
+            "name": "create",
+            "label": "Create",
+            "description": "Tool for creating new files. * Creates a new file with the specified content at the given path * Cannot be used if the specified path already exists * Parent directories must exist before creating the file * Path *MUST* be absolute",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for create; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "baseline-enabled",
+            "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
+            "sources": []
+        },
+        {
+            "name": "create_pull_request",
+            "label": "Create Pull Request",
+            "description": "Create a pull request for the current branch. Call this tool when the task is complete and the changes are ready for review. If a pull request already exists for the branch, this tool will return successfully and indicate that. Only call this tool when the user explicitly asks for a pull request to be created.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for create_pull_request; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "internal",
+            "defaultReason": "PR-agent-specific tool; requires an explicit by-name request, never the ordinary '*' coding wildcard. Its native workflow can inspect or publish repository work. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "edit",
+            "label": "Edit",
+            "description": "Tool for making string replacements in files. * Replaces exactly one occurrence of `old_str` with `new_str` in the specified file * When called multiple times in a single response, edits are independently made in the order calls are specified * The `old_str` parameter must match EXACTLY one or more consecutive lines from the original file * If `old_str` is not unique in the file, replacement will not be performed * Make sure to include enough context in `old_str` to make it unique * Path *MUST* be absolute",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for edit; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "baseline-enabled",
+            "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
+            "sources": []
+        },
+        {
+            "name": "execution_subagent",
+            "label": "Execution subagent",
+            "description": "Runs terminal commands in a constrained execution-only subagent and returns a focused summary instead of raw command output.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for execution_subagent; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires online mode, the execution-subagent feature/experiment, and session/model availability. Delegates host command execution; not a universal default. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "exit_plan_mode",
+            "label": "Plan ready for review",
+            "description": "Exit plan mode and return to normal interactive mode. Use this tool when you have created a plan and want to get user approval before implementing. Provide a summary of the plan for the user to review. For highly parallelizable implementation work (or parallelizable todos), set `showFleet` to also offer the autopilot + /fleet option and usually recommend `autopilot_fleet`.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for exit_plan_mode; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires active plan mode, plan-mode capability, and a responder; cache-stability treatment can retain the descriptor outside plan mode without invoking approval.",
+            "sources": []
+        },
+        {
+            "name": "extensions_manage",
+            "label": "Managing extensions",
+            "description": "Manage the Copilot CLI extension ecosystem.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for extensions_manage; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Fixed runtime extension-management tools require an active extension service with management tools enabled. They can read/write extension files or restart host subprocesses; dynamically contributed extension tools are outside this static catalog. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "extensions_reload",
+            "label": "Reloading extensions",
+            "description": "Reload all extensions from disk. Call this after creating or modifying extension files in .github/extensions/ or the user extensions directory. New tools are available immediately after reload.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for extensions_reload; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Fixed runtime extension-management tools require an active extension service with management tools enabled. They can read/write extension files or restart host subprocesses; dynamically contributed extension tools are outside this static catalog. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "factories_manage",
+            "label": "Managing factories",
+            "description": "Manage registered agent factories: discover definitions, inspect runs and resumable work, and, when enabled, author session-scoped JavaScript factories.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for factories_manage; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires factory availability, including session capabilities/feature and quota policy. Factories can launch agents; authoring can write session-scoped JavaScript on the host. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "fetch_copilot_cli_documentation",
+            "label": "Checking my documentation",
+            "description": "Fetch authoritative GitHub Copilot CLI README/help for questions about your capabilities, usage, or features.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for fetch_copilot_cli_documentation; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires cli-documentation capability; it is not automatically present in every runtime host.",
+            "sources": []
+        },
+        {
+            "name": "file_search",
+            "label": "File Search",
+            "description": "Find workspace files whose paths match a glob pattern.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for file_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
+            "sources": []
+        },
+        {
+            "name": "generic_tool_search",
+            "label": "Search tools",
+            "description": "Search for tools in the tool registry to discover capabilities for completing the current task. Use this when you need functionality not provided by your currently available tools. The search queries against tool names, descriptions, and parameter information to find the most relevant tools. Returns references to matching tools which will be expanded into full definitions you can then invoke.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for generic_tool_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Internal descriptor variant for generic client tool search, gated by GENERIC_CLIENT_TOOL_SEARCH. It is not another always-on public search function; model-facing search is normalized separately.",
+            "sources": []
+        },
+        {
+            "name": "glob",
+            "label": "Glob",
+            "description": "Find files quickly by glob pattern.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for glob; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "baseline-enabled",
+            "defaultReason": "Literal baseline gate: glob is included before the session's later tool/agent filters.",
+            "sources": []
+        },
+        {
+            "name": "grep",
+            "label": "Grep",
+            "description": "Search file contents quickly and precisely with ripgrep.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for grep; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "baseline-enabled",
+            "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
+            "sources": []
+        },
+        {
+            "name": "grep_search",
+            "label": "Grep Search",
+            "description": "Search file contents in the workspace using text or a regular expression.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for grep_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
+            "sources": []
+        },
+        {
+            "name": "invoke_canvas_action",
+            "label": "Invoking canvas action",
+            "description": "Invoke an action on an open canvas instance. Identify the panel by the instanceId you passed to open_canvas — do not pass canvasId or extensionId here. Action names and schemas come from list_canvas_capabilities for the canvas type.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for invoke_canvas_action; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires canvas-renderer capability and applicable registered canvases/actions. Workspace flag is conservative: provider callbacks are opaque and can perform host effects; it is not a claim that every canvas needs files. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "lexical_code_search",
+            "label": "Lexical Code Search",
+            "description": "Search GitHub.com's lexical code index across repositories visible to the current GitHub.com credentials. Use it for exact text, identifiers, symbols, regular expressions, and cross-repository searches, including repositories not cloned locally. Searches cover indexed default branches and return ranked, not exhaustive, results.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for lexical_code_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires the corresponding Blackbird settings/experiment and online eligibility. Repository/authentication context is resolved at execution; workspace flag conservatively marks repository-context dependence.",
+            "sources": []
+        },
+        {
+            "name": "list_agents",
+            "label": "List Agents",
+            "description": "Lists visible background agents by status: running, idle, completed, failed, or cancelled. * Use only for requested overviews or when no usable agent_id is in recent context. For status or follow-up, use IDs from task, read_agent, or notifications directly with read_agent/write_agent, even while running or incomplete, or wait for notifications; do not call list_agents merely to rediscover IDs. * Idle agents accept write_agent follow-ups. '(one-shot)' MCP tasks support read_agent only; start a new task to send more input.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for list_agents; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, factories, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
+            "sources": []
+        },
+        {
+            "name": "list_bash",
+            "label": "List Bash sessions",
+            "description": "Lists active Bash command sessions and their status.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for list_bash; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
+            "sources": []
+        },
+        {
+            "name": "list_canvas_capabilities",
+            "label": "Listing canvas capabilities",
+            "description": "Inspect a canvas *type* to discover its open input schema and supported actions (action names + input schemas). Takes a canvasId from the <canvases> section — not a running instanceId.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for list_canvas_capabilities; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires canvas-renderer capability. Lists host-provided canvas metadata; it does not itself operate on project files. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "list_powershell",
+            "label": "List PowerShell sessions",
+            "description": "Lists active PowerShell command sessions and their status.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for list_powershell; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
+            "sources": []
+        },
+        {
+            "name": "lsp",
+            "label": "Lsp",
+            "description": "Language Server Protocol tool for code intelligence. Operations: - goToDefinition: Find where a symbol is defined - findReferences: Find all usages of a symbol - rename: Semantically rename a symbol across files - hover: Get type info and documentation - documentSymbol: List all symbols in a file - workspaceSymbol: Search symbols across workspace - goToImplementation: Find implementations of an interface/type - incomingCalls: Find what calls a function - outgoingCalls: Find what a function calls",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for lsp; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires the shipped LSP leaf and available session LSP configurations. It can read project code and launch language-server processes.",
+            "sources": []
+        },
+        {
+            "name": "manage_schedule",
+            "label": "Manage schedule",
+            "description": "Manage scheduled prompts. Use action 'create' to schedule a new prompt (recurring), 'list' to see active schedules (both recurring and one-shot), or 'stop' with an id to cancel one. For 'create', provide either 'interval' (a relative cadence like '5m') or 'cron' (a 5-field calendar expression like '0 9 * * 1-5'), plus the 'prompt'. When you determine that a scheduled task's goal has been met, stop the schedule.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for manage_schedule; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires manage-schedule enablement. Workspace flag is conservative: scheduled prompts may later run native file/shell-capable agent work.",
+            "sources": []
+        },
+        {
+            "name": "open_canvas",
+            "label": "Opening canvas",
+            "description": "Open or focus a declared canvas. canvasId selects the canvas type (from the <canvases> section); instanceId is a handle you choose for this specific panel and reuse in later invoke_canvas_action calls. Re-opening the same instanceId focuses the existing panel; using a new instanceId opens an additional panel of the same canvas type.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for open_canvas; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires canvas-renderer capability and applicable registered canvases/actions. Workspace flag is conservative: provider callbacks are opaque and can perform host effects; it is not a claim that every canvas needs files. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "powershell",
+            "label": "Run PowerShell commands",
+            "description": "Runs a PowerShell command on the host; supports foreground and background command sessions.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for powershell; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
+            "sources": []
+        },
+        {
+            "name": "read_agent",
+            "label": "Read Agent",
+            "description": "Read a background agent's status and results. Waiting behavior and guidance depend on session notification capabilities.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for read_agent; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, factories, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
+            "sources": []
+        },
+        {
+            "name": "read_bash",
+            "label": "Read Bash output",
+            "description": "Reads accumulated output from a running Bash command session.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for read_bash; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
+            "sources": []
+        },
+        {
+            "name": "read_file",
+            "label": "Read File",
+            "description": "Read a range of lines from a file.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for read_file; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
+            "sources": []
+        },
+        {
+            "name": "read_inbox",
+            "label": "Read Inbox",
+            "description": "Reads a message from the session inbox. * Use this when a system notification indicates a new inbox message. * If entry_id is omitted, reads the most recent unread inbox entry.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for read_inbox; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires sidekick agents. Reads session inbox state rather than project files.",
+            "sources": []
+        },
+        {
+            "name": "read_memories",
+            "label": "Read Memories",
+            "description": "Fetch stored memories for this session. Returns facts, conventions, patterns, and practices learned from previous interactions.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for read_memories; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Requires an available memory service and a literal agent-definition request. Root-owned memory mutations are separate tools.",
+            "sources": []
+        },
+        {
+            "name": "read_powershell",
+            "label": "Read PowerShell output",
+            "description": "Reads accumulated output from a running PowerShell command session.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for read_powershell; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
+            "sources": []
+        },
+        {
+            "name": "reply_to_comment",
+            "label": "Reply To Comment",
+            "description": "Reply to new comments. Use when you've completed a meaningful unit of work that specifically addresses the request, question, or feedback in the comment. * Use this tool no more than once per <comment_id>, and only after you have completed meaningful work that specifically addresses the text in the comment. * Ignore comments with no comment_id. Do not make up comment_ids. * Keep your reply simple, focused, and concise. Don't use headers or tables in the reply. * Include the short hash of the commit that addresses the comment in the reply.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for reply_to_comment; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "internal",
+            "defaultReason": "PR-agent-specific tool; requires an explicit by-name request, never the ordinary '*' coding wildcard. Its native workflow can inspect or publish repository work. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "report_dreaming_artifact",
+            "label": "Report Dreaming Artifact",
+            "description": "Deliver a Dreaming artifact when requested by the job instructions. * Provide a short title and Markdown summary * Include structured data only when useful",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for report_dreaming_artifact; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "internal",
+            "defaultReason": "Requires the linked tool-handlers leaf and a literal Dreaming-job request. Delivers a progress artifact, not a project-file operation. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "report_progress",
+            "label": "Report Progress",
+            "description": "Report pull-request-agent progress and publish the corresponding repository changes; the descriptor varies with push-only configuration.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for report_progress; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "internal",
+            "defaultReason": "PR-agent-specific descriptor, materialized only by a literal request. Its push-only/pull-request behavior depends on repository settings. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "rg",
+            "label": "Rg",
+            "description": "Search file contents quickly and precisely with ripgrep.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for rg; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Model-dependent editing/search alternative, not an additional always-on editor. Apply-patch style selects rg and apply_patch; replace style selects str_replace_editor and omits standalone view/create/edit.",
+            "sources": []
+        },
+        {
+            "name": "run_factory",
+            "label": "Run factory",
+            "description": "Starts a registered factory by name, or resumes a prior run by ID, and returns immediately with a run ID while execution continues in the background. Use only when the user explicitly requests a factory at this scale, or when a skill or slash command specifically instructs you to use one. Do not infer factory use merely because a task could benefit from parallelism: a factory may spawn dozens of agents and consume substantial credits. The limits are optional overrides: on a new run, omit them unless the user specified a ceiling.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for run_factory; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires factory availability, including session capabilities/feature and quota policy. Factories can launch agents; authoring can write session-scoped JavaScript on the host. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "search_code_subagent",
+            "label": "Search Code Subagent",
+            "description": "Searches the codebase with a constrained search-only subagent and returns relevant file paths and line ranges with hydrated code snippets.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for search_code_subagent; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires online mode, allowed search-subagent filters, an eligible resolved model, and the appropriate request context. May search local project code and use a remote model. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "semantic_code_search",
+            "label": "Semantic Code Search",
+            "description": "Search one GitHub repository's indexed default branch using a natural-language description. Use for locating or understanding code, even with a known identifier. Defaults to the current repository; `repo` selects another. Workspace changes are excluded.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for semantic_code_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires the corresponding Blackbird settings/experiment and online eligibility. Repository/authentication context is resolved at execution; workspace flag conservatively marks repository-context dependence.",
+            "sources": []
+        },
+        {
+            "name": "semantic_search",
+            "label": "Semantic Search",
+            "description": "Search the current repository semantically for code relevant to a natural-language query.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for semantic_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
+            "sources": []
+        },
+        {
+            "name": "send_inbox",
+            "label": "Send Inbox",
+            "description": "Send relevant context into the session inbox for the main agent to read later, with a concise summary and full content.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for send_inbox; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "internal",
+            "defaultReason": "Literal agent-definition request only; the '*' coding request does not admit this non-standard sidekick tool.",
+            "sources": []
+        },
+        {
+            "name": "session_store_sql",
+            "label": "Session Store Sql",
+            "description": "Query cross-session history. Available local, personal-cloud, organization, and repository scopes depend on session capabilities and configuration.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for session_store_sql; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires session-store capability and cloud-session-store enablement. Supported local/org/repo scopes and backend availability are conditional; not a project-file tool.",
+            "sources": []
+        },
+        {
+            "name": "skill",
+            "label": "Skill",
+            "description": "Load an available skill into the conversation. The native description incorporates the session's model-invocable skill catalog.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for skill; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires a non-empty model-invocable skill catalog. Workspace flag is conservative: disk-backed skill discovery/loading can read local assets, while a host-provided skill may be text-only.",
+            "sources": []
+        },
+        {
+            "name": "sql",
+            "label": "Sql",
+            "description": "Query and update the session SQLite database; some configurations also expose local cross-session history through this tool.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for sql; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires a session database. It operates on session/history storage, not arbitrary project files; workspace:false does not mean storage-free.",
+            "sources": []
+        },
+        {
+            "name": "stop_bash",
+            "label": "Stop Bash command",
+            "description": "Stops a running Bash command by terminating its process tree.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for stop_bash; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
+            "sources": []
+        },
+        {
+            "name": "stop_powershell",
+            "label": "Stop PowerShell command",
+            "description": "Stops a running PowerShell command by terminating its process tree.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for stop_powershell; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "platform-specific",
+            "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
+            "sources": []
+        },
+        {
+            "name": "store_memory",
+            "label": "Store Memory",
+            "description": "Store a fact about the codebase in memory, so that it can be used in future code generation or review tasks. The fact should be a clear and concise statement about the codebase conventions, structure, logic, or usage. It may be based on the code itself, or on information provided by the user.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for store_memory; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires memory capability, an available memory service, and root-owned mutation eligibility; voting has its own enablement. Storage may be remote or local, but these are not arbitrary project-file APIs. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "str_replace_editor",
+            "label": "Str Replace Editor",
+            "description": "View and edit files with the combined string-replacement editor selected for replace-style models.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for str_replace_editor; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Model-dependent editing/search alternative, not an additional always-on editor. Apply-patch style selects rg and apply_patch; replace style selects str_replace_editor and omits standalone view/create/edit.",
+            "sources": []
+        },
+        {
+            "name": "task",
+            "label": "Task",
+            "description": "Delegate work to a configured built-in or custom subagent. The available agent list and native schema are assembled per session.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for task; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires at least one visible dispatchable agent after model, agent-policy, and depth filtering. Workspace flag is conservative: delegated agents may use project files or host shells.",
+            "sources": []
+        },
+        {
+            "name": "task_complete",
+            "label": "Task complete",
+            "description": "Mark the current task as complete. Use this tool ONLY when you are confident the task is fully done.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for task_complete; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Offered in autopilot, or when plan-mode cache-stability treatment arms it. Retained tools may be no-ops outside their active mode; ordinary interactive mode does not imply availability. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "tool_search_tool",
+            "label": "Search tools",
+            "description": "Searches for functions by matching a regex pattern against tool names, descriptions, and parameters. Returns matching tools that can then be called. Use this to discover available tools when you need a capability that isn't immediately visible.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for tool_search_tool; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "specialized-json",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Specialized tool-search surface selected by model/provider, search settings, experiments, and deferred catalog availability. Explicit native overrides are supported through the specialized client_tool_search_override path; generic-client search is a distinct branch.",
+            "sources": []
+        },
+        {
+            "name": "update_todo",
+            "label": "Update Todo",
+            "description": "Use this TODO tool to manage the tasks that must be completed to solve the problem. Use this tool VERY frequently to keep track of your progress towards completing the overall goal, keeping all item statuses up to date. Call this tool to make the initial todo list for a complex problem. Then call this tool every time you finish a task and check off the corresponding item in the TODO list. If new tasks are identified, add them to the list as well. Re-planning is allowed if necessary.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for update_todo; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Compiled descriptor, selected by the runtime request/factory and final agent-policy path. It is not a dedicated operation in the legacy tool_assembly_plan; do not infer a universal coding default from registry membership. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "view",
+            "label": "View",
+            "description": "View files, images, or directories. * Images return base64 data and MIME type. * Text files return their content. * Directories list non-hidden entries up to 2 levels deep. * `path` must be absolute. * Files over 20KB are truncated; use `view_range` for sections.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for view; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "baseline-enabled",
+            "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
+            "sources": []
+        },
+        {
+            "name": "vote_memory",
+            "label": "Vote Memory",
+            "description": "Vote on an existing memory by exact fact text to indicate whether you agree or disagree with it. Use \"upvote\" for useful verified memories and \"downvote\" for incorrect or outdated memories.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for vote_memory; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires memory capability, an available memory service, and root-owned mutation eligibility; voting has its own enablement. Storage may be remote or local, but these are not arbitrary project-file APIs. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": []
+        },
+        {
+            "name": "web_fetch",
+            "label": "Fetching web content",
+            "description": "Fetches a URL from the internet and returns the page as either markdown or raw HTML. Use this to safely retrieve up-to-date information from HTML web pages.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for web_fetch; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "baseline-enabled",
+            "defaultReason": "Literal online gate: included when the session is not offline. Network access is not a project-file capability; permission and policy checks remain separate.",
+            "sources": []
+        },
+        {
+            "name": "write_agent",
+            "label": "Write Agent",
+            "description": "Sends a message to one or more running or idle background agents, delivered as a new user turn in each agent's conversation. * Messages are delivered directly into the agent's conversation as a new user turn. * If the agent is idle (finished its last turn), it will wake up and process the message as its next turn. * If the agent is running, the message will be queued and delivered after the current turn completes.",
+            "group": "Workspace",
+            "workspace": true,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for write_agent; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": true,
+            "defaultStatus": "conditional",
+            "defaultReason": "Requires agent-management availability. Workspace flag is conservative: sending a turn can wake an agent that then uses native file/shell tools.",
+            "sources": []
+        }
+    ]
+}

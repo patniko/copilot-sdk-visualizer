@@ -6,7 +6,6 @@ import {
     ArrowLeft,
     ArrowRight,
     BookOpen,
-    Braces,
     Check,
     CircleHelp,
     Cpu,
@@ -26,8 +25,7 @@ import {
 } from "lucide-react";
 import { capabilitySides, runtimeCapability, turnWalkthrough } from "../content/runtime-map";
 import type { RuntimeCapabilityId } from "../content/runtime-map";
-import { reference } from "../content/reference";
-import type { Evidence, ViewId } from "./editor";
+import type { ViewId } from "./editor";
 import { Button } from "./ui";
 import "../runtime-explorer.css";
 
@@ -45,13 +43,7 @@ const icons: Record<RuntimeCapabilityId, LucideIcon> = {
     sessions: Database,
 };
 
-export function RuntimeExplorer({
-    onNavigate,
-    onEvidence,
-}: {
-    onNavigate: (view: ViewId) => void;
-    onEvidence: (evidence: Evidence) => void;
-}) {
+export function RuntimeExplorer({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
     const [selected, setSelected] = useState<RuntimeCapabilityId>("loop");
     const [step, setStep] = useState<number | null>(null);
     const capability = runtimeCapability(selected);
@@ -110,64 +102,26 @@ export function RuntimeExplorer({
                         <Network size={14} aria-hidden="true" /> Meet the Copilot runtime
                     </p>
                     <h2 id="editor-heading" tabIndex={-1}>
-                        Your harness.
-                        <br />
-                        <span>A whole engine underneath.</span>
+                        Meet the engine behind your harness.
                     </h2>
                     <p className="rt-lead">
-                        Not just a wrapper around a model. A shared agent loop that brings tools, skills,
-                        plugins, inference, and session state together—so you can build the parts that make
-                        your product yours.
+                        The runtime coordinates the agent loop and shared capabilities. You configure its
+                        behavior; your application keeps product logic, identity, and authority.
                     </p>
                 </div>
-                <div className="rt-hero-note">
-                    <span className="rt-overline">The question this map answers</span>
-                    <p>“What do I get from the runtime, and what do I still build?”</p>
-                    <Button onClick={() => onNavigate("base-profile")}>
-                        Configure your harness <ArrowRight size={15} aria-hidden="true" />
-                    </Button>
-                </div>
-            </section>
-
-            <section className="rt-boundaries" aria-label="Application, SDK, and runtime responsibilities">
-                <article>
-                    <SlidersHorizontal size={20} aria-hidden="true" />
-                    <div>
-                        <span className="rt-overline">You design</span>
-                        <h3>Harness &amp; product</h3>
-                        <p>Behavior, domain tools, UX, identity, and authority.</p>
-                    </div>
-                </article>
-                <span className="rt-boundary-arrow" aria-hidden="true">
-                    ↔
-                </span>
-                <article>
-                    <Braces size={20} aria-hidden="true" />
-                    <div>
-                        <span className="rt-overline">The SDK connects</span>
-                        <h3>Config, callbacks &amp; events</h3>
-                        <p>A language-native client. Not a second agent loop.</p>
-                    </div>
-                </article>
-                <span className="rt-boundary-arrow" aria-hidden="true">
-                    ↔
-                </span>
-                <article className="rt-boundary-runtime">
-                    <Cpu size={20} aria-hidden="true" />
-                    <div>
-                        <span className="rt-overline">The runtime executes</span>
-                        <h3>The shared machinery</h3>
-                        <p>Model/tool orchestration and capability integration.</p>
-                    </div>
-                </article>
+                <Button onClick={() => onNavigate("base-profile")}>
+                    Configure your harness <ArrowRight size={15} aria-hidden="true" />
+                </Button>
             </section>
 
             <section className="rt-atlas" aria-labelledby="runtime-map-title">
                 <div className="rt-section-heading">
                     <div>
-                        <p className="rt-overline">01 / Explore the engine</p>
-                        <h3 id="runtime-map-title">Many capabilities. One execution loop.</h3>
-                        <p>Select a node to see the abstraction, your part, and the boundary.</p>
+                        <h3 id="runtime-map-title">Explore the shared engine</h3>
+                        <p>
+                            Select a capability to see what the runtime provides and what your application
+                            still owns.
+                        </p>
                     </div>
                     <div className="rt-mode-switch" role="group" aria-label="Map exploration mode">
                         <Button
@@ -331,49 +285,6 @@ export function RuntimeExplorer({
                             <strong>The boundary</strong>
                             <p>{capability.boundary}</p>
                         </div>
-                        <div className="rt-controls">
-                            <p className="rt-overline">Related SDK surfaces · not a config recipe</p>
-                            <div>
-                                {capability.controls.map((control) => (
-                                    <code key={control}>{control}</code>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="rt-related">
-                            <p className="rt-overline">Connect the ideas</p>
-                            <div>
-                                {capability.related.map((id) => (
-                                    <button
-                                        key={id}
-                                        onClick={() => select(id)}
-                                        aria-controls="runtime-capability-detail"
-                                    >
-                                        {runtimeCapability(id).name}
-                                        <ArrowRight size={12} aria-hidden="true" />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="rt-detail-actions">
-                            <Button variant="primary" onClick={() => onNavigate(capability.view)}>
-                                {capability.action}
-                                <ArrowRight size={14} aria-hidden="true" />
-                            </Button>
-                            <Button
-                                size="small"
-                                variant="ghost"
-                                onClick={() =>
-                                    onEvidence({
-                                        kind: "topic",
-                                        title: `${capability.name}: runtime evidence`,
-                                        detail: `${capability.summary} ${capability.boundary}`,
-                                        sources: capability.sources,
-                                    })
-                                }
-                            >
-                                <BookOpen size={14} aria-hidden="true" /> Inspect source evidence
-                            </Button>
-                        </div>
                     </section>
                 </div>
             </section>
@@ -381,7 +292,6 @@ export function RuntimeExplorer({
             <section className="rt-takeaway" aria-labelledby="runtime-takeaway-title">
                 <div className="rt-section-heading">
                     <div>
-                        <p className="rt-overline">02 / Keep the ownership clear</p>
                         <h3 id="runtime-takeaway-title">Reuse the machinery. Own the meaning.</h3>
                         <p>
                             Standard interfaces reduce integration work. They do not remove your product
@@ -430,12 +340,6 @@ export function RuntimeExplorer({
                     </Button>
                 </div>
             </section>
-            <p className="rt-provenance">
-                Source-backed conceptual map · snapshot {reference.asOf} · runtime{" "}
-                <code>{reference.revisions.runtime.slice(0, 7)}</code> / SDK{" "}
-                <code>{reference.revisions.sdk.slice(0, 7)}</code>. Not a live inventory or a promise of
-                SDK/version parity. Some evidence requires repository access.
-            </p>
         </div>
     );
 }

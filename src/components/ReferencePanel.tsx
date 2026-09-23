@@ -152,7 +152,7 @@ export function ReferencePanel({
                                 <span className="hb-gap-title">{gap.title}</span>
                                 <span className="hb-muted-copy">{gap.summary}</span>
                                 <span className="hb-text-link">
-                                    Inspect evidence and limits
+                                Review limits
                                     <ArrowUpRight size={13} aria-hidden="true" />
                                 </span>
                             </button>
@@ -162,9 +162,8 @@ export function ReferencePanel({
                 <Tabs.Content value="sdk-docs" className="hb-tab-content">
                     <Notice title="Where to read next in the official SDK docs" tone="accent">
                         Each builder step maps to a guide in the <code>{"github/copilot-sdk"}</code> docs.
-                        These links point at the living documentation (main branch), unlike the commit-pinned
-                        evidence in the other tabs. Open the matching editor here, then follow the guide when
-                        you implement it in your host.{" "}
+                        Open the matching editor here, then follow the guide when you implement it in your
+                        host.{" "}
                         <a href={SDK_DOCS_HOME} target="_blank" rel="noopener noreferrer">
                             SDK docs home
                             <ExternalLink size={13} aria-hidden="true" />
@@ -209,8 +208,8 @@ export function ReferencePanel({
             <div className="hb-reference-stamp">
                 <BookOpen size={15} aria-hidden="true" />
                 <p>
-                    Snapshot <time dateTime={reference.asOf}>{reference.asOf}</time>. Commit-pinned source
-                    links may require organization access. Nothing is fetched automatically.
+                    Guidance snapshot <time dateTime={reference.asOf}>{reference.asOf}</time>. Nothing is
+                    fetched automatically.
                 </p>
             </div>
         </div>

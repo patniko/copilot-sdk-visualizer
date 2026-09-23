@@ -6,7 +6,7 @@ import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
 import { ExternalLink } from "lucide-react";
 import { S2S_AUTH_DOCS } from "../content/sdk-docs";
-import { copilotModelCatalog, copilotModelOptions } from "../content/models";
+import { copilotModelOptions } from "../content/models";
 
 const endpointExamples = {
     openai: "https://api.openai.com/v1",
@@ -335,20 +335,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                                 })
                             }
                             error={issueFor(issues, "model.id")}
-                            hint={
-                                <>
-                                    Choose from the{" "}
-                                    <a
-                                        href={copilotModelCatalog.sources.runtime}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        bundled public model catalog
-                                    </a>
-                                    , or leave model selection to the host. Account and organization policy
-                                    determine actual availability.
-                                </>
-                            }
+                            hint="Choose from the bundled model catalog, or leave model selection to the host. Account and organization policy determine actual availability."
                         />
                     )}
                     <SelectField

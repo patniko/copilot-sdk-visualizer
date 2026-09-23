@@ -20,7 +20,7 @@ describe("shared educational help", () => {
             expect(help.boundary.length).toBeGreaterThan(20);
             expect(help.sources.length).toBeGreaterThan(0);
             for (const source of help.sources) {
-                if (source.url) expect(source.url).toMatch(/\/blob\/[a-f0-9]{40}\//);
+                if (source.url) expect(source.url).toMatch(/^https:\/\//);
             }
             if ("details" in help) {
                 expect(help.scope).not.toBe("");

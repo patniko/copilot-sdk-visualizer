@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { describe, expect, it } from "vitest";
-import { getSource, reference } from "./reference";
+import { getSource } from "./reference";
 import { capabilitySides, runtimeCapabilities, runtimeCapability, turnWalkthrough } from "./runtime-map";
 import { sdkDocsForView } from "./sdk-docs";
 
@@ -13,7 +13,7 @@ describe("runtime capability map", () => {
         expect(capabilitySides.right).toHaveLength(5);
     });
 
-    it("grounds every capability in pinned sources, ownership, and a real destination", () => {
+    it("grounds every capability in maintained references, ownership, and a real destination", () => {
         expect(new Set(runtimeCapabilities.map((entry) => entry.id)).size).toBe(runtimeCapabilities.length);
         for (const capability of runtimeCapabilities) {
             expect(capability.provides).toHaveLength(2);
@@ -22,9 +22,7 @@ describe("runtime capability map", () => {
             expect(capability.sources.length).toBeGreaterThan(0);
             expect(sdkDocsForView(capability.view)).toBeDefined();
             for (const source of capability.sources) {
-                expect(getSource(source).url).toMatch(
-                    new RegExp(`/blob/(${reference.revisions.sdk}|${reference.revisions.runtime})/`),
-                );
+                expect(getSource(source).label.length).toBeGreaterThan(3);
             }
             for (const id of capability.related) {
                 expect(id).not.toBe(capability.id);

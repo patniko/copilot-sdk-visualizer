@@ -4,7 +4,6 @@ import {
     Activity,
     BrainCircuit,
     Database,
-    ExternalLink,
     Eye,
     Gauge,
     LockKeyhole,
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 import { advancedCategories, advancedControls, advancedSupportLevels } from "../content/advanced-controls";
 import type { AdvancedCategory, AdvancedSupport } from "../content/advanced-controls";
-import { reference } from "../content/reference";
 import { Badge, EmptyState, Notice, SelectField, TextField } from "./ui";
 import "../advanced.css";
 
@@ -229,19 +227,9 @@ export function AdvancedEditor() {
                                                     <dd>{control.readOnlyReason}</dd>
                                                 </div>
                                             </dl>
-                                            <a
-                                                className="hb-advanced-source"
-                                                href={control.sourceUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
+                                            <span className="hb-advanced-source">
                                                 {control.sourceLabel}
-                                                <ExternalLink size={12} aria-hidden="true" />
-                                                <span className="hb-sr-only">
-                                                    {" "}
-                                                    (opens source in a new tab)
-                                                </span>
-                                            </a>
+                                            </span>
                                         </article>
                                     ))}
                                 </div>
@@ -260,9 +248,8 @@ export function AdvancedEditor() {
             <div className="hb-reference-stamp">
                 <LockKeyhole size={15} aria-hidden="true" />
                 <p>
-                    Source snapshot: SDK <code>{reference.revisions.sdk.slice(0, 7)}</code> and runtime{" "}
-                    <code>{reference.revisions.runtime.slice(0, 7)}</code>. Secret values, experiment
-                    assignments, trust bypasses, and operator routing overrides are intentionally excluded.
+                    Secret values, experiment assignments, trust bypasses, and operator routing overrides are
+                    intentionally excluded.
                 </p>
             </div>
         </div>

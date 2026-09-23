@@ -6,7 +6,6 @@ import type { BuiltinName } from "../content/builtin-tools";
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
 import { inputKindLabels, toolActionLabel } from "./tool-catalog-ui";
-import { ToolCatalogSources } from "./ToolCatalogSources";
 import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
 import { Badge, Button, ChoiceField, Notice, TextAreaField } from "./ui";
@@ -283,14 +282,6 @@ export function BuiltinToolDetail({
                     </p>
                 </section>
             )}
-            <details className="hb-tool-evidence">
-                <summary>Pinned sources ({spec.sources.length})</summary>
-                <ToolCatalogSources sources={spec.sources} />
-                <p className="hb-field-hint">
-                    Snapshot <code title={toolCatalog.revision}>{toolCatalog.revision.slice(0, 7)}</code>.
-                    Links may require organization access.
-                </p>
-            </details>
         </article>
     );
 }

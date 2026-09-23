@@ -315,7 +315,6 @@ export const pythonAdapter = {
                           "RuntimeConnection.for_inprocess() accepts no path/args. The runner sets COPILOT_CLI_PATH before constructing the client; it does not pass forbidden client env/telemetry/working_directory options. A selected workspace remains a separate session option.",
                       ]
                     : []),
-                `Python signatures: https://github.com/github/copilot-sdk/blob/${SDK_COMMIT}/python/copilot/client.py#L2258-L2344; host callbacks: python/copilot/session.py#L403-L576; storage: python/copilot/session_fs_provider.py#L52-L148.`,
             ],
             sources,
         };

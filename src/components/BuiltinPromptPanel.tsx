@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { useId, useState } from "react";
-import { BookOpen, ExternalLink, Search } from "lucide-react";
+import { BookOpen, Search } from "lucide-react";
 import { previewPromptSection, promptReference } from "../content/prompts";
 import type { BuiltinPromptReference } from "../content/prompts";
 import { inputsInReference, promptInputs } from "../content/prompt-inputs";
@@ -128,11 +128,6 @@ function PromptReferencePreview({
                         <span>{kindLabels[section.kind]}</span>
                     </span>
                 </div>
-                <a href={section.source} target="_blank" rel="noopener noreferrer">
-                    Pinned source
-                    <ExternalLink size={13} aria-hidden="true" />
-                    <span className="hb-sr-only"> for {section.id} (opens in a new tab)</span>
-                </a>
             </div>
             <p className="hb-field-hint">{section.note}</p>
             {section.members && section.members.length > 0 && (
@@ -230,11 +225,6 @@ function PromptReferencePreview({
                     </p>
                 </div>
             )}
-            <p className="hb-prompt-provenance">
-                Repository snapshot{" "}
-                <code title={promptReference.revision}>{promptReference.revision.slice(0, 7)}</code>. Source
-                links may require organization access.
-            </p>
         </div>
     );
 }

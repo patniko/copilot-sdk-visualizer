@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { z } from "zod";
-import snapshot from "./model-catalog.json";
+import snapshot from "./model-catalog.public.json";
 
-const revision = z.string().regex(/^[a-f0-9]{40}$/);
 export const copilotModelCatalog = z
     .object({
-        revisions: z.object({ sdk: revision, runtime: revision }),
-        sources: z.object({ sdk: z.url(), runtime: z.url() }),
         modelIds: z
             .array(
                 z

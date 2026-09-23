@@ -335,7 +335,7 @@ function BlockerCard({
                         }
                     >
                         <BookOpen size={14} aria-hidden="true" />
-                        Evidence
+                        Review details
                     </Button>
                 )}
             </div>

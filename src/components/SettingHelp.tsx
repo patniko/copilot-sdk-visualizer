@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { useId } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { CircleHelp, ExternalLink, X } from "lucide-react";
+import { CircleHelp, X } from "lucide-react";
 import type { ToggleHelp, ValueHelp } from "../content/help-types";
 import "../setting-help.css";
 
@@ -109,23 +109,6 @@ export function SettingHelp(props: SettingHelpProps) {
                         These explanations distinguish planner choices, SDK options, and required host code. A
                         valid configuration is not an authorization or deployment-readiness guarantee.
                     </p>
-                    <div className="hb-setting-help-sources">
-                        {help.sources.map((source) =>
-                            source.url ? (
-                                <a
-                                    key={source.url}
-                                    href={source.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {source.label}
-                                    <ExternalLink size={12} aria-hidden="true" />
-                                </a>
-                            ) : (
-                                <span key={source.label}>{source.label}</span>
-                            ),
-                        )}
-                    </div>
                     <Popover.Arrow className="hb-setting-help-arrow" />
                 </Popover.Content>
             </Popover.Portal>

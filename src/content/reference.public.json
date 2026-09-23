@@ -1,0 +1,1218 @@
+{
+    "$comment": "Copyright (c) Microsoft Corporation. All rights reserved. Generated research snapshot; no runtime or SDK source dependency.",
+    "asOf": "2026-09-13",
+    "revisions": {
+        "runtime": "efebfd34dfa68830b11f49302fd88d12950df2e4",
+        "sdk": "f45c46fd1812f8bed5b4cbc250f47177c83068f0"
+    },
+    "sources": {
+        "author-direction": {
+            "label": "Author's architecture direction",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "manual": {
+            "label": "SDK field manual, chapters 01, 05, 12, and 13",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-core": {
+            "label": "Runtime core and native host boundary",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-leaves": {
+            "label": "Runtime feature-registration seam",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "native-host": {
+            "label": "Thin TypeScript native-runtime loader",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-contract": {
+            "label": "sdk-contract is the wire source of truth",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-dispatch": {
+            "label": "One native dispatcher across transports",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-loop": {
+            "label": "Four native interaction seams",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-tools": {
+            "label": "Session-scoped native, host, and MCP tool dispatch",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-mode": {
+            "label": "Runtime SessionMode is a separate concept",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-skills": {
+            "label": "Implemented reverse skill-provider transport",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-skill-contract": {
+            "label": "Catalog metadata and lazy skill content contract",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-output": {
+            "label": "Per-turn responseFormat contract and limits",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "runtime-storage": {
+            "label": "Client-provided session filesystem registration",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-overview": {
+            "label": "SDK engine framing and six languages",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-modes": {
+            "label": "SDK client modes: empty and copilot-cli",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-default": {
+            "label": "Current default and empty-mode persistence requirements",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-empty": {
+            "label": "How empty mode lowers to explicit runtime settings",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-transports": {
+            "label": "Process, connection, and experimental in-process options",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-codegen": {
+            "label": "SDK generation consumes the pinned runtime schemas",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-protocol": {
+            "label": "Inspected SDK protocol version bounds",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-skill-schema": {
+            "label": "Skill-provider DTOs in generated Node contracts",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-callbacks": {
+            "label": "Inspected Node client-session callback groups",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-tools": {
+            "label": "Typed tools and host handlers",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-isolated-tools": {
+            "label": "Curated isolated tool set",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-prompts": {
+            "label": "Append, replace, and customize system messages",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-attachments": {
+            "label": "Message and attachment input",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-hooks": {
+            "label": "SessionHooks callback surface",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-permissions": {
+            "label": "Permission callback and approve-all helper",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-mcp": {
+            "label": "MCP server configuration",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-agents": {
+            "label": "Custom agent configuration and selection",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-providers": {
+            "label": "Provider endpoints and credential callbacks",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-auth": {
+            "label": "Per-session GitHub credential options",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-storage": {
+            "label": "Host-owned SessionFsProvider",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-events": {
+            "label": "Send, wait, and event-driven completion",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-lifecycle": {
+            "label": "Disconnect versus delete",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-model-policy": {
+            "label": "Runtime-authoritative model allowlisting RPC",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-defaults": {
+            "label": "Default marketplace registry",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-cli": {
+            "label": "CLI installation calls shared plugin management",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-api": {
+            "label": "Shared marketplace API facade",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-catalog": {
+            "label": "Marketplace entry is a name and package source",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-management": {
+            "label": "Installation and loading are separate features",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-active": {
+            "label": "Effective plugin snapshot separates active set and inventory",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-policy": {
+            "label": "Plugin activation policy precedence",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-live": {
+            "label": "Live local plugin records do not require cached installation",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-directories": {
+            "label": "Explicit runtime plugin directories",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-builtins": {
+            "label": "Host-only built-in plugin registration",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-formats": {
+            "label": "Manifest precedence and exact Agent Plugins schema",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-components": {
+            "label": "Portable components versus Copilot-specific additions",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-validation": {
+            "label": "Schema-gated discovery and non-fatal manifest warnings",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-extension-discovery": {
+            "label": "Executable extension directories are a separate concept",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-host-enable": {
+            "label": "Extensions require host enablement",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "override-planning": {
+            "label": "Explicit tool collision and override planning",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "override-schema": {
+            "label": "The host definition supplies model-facing tool metadata",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "override-dispatch": {
+            "label": "An explicit external override is dispatched before the native implementation",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "override-permissions": {
+            "label": "External overrides use custom-tool permission requests",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "override-advertised": {
+            "label": "Override lookup uses the valid advertised definition",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "plugin-reload-boundary": {
+            "label": "Declared plugin reload fan-out",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-mutable-options": {
+            "label": "The live options patch is a narrower mutable subset",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-live-tools": {
+            "label": "Live tool declaration replacement does not replace the local handler map",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-filter-names": {
+            "label": "Bare names and source-qualified tool filters",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-filter-rules": {
+            "label": "Filter validation and exclusion precedence",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-tool-search": {
+            "label": "Tool search configuration and override metadata",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-result-envelope": {
+            "label": "Explicit external-tool result envelope",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-override-example": {
+            "label": "SDK integration example replaces built-in grep",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-discovery-option": {
+            "label": "Configuration discovery is an explicit option",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-pack-inputs": {
+            "label": "SDK skill/plugin directories and MCP-disable lifetime",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-managed-lifetime": {
+            "label": "Managed settings are startup policy, not persisted mutable state",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-resume-bindings": {
+            "label": "Resume re-registers application-owned handlers",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-startup-options": {
+            "label": "Client startup and base-directory options",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-idle-option": {
+            "label": "Server-wide idle-session cleanup",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-storage-binding": {
+            "label": "Client session filesystem requires a real provider binding",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-storage-capabilities": {
+            "label": "Session filesystem and optional SQLite capability",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-infinite-options": {
+            "label": "Infinite-session and compaction settings",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-large-output": {
+            "label": "Large-output handling can spill to temporary files",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-stream-options": {
+            "label": "Session streaming and event options",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-session-config": {
+            "label": "High-level session configuration surface",
+            "scope": "Maintained in the private research snapshot."
+        },
+        "sdk-model-change": {
+            "label": "Public model changes versus live wire options",
+            "scope": "Maintained in the private research snapshot."
+        }
+    },
+    "controls": [
+        {
+            "name": "systemMessage",
+            "axis": "cfg-prompt",
+            "description": "Append, replace, or customize prompt sections. Not part of the general live options patch.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume",
+            "stability": "High-level SDK",
+            "source": "sdk-prompts"
+        },
+        {
+            "name": "skipCustomInstructions",
+            "axis": "cfg-prompt",
+            "description": "Control custom-instruction inclusion independently of prompt replacement.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "availableTools",
+            "axis": "cfg-inventory",
+            "description": "Include bare names or source-qualified tool selectors. Live patches use arrays, not ToolSet builders.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-filter-rules"
+        },
+        {
+            "name": "excludedTools",
+            "axis": "cfg-inventory",
+            "description": "Remove selected tools from exposure; exclusions win over inclusions.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-filter-rules"
+        },
+        {
+            "name": "toolSearch",
+            "axis": "cfg-inventory",
+            "description": "Configure tool-search enablement and defer threshold without replacing its implementation.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-tool-search"
+        },
+        {
+            "name": "tools",
+            "axis": "cfg-handler",
+            "description": "Declare custom tools, schemas, optional handlers, and explicit replacements.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; handler registration",
+            "stability": "High-level SDK",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "overridesBuiltInTool",
+            "axis": "cfg-handler",
+            "description": "Opt into same-name built-in replacement. Use the bare tool name, not a source-qualified filter.",
+            "scopes": [
+                "tool"
+            ],
+            "when": "Tool declaration",
+            "stability": "High-level SDK; bounded by runtime reservations",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "handler",
+            "axis": "cfg-handler",
+            "description": "Application execution callback. Handlerless declarations require explicit pending-request resolution.",
+            "scopes": [
+                "tool"
+            ],
+            "when": "Host callback binding",
+            "stability": "High-level SDK; not persisted JSON",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "parameters",
+            "axis": "cfg-handler",
+            "description": "Raw JSON Schema, Zod-like schema, or omitted parameters. defineTool itself is not an argument-validation wrapper.",
+            "scopes": [
+                "tool"
+            ],
+            "when": "Tool declaration",
+            "stability": "High-level SDK; host validates semantics",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "defer",
+            "axis": "cfg-inventory",
+            "description": "Choose auto or never for a tool's deferred exposure behavior.",
+            "scopes": [
+                "tool"
+            ],
+            "when": "Tool declaration",
+            "stability": "High-level SDK",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "isTerminal",
+            "axis": "cfg-handler",
+            "description": "Declare that a successful tool should end the agent turn.",
+            "scopes": [
+                "tool"
+            ],
+            "when": "Tool declaration",
+            "stability": "High-level SDK; success-dependent behavior",
+            "source": "sdk-tools"
+        },
+        {
+            "name": "mcpServers",
+            "axis": "cfg-handler",
+            "description": "Supply approved local or remote MCP integrations and their tool scopes.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-mcp"
+        },
+        {
+            "name": "rpc.tools.set",
+            "axis": "cfg-handler",
+            "description": "Replace this connection's external wire declarations, not its local SDK handler map.",
+            "scopes": [
+                "live"
+            ],
+            "when": "Live connection-scoped RPC",
+            "stability": "Experimental",
+            "source": "sdk-live-tools"
+        },
+        {
+            "name": "workingDirectory",
+            "axis": "cfg-context",
+            "description": "Choose a client or session working directory. A live session directory change uses the options patch.",
+            "scopes": [
+                "client",
+                "session",
+                "live"
+            ],
+            "when": "Client / create / resume; live patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "attachments",
+            "axis": "cfg-context",
+            "description": "Supply file, directory, selection, or blob context with a sent message.",
+            "scopes": [
+                "live"
+            ],
+            "when": "Per turn: send",
+            "stability": "High-level SDK",
+            "source": "sdk-attachments"
+        },
+        {
+            "name": "largeOutput",
+            "axis": "cfg-context",
+            "description": "Control oversized-result handling; enabled defaults can spill to temporary files.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-large-output"
+        },
+        {
+            "name": "enableConfigDiscovery",
+            "axis": "cfg-packs",
+            "description": "Explicitly opt into configuration discovery. The documented default is false, even with the coding client mode.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-discovery-option"
+        },
+        {
+            "name": "enableSkills",
+            "axis": "cfg-packs",
+            "description": "Enable or disable skill behavior independently of an allowed skill tool name.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "skillDirectories",
+            "axis": "cfg-packs",
+            "description": "Supply reviewed skill directories; this is distinct from a lazy service-backed skill provider.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-pack-inputs"
+        },
+        {
+            "name": "pluginDirectories",
+            "axis": "cfg-packs",
+            "description": "Supply explicit plugin directories even when ambient discovery is disabled.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-pack-inputs"
+        },
+        {
+            "name": "disabledMcpServers",
+            "axis": "cfg-packs",
+            "description": "Suppress configured servers; a resident resume cannot use this field to stop already-running servers.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; lifecycle-sensitive",
+            "stability": "High-level SDK; not a shutdown operation",
+            "source": "sdk-pack-inputs"
+        },
+        {
+            "name": "session.plugins.reload",
+            "axis": "cfg-packs",
+            "description": "Refresh the runtime's declared component subset, not every capability or host callback atomically.",
+            "scopes": [
+                "runtime"
+            ],
+            "when": "Runtime session operation",
+            "stability": "Projection and component scope vary",
+            "source": "plugin-reload-boundary"
+        },
+        {
+            "name": "customAgents",
+            "axis": "cfg-agents",
+            "description": "Declare specialist prompts, tools, models, skills, and MCP configuration.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-agents"
+        },
+        {
+            "name": "agent",
+            "axis": "cfg-agents",
+            "description": "Choose the initial custom agent; separate select/deselect RPCs can change selection.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; specialized RPCs",
+            "stability": "Live agent RPCs are experimental",
+            "source": "sdk-agents"
+        },
+        {
+            "name": "defaultAgent",
+            "axis": "cfg-agents",
+            "description": "Configure root-agent behavior; excludedTools hides from the primary agent without excluding the tool from children.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK; scope matters",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "customAgents[].model",
+            "axis": "cfg-agents",
+            "description": "Choose a specialist model preference. Unavailability can fall back to the parent model rather than hard-fail.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Agent declaration",
+            "stability": "High-level SDK; not a strict no-fallback policy",
+            "source": "sdk-agents"
+        },
+        {
+            "name": "model",
+            "axis": "cfg-models",
+            "description": "Select the session model; prefer the public session.setModel method for live changes.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; setModel",
+            "stability": "High-level SDK",
+            "source": "sdk-model-change"
+        },
+        {
+            "name": "reasoningEffort",
+            "axis": "cfg-models",
+            "description": "Select supported reasoning effort for the model.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch experimental; model-dependent",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "contextTier",
+            "axis": "cfg-models",
+            "description": "Select a supported model context tier.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch experimental; model-dependent",
+            "source": "sdk-mutable-options"
+        },
+        {
+            "name": "provider",
+            "axis": "cfg-models",
+            "description": "Configure the provider endpoint and credentials. Updating wire configuration does not register new host token callbacks.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; live options patch",
+            "stability": "Live patch experimental; callback binding is separate",
+            "source": "sdk-providers"
+        },
+        {
+            "name": "rpc.model.setAllowedModels",
+            "axis": "cfg-models",
+            "description": "Apply session-level model allowlisting; CAPI identifiers intersect repository policy.",
+            "scopes": [
+                "live"
+            ],
+            "when": "Live session RPC",
+            "stability": "Experimental; not a per-agent fallback switch",
+            "source": "sdk-model-policy"
+        },
+        {
+            "name": "gitHubToken",
+            "axis": "cfg-identity",
+            "description": "Supply a client or session GitHub identity. Session scope differs from process identity.",
+            "scopes": [
+                "client",
+                "session"
+            ],
+            "when": "Client / create / resume; not live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-auth"
+        },
+        {
+            "name": "gitHubTokenProvider",
+            "axis": "cfg-identity",
+            "description": "Provide refreshable session credentials; mutually exclusive with a static session token.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume callback registration",
+            "stability": "Host callback; not persisted JSON",
+            "source": "sdk-auth"
+        },
+        {
+            "name": "useLoggedInUser",
+            "axis": "cfg-identity",
+            "description": "Decide whether client authentication may use the logged-in user's credentials.",
+            "scopes": [
+                "client"
+            ],
+            "when": "Client construction",
+            "stability": "High-level SDK; empty mode does not disable it automatically",
+            "source": "sdk-default"
+        },
+        {
+            "name": "bearerTokenProvider",
+            "axis": "cfg-identity",
+            "description": "Supply provider bearer tokens on demand; this is separate from the GitHub session token provider.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Provider callback registration",
+            "stability": "Experimental",
+            "source": "sdk-providers"
+        },
+        {
+            "name": "onPermissionRequest",
+            "axis": "cfg-policy",
+            "description": "Bind the application's permission policy. Omission can leave requests pending for explicit resolution.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; authorization still host-owned",
+            "source": "sdk-permissions"
+        },
+        {
+            "name": "hooks",
+            "axis": "cfg-policy",
+            "description": "Intercept supported lifecycle, prompt, and tool stages with application callbacks.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; not an inner-loop replacement",
+            "source": "sdk-hooks"
+        },
+        {
+            "name": "managedSettings",
+            "axis": "cfg-policy",
+            "description": "Supply startup policy; it is not persisted and must be supplied again rather than treated as an ordinary live option.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume startup policy",
+            "stability": "Not a general mutable configuration field",
+            "source": "sdk-managed-lifetime"
+        },
+        {
+            "name": "onUserInputRequest",
+            "axis": "cfg-policy",
+            "description": "Handle user interaction, including the ask_user surface when available.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; requires a real host handler",
+            "source": "sdk-permissions"
+        },
+        {
+            "name": "onElicitationRequest",
+            "axis": "cfg-policy",
+            "description": "Handle structured host elicitation requests.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK; host interface",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "sessionId",
+            "axis": "cfg-storage",
+            "description": "Choose a session identity at creation or identify the session to resume.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create field / resume argument",
+            "stability": "Identity, not a live rename field",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "infiniteSessions",
+            "axis": "cfg-storage",
+            "description": "Configure persistence and compaction behavior; enabled by default, including in empty mode.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume; not general live patch",
+            "stability": "High-level SDK",
+            "source": "sdk-infinite-options"
+        },
+        {
+            "name": "sessionFs",
+            "axis": "cfg-storage",
+            "description": "Configure client-side session filesystem conventions and capabilities.",
+            "scopes": [
+                "client"
+            ],
+            "when": "Client construction",
+            "stability": "Experimental filesystem-shaped provider surface",
+            "source": "sdk-storage-capabilities"
+        },
+        {
+            "name": "createSessionFsProvider",
+            "axis": "cfg-storage",
+            "description": "Bind an actual host storage provider for each session when sessionFs is configured.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume provider registration",
+            "stability": "Experimental; not a no-op storage substitute",
+            "source": "sdk-storage-binding"
+        },
+        {
+            "name": "mode",
+            "axis": "cfg-storage",
+            "description": "Choose the empty or copilot-cli client baseline; this is separate from runtime interaction mode.",
+            "scopes": [
+                "client"
+            ],
+            "when": "Client construction, not a live profile switch",
+            "stability": "High-level SDK",
+            "source": "sdk-modes"
+        },
+        {
+            "name": "baseDirectory",
+            "axis": "cfg-storage",
+            "description": "Choose an explicit local state base for a client-owned runtime.",
+            "scopes": [
+                "client"
+            ],
+            "when": "Client construction",
+            "stability": "High-level SDK; persistence choice",
+            "source": "sdk-startup-options"
+        },
+        {
+            "name": "sessionIdleTimeoutSeconds",
+            "axis": "cfg-storage",
+            "description": "Configure server-wide idle-session cleanup, not the timeout of a model turn.",
+            "scopes": [
+                "client"
+            ],
+            "when": "Client / runtime startup",
+            "stability": "Startup-only; default cleanup disabled",
+            "source": "sdk-idle-option"
+        },
+        {
+            "name": "streaming",
+            "axis": "cfg-events",
+            "description": "Enable delta delivery at session setup. The live options patch uses the different name enableStreaming.",
+            "scopes": [
+                "session",
+                "live"
+            ],
+            "when": "Create / resume; enableStreaming live patch",
+            "stability": "Live patch is experimental",
+            "source": "sdk-stream-options"
+        },
+        {
+            "name": "onEvent",
+            "axis": "cfg-events",
+            "description": "Attach a creation/resume-time host observer.",
+            "scopes": [
+                "session"
+            ],
+            "when": "Create / resume callback binding",
+            "stability": "High-level SDK",
+            "source": "sdk-session-config"
+        },
+        {
+            "name": "session.on",
+            "axis": "cfg-events",
+            "description": "Subscribe to typed session events and unsubscribe locally as the host UI or workflow changes.",
+            "scopes": [
+                "live"
+            ],
+            "when": "Live host subscription",
+            "stability": "High-level SDK",
+            "source": "sdk-events"
+        },
+        {
+            "name": "responseFormat",
+            "axis": "cfg-events",
+            "description": "Newer provider-native per-turn format contract, not present in this Node SDK projection; output remains text.",
+            "scopes": [
+                "runtime"
+            ],
+            "when": "Runtime turn request",
+            "stability": "Runtime contract; provider and schema limitations",
+            "source": "runtime-output"
+        },
+        {
+            "name": "Harness methods and evals",
+            "axis": "cfg-quality",
+            "description": "Choose domain methods, evaluation data, thresholds, and release policy outside a turnkey SDK field.",
+            "scopes": [
+                "host"
+            ],
+            "when": "Host design and release lifecycle",
+            "stability": "Host-owned responsibility, not an API property",
+            "source": "author-direction"
+        }
+    ],
+    "axes": [
+        {
+            "id": "cfg-prompt",
+            "label": "System prompt",
+            "title": "System prompt policy",
+            "summary": "Decide the agent's identity, operating instructions, and domain methods independently of its tools.",
+            "interfaces": [
+                "systemMessage",
+                "append",
+                "replace",
+                "customize"
+            ],
+            "sources": [
+                "sdk-prompts",
+                "sdk-empty"
+            ]
+        },
+        {
+            "id": "cfg-inventory",
+            "label": "Tool inventory",
+            "title": "Tool availability",
+            "summary": "Choose what can be advertised to the model, separately from how each tool executes.",
+            "interfaces": [
+                "availableTools",
+                "excludedTools",
+                "tools",
+                "mcpServers"
+            ],
+            "sources": [
+                "sdk-tools",
+                "sdk-filter-names",
+                "sdk-isolated-tools"
+            ]
+        },
+        {
+            "id": "cfg-handler",
+            "label": "Tool implementation",
+            "title": "Tool implementation and replacement",
+            "summary": "The same advertised tool can execute a different host-owned implementation when deliberately overridden.",
+            "interfaces": [
+                "defineTool",
+                "overridesBuiltInTool",
+                "parameters",
+                "handler"
+            ],
+            "sources": [
+                "override-planning",
+                "override-schema",
+                "override-dispatch",
+                "override-permissions",
+                "sdk-live-tools"
+            ]
+        },
+        {
+            "id": "cfg-context",
+            "label": "Context sources",
+            "title": "Context and instruction sources",
+            "summary": "Decide what enters the model context: messages, attachments, discovered instructions, and domain guidance.",
+            "interfaces": [
+                "prompt",
+                "attachments",
+                "organizationCustomInstructions",
+                "systemMessage"
+            ],
+            "sources": [
+                "sdk-attachments",
+                "sdk-prompts",
+                "sdk-empty",
+                "sdk-large-output"
+            ]
+        },
+        {
+            "id": "cfg-packs",
+            "label": "Skills + plugins",
+            "title": "Reusable capability packs",
+            "summary": "Choose reusable instructions and bundled capabilities independently of the base harness profile.",
+            "interfaces": [
+                "enableConfigDiscovery",
+                "enableSkills",
+                "skillDirectories",
+                "pluginDirectories",
+                "plugins.builtin.set [runtime]"
+            ],
+            "sources": [
+                "sdk-empty",
+                "sdk-pack-inputs",
+                "sdk-discovery-option",
+                "plugin-builtins",
+                "plugin-components"
+            ]
+        },
+        {
+            "id": "cfg-agents",
+            "label": "Agents + delegation",
+            "title": "Agents and delegation",
+            "summary": "Decide whether and how specialist agents participate in a workflow.",
+            "interfaces": [
+                "customAgents",
+                "agent",
+                "defaultAgent",
+                "model",
+                "skills",
+                "mcpServers"
+            ],
+            "sources": [
+                "sdk-agents",
+                "sdk-empty"
+            ]
+        },
+        {
+            "id": "cfg-models",
+            "label": "Models + providers",
+            "title": "Model and provider configuration",
+            "summary": "Harness opinion does not constrain an integrator to one supported model family or endpoint.",
+            "interfaces": [
+                "model",
+                "provider",
+                "reasoningEffort",
+                "contextTier",
+                "rpc.model.setAllowedModels"
+            ],
+            "sources": [
+                "sdk-providers",
+                "sdk-model-policy",
+                "runtime-loop"
+            ]
+        },
+        {
+            "id": "cfg-policy",
+            "label": "Hooks + permissions",
+            "title": "Hooks, permissions, and approvals",
+            "summary": "Put domain decisions at defined execution boundaries rather than trying to encode all authority in the prompt.",
+            "interfaces": [
+                "hooks",
+                "onPermissionRequest",
+                "onUserInputRequest",
+                "onElicitationRequest"
+            ],
+            "sources": [
+                "sdk-hooks",
+                "sdk-permissions",
+                "runtime-loop"
+            ]
+        },
+        {
+            "id": "cfg-identity",
+            "label": "Identity + credentials",
+            "title": "Identity and credential ownership",
+            "summary": "Bind runtime calls to the intended host or user identity rather than inheriting unrelated ambient credentials.",
+            "interfaces": [
+                "gitHubToken",
+                "gitHubTokenProvider",
+                "provider",
+                "bearerTokenProvider"
+            ],
+            "sources": [
+                "sdk-auth",
+                "sdk-providers"
+            ]
+        },
+        {
+            "id": "cfg-storage",
+            "label": "Session state",
+            "title": "Session state, storage, and lifecycle",
+            "summary": "Choose session identity, lifetime, compaction, and persistence without confusing session state with a code checkout.",
+            "interfaces": [
+                "sessionId",
+                "baseDirectory",
+                "sessionFs",
+                "createSessionFsProvider",
+                "infiniteSessions"
+            ],
+            "sources": [
+                "sdk-default",
+                "sdk-storage",
+                "runtime-storage",
+                "sdk-lifecycle"
+            ]
+        },
+        {
+            "id": "cfg-events",
+            "label": "Events + outputs",
+            "title": "Events, telemetry, and output contracts",
+            "summary": "Choose how the host observes behavior and turns model outputs into product state.",
+            "interfaces": [
+                "streaming",
+                "onEvent",
+                "session.on",
+                "responseFormat [runtime]"
+            ],
+            "sources": [
+                "sdk-events",
+                "sdk-attachments",
+                "runtime-output"
+            ]
+        },
+        {
+            "id": "cfg-quality",
+            "label": "Methods + evaluation",
+            "title": "Methods and evaluation ownership",
+            "summary": "Choosing a harness means owning a behavior configuration and an evidence-based quality bar, not only setting API fields.",
+            "interfaces": [
+                "systemMessage",
+                "customAgents",
+                "host workflows",
+                "session events",
+                "domain evals (host-owned)"
+            ],
+            "sources": [
+                "author-direction",
+                "sdk-prompts",
+                "sdk-agents",
+                "runtime-loop",
+                "sdk-events"
+            ]
+        }
+    ],
+    "gaps": [
+        {
+            "id": "gap-skills",
+            "title": "Serve skills directly from a CMS",
+            "status": "SDK projection gap",
+            "summary": "A host wants to fetch tenant-specific skills from its service when needed, instead of shipping folders.",
+            "runtime": "Directory inputs and implemented native skillProvider.list/read. The inspected Node SDK projects DTOs, but no high-level option or callback group was found.",
+            "boundary": "Do not call this purely a missing runtime implementation. The gap spans ergonomic host bindings and a content contract currently limited to text-only SKILL.md, not related assets.",
+            "opportunity": "Expose supported per-session provider callbacks in each SDK and define asset, ownership, and lifecycle semantics. Until then, a host can materialize reviewed files through the existing directory seam.",
+            "sources": [
+                "runtime-skills",
+                "runtime-skill-contract",
+                "sdk-skill-schema",
+                "sdk-callbacks"
+            ]
+        },
+        {
+            "id": "gap-storage",
+            "title": "Store sessions in a product database",
+            "status": "Filesystem-shaped abstraction",
+            "summary": "A product wants session state in its existing encrypted database, under its own retention and data-governance rules.",
+            "runtime": "The host-provided filesystem-shaped session interface, including its path conventions and optional SQLite operations.",
+            "boundary": "This is not 'no pluggable storage exists.' The limitation is the abstraction level and adapter work required. Removing project tools does not remove session-state requirements.",
+            "opportunity": "Define a narrower session-store contract with explicit durability and concurrency semantics, if real workloads justify it. Keep the current filesystem adapter path documented and supportable.",
+            "sources": [
+                "sdk-storage",
+                "runtime-storage",
+                "sdk-default"
+            ]
+        },
+        {
+            "id": "gap-live-plugins",
+            "title": "Swap tool implementations and packs live",
+            "status": "Lifecycle and binding boundary",
+            "summary": "A long-running host wants to replace every resource in a pack while sessions continue, with one consistent effective version.",
+            "runtime": "Live external declaration updates, explicit inputs, resume-time callback binding, and a declared plugin reload path for installed state/skills, MCP, agents, hooks, and configured extensions.",
+            "boundary": "tools.set does not replace the SDK handler map. Plugin reload's declared fan-out omits rules/LSP. Built-in registration is startup-scoped. disabledMcpServers on resident resume does not stop running servers.",
+            "opportunity": "Define per-session versioned resource snapshots, mutability rules, and atomic replacement/restart behavior across component types rather than promising a universal reload.",
+            "sources": [
+                "sdk-live-tools",
+                "sdk-resume-bindings",
+                "plugin-reload-boundary",
+                "plugin-builtins",
+                "sdk-pack-inputs"
+            ]
+        },
+        {
+            "id": "gap-portability",
+            "title": "Reuse an arbitrary foreign plugin unchanged",
+            "status": "Component-specific compatibility",
+            "summary": "A team wants a package from another agent ecosystem to behave identically in its own product without repackaging or semantic changes.",
+            "runtime": "Defined manifest precedence, exact-schema selection, portable skills/MCP, and Copilot-specific component discovery under its namespace.",
+            "boundary": "Spec-mode warnings are not strict conformance certification. The manifest's extensions data map is distinct from executable JS extension directories.",
+            "opportunity": "Co-develop portable component contracts and explicit adapters, backed by behavior fixtures. State exactly which semantics are preserved and which are host-specific.",
+            "sources": [
+                "plugin-formats",
+                "plugin-components",
+                "plugin-validation",
+                "plugin-extension-discovery"
+            ]
+        },
+        {
+            "id": "gap-output",
+            "title": "Consume validated typed output everywhere",
+            "status": "Projection and provider boundary",
+            "summary": "A business workflow needs a typed final result with predictable failure behavior across supported providers and language clients.",
+            "runtime": "The newer provider-native format contract. The host can separately parse and validate output where its chosen runtime/SDK path exposes the required behavior.",
+            "boundary": "No universal fallback is promised. Factory-subagent schema support is a different surface from a general final-response contract.",
+            "opportunity": "Complete language projections and define a portable typed-result/error contract. Keep provider limitations and host validation explicit rather than silently returning success-shaped fallbacks.",
+            "sources": [
+                "runtime-output",
+                "sdk-attachments",
+                "sdk-events"
+            ]
+        },
+        {
+            "id": "gap-loop",
+            "title": "Replace the inner execution algorithm",
+            "status": "Internal seam, not a public replacement API",
+            "summary": "An integrator wants to replace the inner scheduling, retry, or request-processing algorithm rather than configure the behavior running inside it.",
+            "runtime": "Public prompt/tool/agent/hook configuration and host-owned outer orchestration. Internal Rust traits compose native model dispatch, tool invocation, processors, and event sinks.",
+            "boundary": "An internal trait is not evidence of a supported SDK override. This does not prevent an application from scheduling its own sessions or workflows outside the inner loop.",
+            "opportunity": "Identify a narrow policy or scheduling seam justified by concrete workloads, or deliberately keep the outer control plane with the host. Avoid exposing the entire internal loop as an unstable callback framework.",
+            "sources": [
+                "runtime-loop",
+                "sdk-hooks",
+                "sdk-agents",
+                "runtime-contract"
+            ]
+        }
+    ]
+}

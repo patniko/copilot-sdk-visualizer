@@ -1,5 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { Activity, ArrowDown, ArrowUpRight, Braces, ChevronRight, CircleDot, Layers3 } from "lucide-react";
+import {
+    Activity,
+    ArrowDown,
+    ArrowUpRight,
+    Braces,
+    ChevronRight,
+    Layers3,
+    PanelRightClose,
+} from "lucide-react";
 import { analyzePlan, hostContracts, toolSummary } from "../domain/analysis";
 import type { Decision } from "../domain/analysis";
 import type { HarnessPlan } from "../domain/plan";
@@ -23,12 +31,14 @@ export function PlanInspector({
     onEvidence,
     onBuild,
     onExport,
+    onCollapse,
     exportDisabled,
 }: {
     plan: HarnessPlan;
     onEvidence: (evidence: Evidence) => void;
     onBuild: () => void;
     onExport: () => void;
+    onCollapse: () => void;
     exportDisabled: boolean;
 }) {
     const summary = toolSummary(plan);
@@ -42,10 +52,15 @@ export function PlanInspector({
                     <p className="hb-kicker">Your composition</p>
                     <h2 id="live-plan-heading">Live plan</h2>
                 </div>
-                <span className="hb-live-indicator">
-                    <CircleDot size={13} aria-hidden="true" />
-                    Local preview
-                </span>
+                <button
+                    type="button"
+                    className="hb-inspector-toggle"
+                    aria-label="Collapse live plan"
+                    title="Collapse live plan"
+                    onClick={onCollapse}
+                >
+                    <PanelRightClose size={18} aria-hidden="true" />
+                </button>
             </div>
             <section
                 className="hb-runtime-map"
@@ -59,12 +74,12 @@ export function PlanInspector({
                         <strong>Capabilities &amp; context</strong>
                         <span>
                             {summary.inherited
-                                ? `Runtime selects built-ins; ${summary.removed.length} named exclusions`
-                                : `${summary.kept.length} selected built-in names, subject to gates`}
+                                ? `Runtime defaults · ${summary.removed.length} exclusions`
+                                : `${summary.kept.length} selected built-ins`}
                         </span>
                         <span>
-                            {summary.overridden.length} override requests / {plan.customTools.length} custom /{" "}
-                            {summary.mcpTools} MCP declarations
+                            {plan.customTools.length} custom · {summary.mcpTools} MCP ·{" "}
+                            {summary.overridden.length} overrides
                         </span>
                     </div>
                 </div>
@@ -74,75 +89,34 @@ export function PlanInspector({
                     <div>
                         <strong>{providerLabels[plan.model.provider]}</strong>
                         <span>
-                            {plan.events.streaming ? "Streaming" : "Non-streaming"} /{" "}
-                            {plan.events.observer ? "host event observer" : "no observer binding"}
+                            {plan.model.id || "Default model"} ·{" "}
+                            {plan.events.streaming ? "streaming" : "non-streaming"}
                         </span>
                     </div>
                 </div>
             </section>
             <section className="hb-inspector-section">
                 <div className="hb-inspector-section-heading">
-                    <h3>Current selection policy</h3>
-                    <Badge accent={!summary.inherited}>
-                        {summary.inherited ? "Runtime defaults" : "Explicit names"}
-                    </Badge>
+                    <h3>At a glance</h3>
                 </div>
-                <dl
-                    className="hb-count-grid hb-selection-count-grid"
-                    aria-label="Plan decisions, not enabled-tool counts"
-                >
+                <dl className="hb-plan-summary-grid">
                     <div>
-                        <dt>{summary.inherited ? "Default policy" : "Selected names"}</dt>
-                        <dd>{summary.kept.length}</dd>
+                        <dt>Tool policy</dt>
+                        <dd>{summary.inherited ? "Runtime defaults" : "Explicit selection"}</dd>
                     </div>
                     <div>
-                        <dt>Override requests</dt>
-                        <dd>{summary.overridden.length}</dd>
+                        <dt>Extensions</dt>
+                        <dd>{plan.customTools.length + summary.mcpTools}</dd>
                     </div>
                     <div>
-                        <dt>Custom declarations</dt>
-                        <dd>{plan.customTools.length}</dd>
+                        <dt>Host bindings</dt>
+                        <dd>{contracts.length}</dd>
                     </div>
                     <div>
-                        <dt>MCP declarations</dt>
-                        <dd>{summary.mcpTools}</dd>
+                        <dt>Open decisions</dt>
+                        <dd>{decisions.length}</dd>
                     </div>
                 </dl>
-                <p className="hb-inspector-note">
-                    {summary.removed.length} named exclusions.{" "}
-                    {summary.inherited
-                        ? "Default-policy entries are not excluded or overridden; the runtime still decides whether to offer them. They are not enabled-tool counts."
-                        : "Keep selects a name, not a guarantee of availability. Runtime, platform, feature, and permission gates still apply."}
-                </p>
-                <details className="hb-inspector-tool-reference">
-                    <summary>
-                        Reference coding defaults: {referenceBaselineNames.length} baseline entries
-                    </summary>
-                    <p>
-                        Illustrative online, local, top-level coding with split editing and no added
-                        allow/exclude filters. Not the current plan.
-                    </p>
-                    <div className="hb-chip-list">
-                        {referenceBaselineNames.map((name) => (
-                            <code key={name}>{name}</code>
-                        ))}
-                    </div>
-                    <p>
-                        {referenceDefaultGroups
-                            .filter((group) => group.status !== "baseline-enabled")
-                            .map((group) => `${group.names.length} ${group.status}`)
-                            .join(" / ")}
-                        .
-                    </p>
-                    <p>
-                        Shell families are platform-specific. Model, capability, service, and experiment
-                        conditions remain authoritative.
-                    </p>
-                    <p>
-                        {BUILTIN_NAMES.length} descriptors and {toolCatalog.context.aliases.length} separate
-                        selection aliases; aliases do not add tools.
-                    </p>
-                </details>
                 {unverifiedOverrides.length > 0 && (
                     <p className="hb-inspector-unverified">
                         {unverifiedOverrides.length} stored override{" "}
@@ -152,78 +126,128 @@ export function PlanInspector({
                     </p>
                 )}
             </section>
-            <section className="hb-inspector-section">
-                <div className="hb-inspector-section-heading">
-                    <h3>Required host contracts</h3>
-                    <Badge>{contracts.length}</Badge>
-                </div>
-                <ul className="hb-contract-list">
-                    {contracts.slice(0, 5).map((contract) => (
-                        <li key={contract}>
-                            <Braces size={13} aria-hidden="true" />
-                            <span>{contract}</span>
-                        </li>
-                    ))}
-                </ul>
-                {contracts.length > 5 && (
-                    <details className="hb-inspector-details">
-                        <summary>Show {contracts.length - 5} more bindings</summary>
-                        <ul className="hb-contract-list">
-                            {contracts.slice(5).map((contract) => (
-                                <li key={contract}>
-                                    <Braces size={13} aria-hidden="true" />
-                                    <span>{contract}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </details>
-                )}
-                <p className="hb-inspector-note">
-                    Declarations are not implementations. Build &amp; run turns these into explicit project
-                    integration requirements. Runtime-gated tools are potential capabilities, not confirmed
-                    active tools.
-                </p>
-            </section>
-            <section className="hb-inspector-section">
-                <div className="hb-inspector-section-heading">
-                    <h3>Decisions to make</h3>
-                    <Badge>{decisions.length}</Badge>
-                </div>
-                <div className="hb-decision-list">
-                    {decisions.slice(0, 5).map((decision) => (
-                        <DecisionButton key={decision.id} decision={decision} onEvidence={onEvidence} />
-                    ))}
-                </div>
-                {decisions.length > 5 && (
-                    <details className="hb-inspector-details">
-                        <summary>Show {decisions.length - 5} more decisions</summary>
-                        <div className="hb-decision-list">
-                            {decisions.slice(5).map((decision) => (
-                                <DecisionButton
-                                    key={decision.id}
-                                    decision={decision}
-                                    onEvidence={onEvidence}
-                                />
+            {decisions.length > 0 && (
+                <section className="hb-inspector-section">
+                    <div className="hb-inspector-section-heading">
+                        <h3>Needs attention</h3>
+                        <Badge>{decisions.length}</Badge>
+                    </div>
+                    <div className="hb-decision-list">
+                        {decisions.slice(0, 3).map((decision) => (
+                            <DecisionButton key={decision.id} decision={decision} onEvidence={onEvidence} />
+                        ))}
+                    </div>
+                    {decisions.length > 3 && (
+                        <details className="hb-inspector-details">
+                            <summary>Show {decisions.length - 3} more</summary>
+                            <div className="hb-decision-list">
+                                {decisions.slice(3).map((decision) => (
+                                    <DecisionButton
+                                        key={decision.id}
+                                        decision={decision}
+                                        onEvidence={onEvidence}
+                                    />
+                                ))}
+                            </div>
+                        </details>
+                    )}
+                </section>
+            )}
+            <details className="hb-inspector-technical">
+                <summary>
+                    <span>Technical details</span>
+                    <span>{contracts.length} host bindings</span>
+                </summary>
+                <section className="hb-inspector-section">
+                    <div className="hb-inspector-section-heading">
+                        <h3>Selection policy</h3>
+                        <Badge accent={!summary.inherited}>
+                            {summary.inherited ? "Runtime defaults" : "Explicit names"}
+                        </Badge>
+                    </div>
+                    <dl
+                        className="hb-count-grid hb-selection-count-grid"
+                        aria-label="Plan decisions, not enabled-tool counts"
+                    >
+                        <div>
+                            <dt>{summary.inherited ? "Default policy" : "Selected names"}</dt>
+                            <dd>{summary.kept.length}</dd>
+                        </div>
+                        <div>
+                            <dt>Overrides</dt>
+                            <dd>{summary.overridden.length}</dd>
+                        </div>
+                        <div>
+                            <dt>Custom</dt>
+                            <dd>{plan.customTools.length}</dd>
+                        </div>
+                        <div>
+                            <dt>MCP</dt>
+                            <dd>{summary.mcpTools}</dd>
+                        </div>
+                    </dl>
+                    <p className="hb-inspector-note">
+                        {summary.removed.length} named exclusions.{" "}
+                        {summary.inherited
+                            ? "The runtime still decides which default-policy tools to offer."
+                            : "Selected names remain subject to runtime, platform, feature, and permission gates."}
+                    </p>
+                    <details className="hb-inspector-tool-reference">
+                        <summary>
+                            Reference coding defaults: {referenceBaselineNames.length} baseline entries
+                        </summary>
+                        <p>
+                            Illustrative online, local, top-level coding with split editing and no added
+                            allow/exclude filters. Not the current plan.
+                        </p>
+                        <div className="hb-chip-list">
+                            {referenceBaselineNames.map((name) => (
+                                <code key={name}>{name}</code>
                             ))}
                         </div>
+                        <p>
+                            {referenceDefaultGroups
+                                .filter((group) => group.status !== "baseline-enabled")
+                                .map((group) => `${group.names.length} ${group.status}`)
+                                .join(" / ")}
+                            .
+                        </p>
+                        <p>
+                            Shell families are platform-specific. Model, capability, service, and experiment
+                            conditions remain authoritative.
+                        </p>
+                        <p>
+                            {BUILTIN_NAMES.length} descriptors and {toolCatalog.context.aliases.length}{" "}
+                            separate selection aliases; aliases do not add tools.
+                        </p>
                     </details>
-                )}
-                {decisions.length === 0 && (
+                </section>
+                <section className="hb-inspector-section">
+                    <div className="hb-inspector-section-heading">
+                        <h3>Required host contracts</h3>
+                        <Badge>{contracts.length}</Badge>
+                    </div>
+                    <ul className="hb-contract-list">
+                        {contracts.map((contract) => (
+                            <li key={contract}>
+                                <Braces size={13} aria-hidden="true" />
+                                <span>{contract}</span>
+                            </li>
+                        ))}
+                    </ul>
                     <p className="hb-inspector-note">
-                        No additional scenario decisions were detected. Host implementation and workload
-                        evaluation are still required.
+                        Build &amp; run turns these declarations into project integration requirements.
                     </p>
-                )}
-            </section>
+                </section>
+            </details>
             <div className="hb-inspector-footer">
                 <Button variant="primary" onClick={onBuild}>
                     Build &amp; run
                     <ArrowUpRight size={15} aria-hidden="true" />
                 </Button>
                 <Button variant="ghost" size="small" onClick={onExport} disabled={exportDisabled}>
-                    Plan JSON / TypeScript sketch
+                    Export plan
                 </Button>
-                <p>Project commands are never executed here.</p>
             </div>
         </aside>
     );

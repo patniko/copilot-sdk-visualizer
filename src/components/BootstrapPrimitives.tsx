@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { useState } from "react";
-import { Check, Copy, ExternalLink } from "lucide-react";
-import { reference } from "../content/reference";
-import { Button, Notice } from "./ui";
+import { Check, Copy } from "lucide-react";
+import { Button } from "./ui";
 
 export function CopyTextButton({ text, label }: { text: string; label: string }) {
     const [feedback, setFeedback] = useState<{ text: string; error: string | null } | null>(null);
@@ -46,40 +45,5 @@ export function CopyTextButton({ text, label }: { text: string; label: string })
                 </span>
             )}
         </div>
-    );
-}
-
-export function BootstrapSources({ sources }: { sources: string[] }) {
-    return (
-        <ul className="hb-source-list">
-            {Array.from(new Set(sources)).map((id) => {
-                const source = reference.sources[id];
-                return (
-                    <li key={id}>
-                        {!source ? (
-                            <Notice tone="error" title="Source reference unavailable">
-                                The adapter referenced an unknown source: <code>{id}</code>.
-                            </Notice>
-                        ) : (
-                            <>
-                                {source.url ? (
-                                    <a href={source.url} target="_blank" rel="noopener noreferrer">
-                                        {source.label}
-                                        <ExternalLink size={13} aria-hidden="true" />
-                                        <span className="hb-sr-only">
-                                            {" "}
-                                            (opens the pinned source in a new tab)
-                                        </span>
-                                    </a>
-                                ) : (
-                                    <strong>{source.label}</strong>
-                                )}
-                                <p>{source.scope}</p>
-                            </>
-                        )}
-                    </li>
-                );
-            })}
-        </ul>
     );
 }

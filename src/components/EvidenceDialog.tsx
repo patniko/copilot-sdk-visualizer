@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { ArrowRight, ExternalLink } from "lucide-react";
-import { getSource, reference } from "../content/reference";
+import { ArrowRight } from "lucide-react";
+import { reference } from "../content/reference";
 import type { ReferenceGap } from "../content/reference";
 import { controlCoverage, scopeLabel } from "./reference-ui";
 import type { Evidence, ViewId } from "./editor";
@@ -29,12 +29,6 @@ export function EvidenceDialog({
             : evidence.kind === "control"
               ? evidence.value.name
               : evidence.value.title;
-    const sources =
-        evidence.kind === "topic"
-            ? evidence.sources
-            : evidence.kind === "control"
-              ? [evidence.value.source]
-              : evidence.value.sources;
     const related =
         evidence.kind === "decision"
             ? reference.gaps.filter((gap) => relatedGapIds[evidence.value.id]?.includes(gap.id))
@@ -47,7 +41,7 @@ export function EvidenceDialog({
                 if (!open) onClose();
             }}
             title={title}
-            description="Source-backed guidance from the pinned SDK and runtime snapshot. Scope and lifecycle matter."
+            description="Implementation guidance with the relevant scope and lifecycle boundaries."
             size="drawer"
         >
             <div className="hb-evidence-stack">
@@ -106,28 +100,8 @@ export function EvidenceDialog({
                     <details className="hb-related-gap" key={gap.id}>
                         <summary>Related boundary: {gap.title}</summary>
                         <GapDetails gap={gap} />
-                        <SourceList ids={gap.sources} />
                     </details>
                 ))}
-                <section className="hb-evidence-section">
-                    <h3>Evidence</h3>
-                    <p className="hb-field-hint">
-                        Links open the exact inspected revision. Some require GitHub organization access.
-                    </p>
-                    <SourceList ids={sources} />
-                </section>
-                <div className="hb-source-revisions">
-                    <span>Snapshot {reference.asOf}</span>
-                    <span>
-                        SDK <code title={reference.revisions.sdk}>{reference.revisions.sdk.slice(0, 7)}</code>
-                    </span>
-                    <span>
-                        Runtime{" "}
-                        <code title={reference.revisions.runtime}>
-                            {reference.revisions.runtime.slice(0, 7)}
-                        </code>
-                    </span>
-                </div>
             </div>
         </Modal>
     );
@@ -151,29 +125,5 @@ function GapDetails({ gap }: { gap: ReferenceGap }) {
                 <p>{gap.opportunity}</p>
             </section>
         </div>
-    );
-}
-
-function SourceList({ ids }: { ids: string[] }) {
-    return (
-        <ul className="hb-source-list">
-            {Array.from(new Set(ids)).map((id) => {
-                const source = getSource(id);
-                return (
-                    <li key={id}>
-                        {source.url ? (
-                            <a href={source.url} target="_blank" rel="noopener noreferrer">
-                                {source.label}
-                                <ExternalLink size={13} aria-hidden="true" />
-                                <span className="hb-sr-only"> (opens source in a new tab)</span>
-                            </a>
-                        ) : (
-                            <strong>{source.label}</strong>
-                        )}
-                        <p>{source.scope}</p>
-                    </li>
-                );
-            })}
-        </ul>
     );
 }

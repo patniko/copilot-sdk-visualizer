@@ -218,7 +218,6 @@ export const goAdapter: LanguageAdapter = {
                 "Session working directories, skills, plugins, discovered configuration, file hooks, and Git context refer to the runtime host's filesystem. A subprocess, an SDK mode, permission callbacks, and session storage are not an OS or tenant sandbox.",
                 "Virtual storage requires copilot.SessionFSProvider: ReadFile, WriteFile, AppendFile, Exists, Stat, MakeDirectory, ReadDirectory, ReadDirectoryWithTypes, Remove, and Rename. The factory is session-scoped; POSIX virtual paths use the selected workspace (or /) and baseDirectory (or /session-state). SQLite is not advertised; implement SessionFSSqliteProvider and SessionFSSqliteTransactionProvider before opting into SQL capabilities.",
                 "The observer logs event types only, never prompts, tool arguments/results, credentials, or assistant content. The final assistant content is printed once as the application result; an idle turn without an assistant message is explicitly reported, including terminal-tool completion.",
-                `Language API anchors: copilot-sdk@${sdkRevision}/go/types.go:116,1053,1218,1320,1707,2224; go/github_token_provider.go:24; go/session.go:494; go/session_fs_provider.go:20.`,
             ],
             sources: [
                 plan.target.runtime === "managed"

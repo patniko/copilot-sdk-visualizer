@@ -24,11 +24,11 @@ async function openRuntime(page: Page) {
         .getByRole("navigation", { name: "Harness workflow" })
         .getByRole("button", { name: /^Runtime map/ })
         .click();
-    await page.getByRole("heading", { name: "Your harness. A whole engine underneath." }).waitFor();
+    await page.getByRole("heading", { name: "Meet the engine behind your harness." }).waitFor();
     await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe("editor-heading");
 }
 
-it("explores every capability, its evidence, and the configurator without modifying the draft", async () => {
+it("explores every capability and the configurator without modifying the draft", async () => {
     const { page, context, errors, external } = await harness.open();
     try {
         const original = await saved(page);
@@ -49,6 +49,11 @@ it("explores every capability, its evidence, and the configurator without modify
         ).toEqual(overviewTheme);
         const map = page.getByRole("group", { name: "Runtime capability topology" });
         const detail = page.locator("#runtime-capability-detail");
+        const mapSurface = page.locator(".rt-map-surface");
+        const mapBox = await mapSurface.boundingBox();
+        expect(mapBox).not.toBeNull();
+        expect(mapBox!.y).toBeLessThan(420);
+        expect(Math.min(mapBox!.y + mapBox!.height, 1100) - Math.max(mapBox!.y, 0)).toBeGreaterThan(500);
         expect(await map.getByRole("button").count()).toBe(runtimeCapabilities.length);
         expect(await page.getByRole("textbox", { name: "Draft name" }).count()).toBe(0);
         expect(await page.locator(".hb-inspector").count()).toBe(0);
@@ -59,19 +64,7 @@ it("explores every capability, its evidence, and the configurator without modify
             ).toBe(true);
             expect(await detail.getByText(capability.boundary, { exact: true }).isVisible()).toBe(true);
             expect(await map.getByRole("button", { pressed: true }).count()).toBe(1);
-            await detail.getByRole("button", { name: "Inspect source evidence" }).click();
-            const dialog = page.getByRole("dialog", { name: `${capability.name}: runtime evidence` });
-            await dialog.waitFor();
-            expect(await dialog.locator('a[href*="/blob/"]').count()).toBe(capability.sources.length);
-            await page.keyboard.press("Escape");
-            await dialog.waitFor({ state: "hidden" });
-            await expect
-                .poll(() =>
-                    detail
-                        .getByRole("button", { name: "Inspect source evidence" })
-                        .evaluate((element) => element === document.activeElement),
-                )
-                .toBe(true);
+            expect(await detail.getByText("Inspect source evidence", { exact: true }).count()).toBe(0);
         }
         await map.getByRole("button", { name: "Explore Plugins", exact: true }).click();
         expect(
@@ -79,15 +72,18 @@ it("explores every capability, its evidence, and the configurator without modify
                 .locator('[data-active="true"]')
                 .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-capability")).sort()),
         ).toEqual(["agents", "loop", "mcp", "plugins", "policy", "skills"]);
-        await detail.getByRole("button", { name: "Skills", exact: true }).click();
+        await map.getByRole("button", { name: "Explore Skills", exact: true }).click();
         expect(await detail.getByRole("heading", { name: "Skills", exact: true }).isVisible()).toBe(true);
-        await detail.getByRole("button", { name: "Configure context & packs", exact: true }).click();
-        await page.getByRole("heading", { name: "Be deliberate about context." }).waitFor();
+        expect(await detail.getByText("Related SDK surfaces · not a config recipe").count()).toBe(0);
+        expect(await detail.getByText("Connect the ideas", { exact: true }).count()).toBe(0);
+        expect(await detail.getByRole("button").count()).toBe(0);
+        await page.getByRole("button", { name: "Configure your harness", exact: true }).click();
+        await page.getByRole("heading", { name: "Compose the behavior." }).waitFor();
         expect(await saved(page)).toBe(original);
         await page.goBack();
-        await page.getByRole("heading", { name: "Your harness. A whole engine underneath." }).waitFor();
+        await page.getByRole("heading", { name: "Meet the engine behind your harness." }).waitFor();
         await page.reload();
-        await page.getByRole("heading", { name: "Your harness. A whole engine underneath." }).waitFor();
+        await page.getByRole("heading", { name: "Meet the engine behind your harness." }).waitFor();
         expect(new URL(page.url()).hash).toBe("#runtime");
         await page.getByRole("link", { name: "Skip to editor" }).focus();
         await page.keyboard.press("Enter");

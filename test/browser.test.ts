@@ -191,6 +191,28 @@ it("collapses the desktop navigation and restores the preference on reload", asy
     });
 });
 
+it("collapses the live plan and restores the preference on reload", async () => {
+    await exercise("collapsed-live-plan", async (page) => {
+        const workspace = page.locator(".hb-workspace");
+        await page.getByRole("button", { name: "Collapse live plan", exact: true }).click();
+        await expect
+            .poll(() => workspace.evaluate((element) => element.classList.contains("hb-plan-collapsed")))
+            .toBe(true);
+        expect(await page.getByRole("button", { name: "Expand live plan", exact: true }).isVisible()).toBe(
+            true,
+        );
+
+        await page.reload({ waitUntil: "domcontentloaded" });
+        expect(await page.getByRole("button", { name: "Expand live plan", exact: true }).isVisible()).toBe(
+            true,
+        );
+        await page.getByRole("button", { name: "Expand live plan", exact: true }).click();
+        await expect
+            .poll(() => workspace.evaluate((element) => element.classList.contains("hb-plan-collapsed")))
+            .toBe(false);
+    });
+});
+
 it("keeps advanced runtime details out of the demo UI", async () => {
     await exercise("advanced-hidden", async (page) => {
         expect(
@@ -482,7 +504,7 @@ it("keeps editable identities stable across custom tools, MCP names, and agent r
     });
 });
 
-it("preserves corrupt data until explicit recovery and exposes searchable evidence", async () => {
+it("preserves corrupt data until explicit recovery and exposes searchable guidance", async () => {
     const corrupt = '{"schemaVersion":99}';
     await exercise(
         "recovery-and-evidence",
@@ -520,9 +542,9 @@ it("preserves corrupt data until explicit recovery and exposes searchable eviden
                 .toBe(true);
             const control = page.getByRole("button", { name: /^overridesBuiltInTool/ });
             await control.click();
-            expect(
-                await page.getByRole("dialog").locator('a[href^="https://github.com/"]').count(),
-            ).toBeGreaterThan(0);
+            const guidance = page.getByRole("dialog");
+            expect(await guidance.locator('a[href*="/blob/"]').count()).toBe(0);
+            expect(await guidance.getByText(/\b[a-f0-9]{40}\b/i).count()).toBe(0);
             await page.keyboard.press("Escape");
             await expect
                 .poll(() => control.evaluate((element) => document.activeElement === element))
