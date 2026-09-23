@@ -529,14 +529,21 @@ it("keeps editable identities stable across custom tools, MCP names, and agent r
         await page.getByRole("textbox", { name: "Agent name", exact: true }).fill("domain-reviewer");
         await expect.poll(async () => (await savedPlan(page)).selectedAgent).toBe("domain-reviewer");
         await page
-            .getByRole("textbox", { name: "Agent allowed tool names", exact: true })
-            .fill("lookup_customer_record");
+            .getByRole("checkbox", { name: "Allow lookup_customer_record for specialist", exact: true })
+            .click();
         await page
-            .getByRole("textbox", { name: "Root-only excluded tools", exact: true })
-            .fill("lookup_customer_record");
+            .getByRole("checkbox", { name: "Exclude lookup_customer_record from root agent", exact: true })
+            .click();
+        await page
+            .getByRole("checkbox", { name: "Exclude verified-runtime-search from root agent", exact: true })
+            .click();
         await expect
             .poll(async () => (await savedPlan(page)).agents[0]?.tools)
             .toEqual(["lookup_customer_record"]);
+        expect((await savedPlan(page)).rootExcludedTools).toEqual([
+            "lookup_customer_record",
+            "verified-runtime-search",
+        ]);
         await page.getByRole("button", { name: "Remove agent domain-reviewer", exact: true }).click();
         await expect.poll(async () => (await savedPlan(page)).selectedAgent).toBe("");
     });

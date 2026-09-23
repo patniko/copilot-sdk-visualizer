@@ -1058,6 +1058,86 @@
     min-height: 36px;
 }
 
+.hb-root-tool-picker {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+}
+
+.hb-root-tool-picker-heading,
+.hb-root-tool-group-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.hb-root-tool-picker-heading h4 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.hb-root-tool-search {
+    max-width: 420px;
+}
+
+.hb-root-tool-groups {
+    display: grid;
+    gap: 16px;
+}
+
+.hb-root-tool-groups > section {
+    display: grid;
+    gap: 8px;
+}
+
+.hb-root-tool-group-heading {
+    color: var(--cp-text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.hb-root-tool-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.hb-root-tool-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--cp-border);
+    border-radius: 8px;
+    background: var(--cp-surface);
+    cursor: pointer;
+}
+
+.hb-root-tool-option:hover {
+    border-color: var(--cp-border-strong);
+}
+
+.hb-root-tool-option:has(input:checked) {
+    border-color: var(--cp-accent);
+    background: var(--cp-accent-soft);
+}
+
+.hb-root-tool-option input {
+    flex-shrink: 0;
+    accent-color: var(--cp-accent);
+}
+
+.hb-root-tool-option code {
+    min-width: 0;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
 .hb-choice-field {
     padding: 0;
     margin: 0;
@@ -2988,6 +3068,10 @@
     .hb-agent-identity-grid > .hb-field > label,
     .hb-agent-identity-grid > .hb-field > .hb-field-heading {
         min-height: 0;
+    }
+
+    .hb-root-tool-options {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .hb-choice-body {
