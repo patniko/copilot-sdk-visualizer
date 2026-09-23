@@ -248,6 +248,75 @@ export default function App() {
                         <p>GitHub Copilot runtime</p>
                     </div>
                 </div>
+                {view !== "runtime" && (
+                    <div className="hb-header-draft">
+                        <div className="hb-draft-identity">
+                            <label htmlFor="harness-draft-name">Draft name</label>
+                            <input
+                                id="harness-draft-name"
+                                value={plan.name}
+                                className="hb-draft-name"
+                                maxLength={80}
+                                disabled={blocked}
+                                aria-invalid={issues.some((issue) => issue.path === "name")}
+                                aria-describedby={
+                                    issues.some((issue) => issue.path === "name")
+                                        ? "draft-validation"
+                                        : undefined
+                                }
+                                onChange={(event) => {
+                                    const value = event.currentTarget.value;
+                                    edit((draft) => {
+                                        draft.name = value;
+                                    });
+                                }}
+                            />
+                        </div>
+                        <div className="hb-draft-actions">
+                            <span
+                                className={`hb-save-status${exportDisabled || saveError ? " hb-save-status-error" : ""}`}
+                                role="status"
+                            >
+                                {exportDisabled || saveError ? (
+                                    <CircleAlert size={14} aria-hidden="true" />
+                                ) : (
+                                    <Check size={14} aria-hidden="true" />
+                                )}
+                                {saveLabel}
+                            </span>
+                            <div className="hb-history" aria-label="Draft history">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Undo"
+                                    title="Undo the last plan change"
+                                    disabled={!canUndo || blocked}
+                                    onClick={() => {
+                                        harness.undo();
+                                        setRevision((current) => current + 1);
+                                        setFeedback("Previous draft restored.");
+                                    }}
+                                >
+                                    <Undo2 size={17} aria-hidden="true" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Redo"
+                                    title="Redo the last undone change"
+                                    disabled={!canRedo || blocked}
+                                    onClick={() => {
+                                        harness.redo();
+                                        setRevision((current) => current + 1);
+                                        setFeedback("Draft change reapplied.");
+                                    }}
+                                >
+                                    <Redo2 size={17} aria-hidden="true" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="hb-header-actions">
                     <Button
                         variant="ghost"
@@ -286,73 +355,6 @@ export default function App() {
                     </Button>
                 </div>
             </header>
-            {view !== "runtime" && (
-                <div className="hb-draft-bar">
-                    <div className="hb-draft-identity">
-                        <label htmlFor="harness-draft-name">Draft name</label>
-                        <input
-                            id="harness-draft-name"
-                            value={plan.name}
-                            className="hb-draft-name"
-                            maxLength={80}
-                            disabled={blocked}
-                            aria-invalid={issues.some((issue) => issue.path === "name")}
-                            aria-describedby={
-                                issues.some((issue) => issue.path === "name") ? "draft-validation" : undefined
-                            }
-                            onChange={(event) => {
-                                const value = event.currentTarget.value;
-                                edit((draft) => {
-                                    draft.name = value;
-                                });
-                            }}
-                        />
-                    </div>
-                    <div className="hb-draft-actions">
-                        <span
-                            className={`hb-save-status${exportDisabled || saveError ? " hb-save-status-error" : ""}`}
-                            role="status"
-                        >
-                            {exportDisabled || saveError ? (
-                                <CircleAlert size={14} aria-hidden="true" />
-                            ) : (
-                                <Check size={14} aria-hidden="true" />
-                            )}
-                            {saveLabel}
-                        </span>
-                        <div className="hb-history" aria-label="Draft history">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Undo"
-                                title="Undo the last plan change"
-                                disabled={!canUndo || blocked}
-                                onClick={() => {
-                                    harness.undo();
-                                    setRevision((current) => current + 1);
-                                    setFeedback("Previous draft restored.");
-                                }}
-                            >
-                                <Undo2 size={17} aria-hidden="true" />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Redo"
-                                title="Redo the last undone change"
-                                disabled={!canRedo || blocked}
-                                onClick={() => {
-                                    harness.redo();
-                                    setRevision((current) => current + 1);
-                                    setFeedback("Draft change reapplied.");
-                                }}
-                            >
-                                <Redo2 size={17} aria-hidden="true" />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
             <div
                 className={`hb-workspace${sidebarCollapsed ? " hb-sidebar-collapsed" : ""}${
                     planCollapsed && view !== "runtime" ? " hb-plan-collapsed" : ""
