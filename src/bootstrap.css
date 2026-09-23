@@ -1,0 +1,52 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. */
+.hb-runtime-option-setup {
+    padding-top: 6px;
+    color: var(--cp-accent);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.hb-setup-docs {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--cp-border);
+    border-radius: 12px;
+    background: var(--cp-surface-soft);
+}
+
+.hb-setup-docs-links {
+    display: grid;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hb-setup-docs-links li {
+    color: var(--cp-text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.hb-setup-docs-links a,
+.hb-setup-docs > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--cp-link);
+    font-weight: 500;
+}
+
+.hb-setup-docs > a {
+    font-size: 12px;
+}
+
+.hb-s2s-checklist {
+    display: grid;
+    gap: 7px;
+    margin: 10px 0 12px;
+    padding-left: 20px;
+    color: var(--cp-text-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}

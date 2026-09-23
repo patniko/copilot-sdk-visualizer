@@ -2,6 +2,7 @@
 import { BUILTIN_NAMES } from "../plan";
 import type { HarnessPlan } from "../plan";
 import { reference } from "../../content/reference";
+import { SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapFile, BootstrapProject, BootstrapRequirement } from "./types";
 
 export function projectName(plan: HarnessPlan): string {
@@ -364,7 +365,7 @@ export function commonFiles(plan: HarnessPlan, project: Omit<BootstrapProject, "
         "",
         "## Source snapshot",
         "",
-        `SDK: \`${reference.revisions.sdk}\`. Runtime: \`${reference.revisions.runtime}\`.`,
+        `SDK source revision: \`${SDK_SOURCE_REVISION}\`. Runtime research is maintained in the builder's private snapshot.`,
         "",
         ...project.sources.map((id) => {
             const source = reference.sources[id];

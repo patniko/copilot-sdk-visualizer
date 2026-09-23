@@ -16,7 +16,10 @@ describe("context toggle help", () => {
         expect(help.disabled.length).toBeGreaterThan(40);
         expect(help.example.length).toBeGreaterThan(40);
         expect(help.boundary.length).toBeGreaterThan(40);
-        expect(help.sources.every((source) => /\/blob\/[a-f0-9]{40}\//.test(source.url))).toBe(true);
+        expect(help.sources.length).toBeGreaterThan(0);
+        expect(help.sources.every((source) => source.label.length > 10 && source.url === undefined)).toBe(
+            true,
+        );
     });
 
     it("keeps the distinction between discovery, capability loading, callbacks, and authority", () => {

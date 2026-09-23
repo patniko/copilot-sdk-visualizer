@@ -77,7 +77,7 @@ no GitHub Actions workflow or committed `dist/` directory is required.
 - Choose an SDK-managed child process, an existing TCP runtime service, or experimental in-process hosting.
 - Generate language-specific bootstrap projects with dependency setup, an entrypoint, host extension points, local preflight, and run instructions.
 - Keep the TypeScript integration sketch, paste-ready Copilot CLI task, and reversible planner JSON available as smaller exports.
-- Explore a materialized SDK control catalog, six scenario gaps, built-in prompt references, and commit-pinned evidence.
+- Explore a materialized SDK control catalog, six scenario gaps, built-in prompt references, and public-safe boundary explanations.
 
 The reference catalog documents additional SDK controls that are not all editable in the builder.
 
@@ -85,15 +85,15 @@ The reference catalog documents additional SDK controls that are not all editabl
 
 Open **Runtime** from the sidebar or the Overview entry card. The full-width, read-only page explains the runtime independently of the draft configurator: one shared agent loop connects plugins, skills, tools, MCP, delegation, inference, authentication, permissions/hooks, context, and sessions/events.
 
-Each node explains **what you do not rebuild**, **what your harness or host still supplies**, and the precise boundary. Related-capability links connect the ideas; source evidence uses the existing pinned snapshot, and configuration links return to the relevant editor. The **Trace a turn** walkthrough highlights configuration, context assembly, inference, authorization, execution, and continuation. It is an illustrative approved-tool path, not a live agent, call graph, enabled inventory, or guarantee of task success.
+Each node explains **what you do not rebuild**, **what your harness or host still supplies**, and the precise boundary. Related-capability links connect the ideas, and configuration links return to the relevant editor. The **Trace a turn** walkthrough highlights configuration, context assembly, inference, authorization, execution, and continuation. It is an illustrative approved-tool path, not a live agent, call graph, enabled inventory, or guarantee of task success.
 
 The map does not mutate the plan or require the runtime/SDK checkouts. The SDK carries configuration, callbacks, and events; the runtime executes the shared machinery; the host still owns identity, tenant authorization, secrets, deployment isolation, and evaluation. Provider features, plugin components, and SDK surfaces remain version-dependent. Browser history and direct `/#runtime` navigation support sharing the explainer; mobile uses a compact capability layout, with no automatic walkthrough playback and reduced-motion support.
 
 ## Educational setting help
 
-Use the question-mark button next to a setting to see its behavior, scope, example, limits, and source references. Switches explain both on and off; choices explain the alternatives. Help works with a mouse, keyboard, or touch, without changing the setting. Escape closes it and returns focus to the help button.
+Use the question-mark button next to a setting to see its behavior, scope, example, and limits. Switches explain both on and off; choices explain the alternatives. Help works with a mouse, keyboard, or touch, without changing the setting. Escape closes it and returns focus to the help button.
 
-Help distinguishes actual SDK options from planner notes and required host code. For example, enabling a pre-tool hook requires a callback implementation; it does not emit `onPreToolUse: true` or implement authorization. Capability claims link to the pinned source snapshot, while planner-owned concepts are labeled as such.
+Help distinguishes actual SDK options from planner notes and required host code. For example, enabling a pre-tool hook requires a callback implementation; it does not emit `onPreToolUse: true` or implement authorization. Public snapshots retain the resulting behavior and boundary explanations without publishing private research locations.
 
 The shared components and content definitions are described in [Project context and intent](docs/project-context.md#educational-help-is-part-of-a-setting). Simple names, descriptions, and search filters stay uncluttered; behavior-changing configuration deserves an explanation.
 
@@ -111,7 +111,7 @@ The builder is a planning aid; the [`github/copilot-sdk` docs](https://github.co
 | Policy & state    | [Hooks](https://github.com/github/copilot-sdk/blob/main/docs/features/hooks.md), [Session limits](https://github.com/github/copilot-sdk/blob/main/docs/features/session-limits.md), [Session persistence](https://github.com/github/copilot-sdk/blob/main/docs/features/session-persistence.md)      |
 | Build & run       | [Choosing a setup path](https://github.com/github/copilot-sdk/blob/main/docs/setup/choosing-a-setup-path.md), [Bundled CLI](https://github.com/github/copilot-sdk/blob/main/docs/setup/bundled-cli.md), [Multi-tenancy](https://github.com/github/copilot-sdk/blob/main/docs/setup/multi-tenancy.md) |
 
-These links track the SDK's living documentation. The in-app **reference catalog** stays commit-pinned to the recorded snapshot; the docs map is a separate reading aid.
+These links track the SDK's living documentation. The in-app **reference catalog** is a sanitized materialized snapshot; the docs map is a separate reading aid.
 
 ## From configuration to a running agent
 
@@ -181,13 +181,15 @@ pnpm test
 pnpm build
 ```
 
+`pnpm test` verifies that the checked-in public snapshots are current and stripped of source revisions before running unit tests. Run `pnpm content:public` after intentionally refreshing private research data.
+
 Browser checks build and serve the production assets on an ephemeral loopback port. They use an installed Google Chrome by default; `PLAYWRIGHT_CHANNEL` can select another installed Playwright browser channel.
 
 ```bash
 pnpm test:browser
 ```
 
-An optional check type-checks generated sketches against a separately supplied SDK source checkout. That checkout is **not** needed to build, run, or use this application:
+Contract checks that do not require an SDK checkout run normally. Supplying `COPILOT_SDK_SOURCE` additionally type-checks generated TypeScript sketches against that checkout. The checkout is **not** needed to build, run, use, or run the default checks for this application:
 
 ```bash
 COPILOT_SDK_SOURCE=/path/to/copilot-sdk/nodejs/src/index.ts pnpm test:contract
@@ -203,11 +205,11 @@ COPILOT_SDK_SOURCE=/path/to/copilot-sdk/nodejs/src/index.ts pnpm test:contract
 | `src/domain/export.ts`               | Lossless plan export and source-backed SDK integration sketches.                                  |
 | `src/domain/store.ts`                | Event-driven draft persistence and bounded undo/redo history.                                     |
 | `src/hooks/useHarness.ts`            | React subscription to the draft store.                                                            |
-| `src/content/reference.json`         | Independent, materialized research snapshot; no sibling-repository reads.                         |
+| `src/content/reference.json`         | Independent private research snapshot used to generate sanitized public content.                  |
 | `src/content/sdk-docs.ts`            | Cross-reference from each builder step to the living SDK documentation.                           |
 | `src/content/runtime-map.ts`         | Source-backed capability narratives, ownership boundaries, topology, and illustrative turn steps. |
 | `src/components/RuntimeExplorer.tsx` | Read-only runtime page, capability detail, and walkthrough, separate from draft configuration.    |
-| `src/components/`                    | Accessible workbench editors, source inspection, and export UI.                                   |
+| `src/components/`                    | Accessible workbench editors, public reference material, and export UI.                           |
 
 The draft store writes only validated plans. Payload version 2 adds runtime/language targets; version 1 drafts migrate with their behavior preserved and TypeScript/managed-process defaults. The storage key stays stable. Invalid edits retain the last valid saved version. A corrupt or unsupported saved draft is not silently overwritten; recovery requires an explicit replacement or import. Drafts are local to the browser origin; concurrent tabs use last-save-wins storage rather than a collaborative synchronization protocol.
 

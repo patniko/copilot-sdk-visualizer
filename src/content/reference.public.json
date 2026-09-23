@@ -2,8 +2,8 @@
     "$comment": "Copyright (c) Microsoft Corporation. All rights reserved. Generated research snapshot; no runtime or SDK source dependency.",
     "asOf": "2026-09-13",
     "revisions": {
-        "runtime": "efebfd34dfa68830b11f49302fd88d12950df2e4",
-        "sdk": "f45c46fd1812f8bed5b4cbc250f47177c83068f0"
+        "runtime": "private",
+        "sdk": "private"
     },
     "sources": {
         "author-direction": {

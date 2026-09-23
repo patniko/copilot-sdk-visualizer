@@ -54,7 +54,7 @@ By the end, participants should be able to:
 | 0:00-0:03 | Why this workshop              | Talk                           | Shift the question from “how do I call a model?” to “what experience am I deliberately building?”                            |
 | 0:03-0:07 | Runtime/SDK journey            | Diagram and narrative          | Show the movement from a complete CLI experience to reusable runtime machinery exposed through language SDKs.                |
 | 0:07-0:10 | Terms and ownership            | Layer diagram                  | Establish the vocabulary used for the rest of the workshop.                                                                  |
-| 0:10-0:18 | Meet the runtime               | Live Runtime                    | Identify the agent loop, tools, context, inference, permissions, sessions, and events that teams do not rebuild.             |
+| 0:10-0:18 | Meet the runtime               | Live Runtime                   | Identify the agent loop, tools, context, inference, permissions, sessions, and events that teams do not rebuild.             |
 | 0:18-0:25 | Frame the use case             | Audience prompts               | Define user, job, trusted data, allowed actions, failure behavior, and measurable success for the tenant document assistant. |
 | 0:25-0:48 | Configure the harness          | Guided Harness Builder demo    | Select a baseline and configure prompt, `view` override, context, model/identity, policy, state, and evaluation.             |
 | 0:48-0:58 | Read the consequences          | Plan inspector and Build & run | Review host contracts, runtime placement, language choice, blockers, and generated project structure.                        |

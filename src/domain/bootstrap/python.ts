@@ -3,10 +3,11 @@ import { BUILTIN_NAMES } from "../plan";
 import type { HarnessPlan } from "../plan";
 import { runtimeEndpoint } from "../target";
 import { commonRequirements, sessionData, toolDefinitions } from "./common";
+import { SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 import { pythonAgent, pythonHost, pythonProvision, pythonRunner, pythonSetup } from "./python-templates";
 
-const SDK_COMMIT = "f45c46fd1812f8bed5b4cbc250f47177c83068f0";
+const SDK_COMMIT = SDK_SOURCE_REVISION;
 const RUNTIME_VERSION = "1.0.84-5";
 const HOST_FILE = "host.py";
 

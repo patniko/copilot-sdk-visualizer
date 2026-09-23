@@ -7,9 +7,9 @@ import { SDK_DOCS_HOME, SDK_DOC_MAP } from "../content/sdk-docs";
 import { controlCoverage, scopeLabel } from "./reference-ui";
 import type { Evidence, ViewId } from "./editor";
 import { Badge, Button, EmptyState, Notice, SelectField, TextField } from "./ui";
+import "../reference-panel.css";
 
 const catalogScopes = Array.from(new Set(reference.controls.flatMap((control) => control.scopes)));
-const visibleSdkDocs = SDK_DOC_MAP.filter((group) => group.view !== "advanced");
 
 const viewLabels: Record<ViewId, string> = {
     overview: "Overview",
@@ -21,7 +21,6 @@ const viewLabels: Record<ViewId, string> = {
     agents: "Agents",
     models: "Models & identity",
     policy: "Policy & state",
-    advanced: "Advanced",
     bootstrap: "Build & run",
     reference: "Reference",
 };
@@ -61,7 +60,7 @@ export function ReferencePanel({
                         Boundaries &amp; gaps<Badge>{reference.gaps.length}</Badge>
                     </Tabs.Trigger>
                     <Tabs.Trigger className="hb-tab" value="sdk-docs">
-                        Map to SDK docs<Badge>{visibleSdkDocs.length}</Badge>
+                        Map to SDK docs<Badge>{SDK_DOC_MAP.length}</Badge>
                     </Tabs.Trigger>
                 </Tabs.List>
                 <Tabs.Content value="catalog" className="hb-tab-content">
@@ -152,7 +151,7 @@ export function ReferencePanel({
                                 <span className="hb-gap-title">{gap.title}</span>
                                 <span className="hb-muted-copy">{gap.summary}</span>
                                 <span className="hb-text-link">
-                                Review limits
+                                    Review limits
                                     <ArrowUpRight size={13} aria-hidden="true" />
                                 </span>
                             </button>
@@ -170,7 +169,7 @@ export function ReferencePanel({
                         </a>
                     </Notice>
                     <div className="hb-docmap-grid">
-                        {visibleSdkDocs.map((group) => (
+                        {SDK_DOC_MAP.map((group) => (
                             <section className="hb-docmap-card" key={group.view}>
                                 <header className="hb-docmap-head">
                                     <div>

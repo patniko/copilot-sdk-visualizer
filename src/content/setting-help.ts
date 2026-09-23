@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { getSource, reference } from "./reference";
+import { getSource } from "./reference";
 import type { HelpSource, ToggleHelp, ValueHelp } from "./help-types";
 
 const sessionScope =
@@ -9,10 +9,9 @@ const hostScope =
 const refs = (...ids: string[]): HelpSource[] =>
     ids.map((id) => {
         const source = getSource(id);
-        return { label: source.label, ...(source.url ? { url: source.url } : {}) };
+        return { label: source.label };
     });
-const types = `https://github.com/github/copilot-sdk/blob/${reference.revisions.sdk}/nodejs/src/types.ts`;
-const contract = (label: string, lines: string): HelpSource[] => [{ label, url: `${types}#${lines}` }];
+const contract = (label: string, _lines: string): HelpSource[] => [{ label }];
 const callbackLabels = { enabled: "Host callback required", disabled: "No callback generated for this slot" };
 
 export const toggleHelp = {

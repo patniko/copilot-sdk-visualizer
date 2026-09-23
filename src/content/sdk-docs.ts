@@ -231,29 +231,6 @@ export const SDK_DOC_MAP: SdkDocGroup[] = [
         ],
     },
     {
-        view: "advanced",
-        title: "Advanced runtime surfaces",
-        summary:
-            "Documented and emerging controls for budgets, hooks, MCP, persistence, observability, and remote execution.",
-        links: [
-            {
-                label: "Session limits",
-                url: doc("features/session-limits.md"),
-                note: "Apply an AI-credit soft cap and observe budget events.",
-            },
-            {
-                label: "Hooks",
-                url: doc("features/hooks.md"),
-                note: "Inspect the full host callback lifecycle beyond pre- and post-tool hooks.",
-            },
-            {
-                label: "OpenTelemetry",
-                url: doc("observability/opentelemetry.md"),
-                note: "Configure trace export while treating content capture as sensitive.",
-            },
-        ],
-    },
-    {
         view: "bootstrap",
         title: "Deployment & runtime placement",
         summary: "Where the CLI/runtime runs and how to scale it.",

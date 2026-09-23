@@ -2,5 +2,5 @@
     "$schema": "./node_modules/oxfmt/configuration_schema.json",
     "tabWidth": 4,
     "printWidth": 110,
-    "ignorePatterns": ["dist", "pnpm-lock.yaml", ".test-artifacts", "coverage"]
+    "ignorePatterns": ["dist", "pnpm-lock.yaml", ".test-artifacts", "coverage", "src/content/*.public.json"]
 }

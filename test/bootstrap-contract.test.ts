@@ -7,63 +7,68 @@ import { expect, it } from "vitest";
 import { createPreset } from "../src/domain/presets";
 import { buildBootstrapProject } from "../src/domain/bootstrap";
 
-it("type-checks the full TypeScript bootstrap against the selected SDK source", async () => {
-    const sdk = process.env.COPILOT_SDK_SOURCE;
-    if (!sdk) throw new Error("Set COPILOT_SDK_SOURCE for the optional contract checks.");
-    const files: string[] = [];
-    for (const identity of ["host-token", "s2s-installation", "byok"] as const) {
-        for (const runtime of ["managed", "external", "inprocess"] as const) {
-            const plan = createPreset("minimal");
-            if (identity === "byok") {
-                plan.model.provider = "openai";
-                plan.model.endpoint = "";
-            } else {
-                plan.identity = identity;
-            }
-            plan.target.runtime = runtime;
-            plan.tools.view.action = "override";
-            plan.policy.preToolHook = true;
-            plan.policy.postToolHook = true;
-            const result = buildBootstrapProject(plan);
-            if (!result.ok) throw new Error(JSON.stringify(result.blockers));
-            const root = path.resolve(".test-artifacts/bootstrap-contract", identity, runtime);
-            for (const file of result.project.files) {
-                const target = path.join(root, file.path);
-                await mkdir(path.dirname(target), { recursive: true });
-                await writeFile(target, file.content);
-                if (file.path.endsWith(".ts")) files.push(target);
-                if (file.path.endsWith(".sh")) {
-                    const syntax = spawnSync("bash", ["-n", target], { encoding: "utf8" });
-                    expect(syntax.status, syntax.stderr).toBe(0);
+const sdkSource = process.env.COPILOT_SDK_SOURCE;
+
+it.skipIf(!sdkSource)(
+    "type-checks the full TypeScript bootstrap against the selected SDK source",
+    async () => {
+        if (!sdkSource) return;
+        const sdk = sdkSource;
+        const files: string[] = [];
+        for (const identity of ["host-token", "s2s-installation", "byok"] as const) {
+            for (const runtime of ["managed", "external", "inprocess"] as const) {
+                const plan = createPreset("minimal");
+                if (identity === "byok") {
+                    plan.model.provider = "openai";
+                    plan.model.endpoint = "";
+                } else {
+                    plan.identity = identity;
+                }
+                plan.target.runtime = runtime;
+                plan.tools.view.action = "override";
+                plan.policy.preToolHook = true;
+                plan.policy.postToolHook = true;
+                const result = buildBootstrapProject(plan);
+                if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+                const root = path.resolve(".test-artifacts/bootstrap-contract", identity, runtime);
+                for (const file of result.project.files) {
+                    const target = path.join(root, file.path);
+                    await mkdir(path.dirname(target), { recursive: true });
+                    await writeFile(target, file.content);
+                    if (file.path.endsWith(".ts")) files.push(target);
+                    if (file.path.endsWith(".sh")) {
+                        const syntax = spawnSync("bash", ["-n", target], { encoding: "utf8" });
+                        expect(syntax.status, syntax.stderr).toBe(0);
+                    }
                 }
             }
         }
-    }
-    const program = ts.createProgram(files, {
-        noEmit: true,
-        strict: true,
-        skipLibCheck: true,
-        target: ts.ScriptTarget.ES2023,
-        module: ts.ModuleKind.ESNext,
-        moduleResolution: ts.ModuleResolutionKind.Bundler,
-        allowSyntheticDefaultImports: true,
-        resolveJsonModule: true,
-        types: ["node"],
-        paths: { "@github/copilot-sdk": [path.resolve(sdk)] },
-    });
-    const ownFiles = new Set(files);
-    const diagnostics = ts
-        .getPreEmitDiagnostics(program)
-        .filter((diagnostic) => !diagnostic.file || ownFiles.has(path.resolve(diagnostic.file.fileName)));
-    expect(
-        diagnostics,
-        ts.formatDiagnosticsWithColorAndContext(diagnostics, {
-            getCanonicalFileName: (file) => file,
-            getCurrentDirectory: () => process.cwd(),
-            getNewLine: () => "\n",
-        }),
-    ).toEqual([]);
-});
+        const program = ts.createProgram(files, {
+            noEmit: true,
+            strict: true,
+            skipLibCheck: true,
+            target: ts.ScriptTarget.ES2023,
+            module: ts.ModuleKind.ESNext,
+            moduleResolution: ts.ModuleResolutionKind.Bundler,
+            allowSyntheticDefaultImports: true,
+            resolveJsonModule: true,
+            types: ["node"],
+            paths: { "@github/copilot-sdk": [path.resolve(sdk)] },
+        });
+        const ownFiles = new Set(files);
+        const diagnostics = ts
+            .getPreEmitDiagnostics(program)
+            .filter((diagnostic) => !diagnostic.file || ownFiles.has(path.resolve(diagnostic.file.fileName)));
+        expect(
+            diagnostics,
+            ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+                getCanonicalFileName: (file) => file,
+                getCurrentDirectory: () => process.cwd(),
+                getNewLine: () => "\n",
+            }),
+        ).toEqual([]);
+    },
+);
 
 it("runs bootstrap preflight without constructing a runtime or invoking a model", async () => {
     const plan = createPreset("empty");

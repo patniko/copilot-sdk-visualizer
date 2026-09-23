@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { ArrowRight, Check, ChevronRight, Columns3 } from "lucide-react";
 import { PRESETS, changedAxes } from "../domain/presets";
 import type { PresetId } from "../domain/plan";
@@ -10,8 +10,11 @@ import type { EditorProps, ViewId } from "./editor";
 import { Badge, Button, ChoiceField, Panel } from "./ui";
 import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
-import { ProfileCompareDialog } from "./ProfileCompareDialog";
 import { profileIcons } from "./profile-ui";
+
+const ProfileCompareDialog = lazy(() =>
+    import("./ProfileCompareDialog").then((module) => ({ default: module.ProfileCompareDialog })),
+);
 
 const axisViews: Record<string, ViewId> = {
     "Runtime & language": "bootstrap",
@@ -61,12 +64,14 @@ export function BaseProfileEditor({
     return (
         <div className="hb-editor-stack">
             {comparing && (
-                <ProfileCompareDialog
-                    focus={comparing}
-                    current={plan.preset}
-                    onClose={() => setComparing(null)}
-                    onApply={onApplyPreset}
-                />
+                <Suspense fallback={null}>
+                    <ProfileCompareDialog
+                        focus={comparing}
+                        current={plan.preset}
+                        onClose={() => setComparing(null)}
+                        onApply={onApplyPreset}
+                    />
+                </Suspense>
             )}
             <div className="hb-profile-grid">
                 {PRESETS.map((preset) => {

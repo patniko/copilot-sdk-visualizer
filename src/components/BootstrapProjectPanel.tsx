@@ -15,6 +15,7 @@ import {
     Terminal,
 } from "lucide-react";
 import { createBootstrapArchive } from "../domain/bootstrap/archive";
+import { downloadBlob } from "../browser/download";
 import type {
     BootstrapCommands,
     BootstrapFile,
@@ -71,17 +72,7 @@ export function BootstrapProjectPanel({ project }: { project: BootstrapProject }
         setDownloadFeedback(null);
         try {
             const archive = createBootstrapArchive(project);
-            const url = URL.createObjectURL(new Blob([archive], { type: "application/zip" }));
-            const anchor = document.createElement("a");
-            try {
-                anchor.href = url;
-                anchor.download = `${project.name}.zip`;
-                document.body.append(anchor);
-                anchor.click();
-            } finally {
-                anchor.remove();
-                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }
+            downloadBlob(new Blob([archive], { type: "application/zip" }), `${project.name}.zip`);
             setDownloadFeedback({
                 project,
                 error: false,

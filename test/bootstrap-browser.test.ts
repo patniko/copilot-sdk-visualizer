@@ -71,6 +71,7 @@ it("migrates existing drafts and makes a real runtime-specific bootstrap ZIP", a
                 .getByRole("button", { name: /^Build & run\b/ })
                 .click();
             const placements = page.getByRole("group", { name: "Runtime placement", exact: true });
+            await placements.waitFor();
             expect(
                 await placements.getByRole("img", { name: /SDK-owned child runtime process/ }).isVisible(),
             ).toBe(true);

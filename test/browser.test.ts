@@ -157,7 +157,9 @@ it("compares profile configurations on demand and applies from the comparison", 
         expect(await page.getByRole("dialog", { name: "Compare starting profiles" }).count()).toBe(0);
         await page.getByRole("button", { name: "Compare Copilot with other profiles" }).click();
         const compare = page.getByRole("dialog", { name: "Compare starting profiles" });
-        expect(await compare.getByRole("columnheader", { name: /Copilot/ }).isVisible()).toBe(true);
+        await expect
+            .poll(() => compare.getByRole("columnheader", { name: /Copilot/ }).isVisible())
+            .toBe(true);
         expect(await compare.getByRole("rowheader", { name: /Project workspace/ }).isVisible()).toBe(true);
         expect(await compare.getByRole("rowheader", { name: /Permission decisions/ }).isVisible()).toBe(true);
         await compare.getByRole("checkbox", { name: "Show differences only" }).check();
@@ -640,7 +642,7 @@ it("keeps all editors and export dialogs usable on a narrow screen", async () =>
         expect(await page.locator("html").getAttribute("data-theme")).toBe("dark");
         await page.getByRole("button", { name: "Export", exact: true }).click();
         const dialog = page.getByRole("dialog", { name: "Export plan, code & CLI instructions" });
-        expect(await dialog.isVisible()).toBe(true);
+        await expect.poll(() => dialog.isVisible()).toBe(true);
         expect(
             await page.getByRole("textbox", { name: "SDK TypeScript integration sketch" }).isVisible(),
         ).toBe(true);

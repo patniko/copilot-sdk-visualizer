@@ -1,16 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { reference } from "./reference";
-import type { ToggleHelp } from "./help-types";
+import type { HelpSource, ToggleHelp } from "./help-types";
 
 export const CONTEXT_TOGGLE_KEYS = ["discovery", "skills", "fileHooks", "hostGit"] as const;
 export type ContextToggleKey = (typeof CONTEXT_TOGGLE_KEYS)[number];
 export interface ContextToggleHelp extends ToggleHelp {
     option: "enableConfigDiscovery" | "enableSkills" | "enableFileHooks" | "enableHostGitOperations";
-    sources: { label: string; url: string }[];
+    sources: HelpSource[];
 }
-
-const types = `https://github.com/github/copilot-sdk/blob/${reference.revisions.sdk}/nodejs/src/types.ts`;
-const runtime = `https://github.com/github/copilot-agent-runtime/blob/${reference.revisions.runtime}`;
 
 export const contextToggleHelp: Record<ContextToggleKey, ContextToggleHelp> = {
     discovery: {
@@ -27,8 +23,8 @@ export const contextToggleHelp: Record<ContextToggleKey, ContextToggleHelp> = {
         boundary:
             "This is not a blanket file-access switch or permission grant. Skills, file-based hooks, tool availability, and host authorization are separate decisions.",
         sources: [
-            { label: "Discovery option and precedence", url: `${types}#L2374-L2380` },
-            { label: "Explicit plugin-directory opt-in", url: `${types}#L2781-L2793` },
+            { label: "Discovery option and precedence" },
+            { label: "Explicit plugin-directory opt-in" },
         ],
     },
     skills: {
@@ -44,7 +40,7 @@ export const contextToggleHelp: Record<ContextToggleKey, ContextToggleHelp> = {
             "A review workflow can use a reviewed SKILL.md instruction pack containing its rubric and operating procedure.",
         boundary:
             "Enabling skills does not automatically select the skill tool in the tool inventory. Selecting that tool does not override this switch. Ordinary system/custom instructions are separate from skills.",
-        sources: [{ label: "Skill-loading gate", url: `${types}#L2927-L2932` }],
+        sources: [{ label: "Skill-loading gate" }],
     },
     fileHooks: {
         title: "File-based hooks",
@@ -59,11 +55,8 @@ export const contextToggleHelp: Record<ContextToggleKey, ContextToggleHelp> = {
         boundary:
             "Review hook files as executable project configuration. This is not the Pre-tool policy hook or Post-tool result hook switch in Policy & state; those wire functions implemented by your host.",
         sources: [
-            { label: "File hooks versus SDK callbacks", url: `${types}#L2906-L2911` },
-            {
-                label: "Hook commands execute as subprocesses",
-                url: `${runtime}/src/runtime/src/hooks/command_executor.rs#L7-L18`,
-            },
+            { label: "File hooks versus SDK callbacks" },
+            { label: "Hook commands execute as subprocesses" },
         ],
     },
     hostGit: {
@@ -78,6 +71,6 @@ export const contextToggleHelp: Record<ContextToggleKey, ContextToggleHelp> = {
             "A coding assistant can receive branch and working-tree context for the intended project instead of relying only on what the user describes.",
         boundary:
             "This is not GitHub authentication, permission to commit/push, or a prohibition on running git through an allowed shell or custom tool. Control those effects with tool selection, permission handlers, and service policy.",
-        sources: [{ label: "Host Git context contract", url: `${types}#L2913-L2918` }],
+        sources: [{ label: "Host Git context contract" }],
     },
 };

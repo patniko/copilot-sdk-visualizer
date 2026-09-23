@@ -11,6 +11,7 @@ import {
 import { SDK_GETTING_STARTED } from "../content/sdk-docs";
 import type { ViewId } from "./editor";
 import { Button } from "./ui";
+import "../onboarding.css";
 
 const layers = [
     {
