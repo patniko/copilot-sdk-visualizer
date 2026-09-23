@@ -126,6 +126,7 @@ it("explains the complete runtime-input set instead of displaying unexplained ma
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Prompt\b/ })
             .click();
+        await page.locator(".hb-prompt-reference-disclosure > summary").click();
         await page.getByLabel("Built-in prompt section", { exact: true }).selectOption("safety");
         const reference = await page
             .getByRole("textbox", { name: "safety captured source reference", exact: true })

@@ -3673,6 +3673,53 @@
     margin-top: 17px;
 }
 
+.hb-prompt-reference-disclosure {
+    border: 1px solid var(--cp-border);
+    border-radius: 12px;
+    background: var(--cp-bg-elevated);
+}
+
+.hb-prompt-reference-disclosure > summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    color: var(--cp-text);
+    cursor: pointer;
+}
+
+.hb-prompt-reference-disclosure > summary::marker {
+    color: var(--cp-text-soft);
+}
+
+.hb-prompt-reference-disclosure > summary svg {
+    flex-shrink: 0;
+    color: var(--cp-text-muted);
+}
+
+.hb-prompt-reference-disclosure > summary span {
+    display: grid;
+    gap: 2px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.hb-prompt-reference-disclosure > summary small {
+    color: var(--cp-text-muted);
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.hb-prompt-reference-disclosure[open] > summary {
+    border-bottom: 1px solid var(--cp-border);
+}
+
+.hb-prompt-reference-disclosure > .hb-panel {
+    border: 0;
+    border-radius: 0 0 12px 12px;
+    box-shadow: none;
+}
+
 @container (max-width: 620px) {
     .hb-file-workbench {
         grid-template-columns: minmax(0, 1fr);

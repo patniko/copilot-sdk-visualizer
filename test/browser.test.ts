@@ -348,13 +348,35 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
         await navigate(page, /^Prompt\b/);
         await page
             .getByRole("group", { name: "System message mode", exact: true })
-            .getByText("Customize", { exact: true })
+            .getByText("Append", { exact: true })
             .click();
+        expect(
+            await page.getByRole("textbox", { name: "Instructions to append", exact: true }).isVisible(),
+        ).toBe(true);
+        await page
+            .getByRole("group", { name: "System message mode", exact: true })
+            .getByText("Replace", { exact: true })
+            .click();
+        expect(
+            await page.getByRole("textbox", { name: "Complete system prompt", exact: true }).isVisible(),
+        ).toBe(true);
+        await page
+            .getByRole("group", { name: "System message mode", exact: true })
+            .getByText("Customize sections", { exact: true })
+            .click();
+        expect(await page.getByRole("textbox", { name: "Complete system prompt", exact: true }).count()).toBe(
+            0,
+        );
+        expect(
+            await page
+                .getByRole("heading", { name: "Customize named prompt sections", exact: true })
+                .isVisible(),
+        ).toBe(true);
         await page.getByRole("button", { name: "Add section", exact: true }).click();
         await page.getByLabel("Section name", { exact: true }).selectOption("tone");
         await page.getByLabel("Section action", { exact: true }).selectOption("replace");
         await page
-            .getByRole("textbox", { name: "Section content", exact: true })
+            .getByRole("textbox", { name: "Replacement section content", exact: true })
             .fill("Be concise and cite evidence.");
         await expect
             .poll(async () => (await savedPlan(page)).prompt.sections[0]?.content)

@@ -248,9 +248,6 @@ function RuntimeInputEntry({ input }: { input: PromptInput }) {
                     <dd>{input.condition}</dd>
                 </div>
             </dl>
-            <p className="hb-field-hint">
-                Reference identifier: <code>{input.id}</code>. Not a public macro API.
-            </p>
         </details>
     );
 }
