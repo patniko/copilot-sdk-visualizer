@@ -48,7 +48,7 @@ import { RuntimeExplorer } from "./components/RuntimeExplorer";
 import { ToolsEditor } from "./components/ToolsEditor";
 import { viewForPath } from "./components/editor";
 import type { EditorProps, Evidence, ViewId } from "./components/editor";
-import { Badge, Button, Modal, Notice } from "./components/ui";
+import { Button, Modal, Notice } from "./components/ui";
 import "./builder.css";
 
 const navigation = [
@@ -297,13 +297,8 @@ export default function App() {
                         <h1>Harness Builder</h1>
                         <p>GitHub Copilot runtime</p>
                     </div>
-                    <Badge className="hb-planner-badge">Planning workbench</Badge>
                 </div>
                 <div className="hb-header-actions">
-                    <span className="hb-local-badge">
-                        <LockKeyhole size={13} aria-hidden="true" />
-                        Local only
-                    </span>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -327,6 +322,7 @@ export default function App() {
                     </Button>
                     <Button
                         className="hb-plan-export-action"
+                        variant="primary"
                         disabled={exportDisabled}
                         onClick={() => setExportOpen(true)}
                         title={
@@ -337,15 +333,6 @@ export default function App() {
                     >
                         <Download size={16} aria-hidden="true" />
                         <span>Export</span>
-                    </Button>
-                    <Button
-                        className="hb-build-cta"
-                        variant="primary"
-                        onClick={() => navigate("bootstrap")}
-                        title="Choose a runtime and language, then download a bootstrap project. Nothing runs here."
-                    >
-                        <PackageOpen size={16} aria-hidden="true" />
-                        Build &amp; run
                     </Button>
                 </div>
             </header>

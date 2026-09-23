@@ -70,10 +70,19 @@ it("migrates existing drafts and makes a real runtime-specific bootstrap ZIP", a
                 .getByRole("navigation", { name: "Harness workflow" })
                 .getByRole("button", { name: /^Build & run\b/ })
                 .click();
-            await page
-                .getByRole("group", { name: "Runtime placement", exact: true })
-                .getByText("Native in-process runtime", { exact: true })
-                .click();
+            const placements = page.getByRole("group", { name: "Runtime placement", exact: true });
+            expect(
+                await placements.getByRole("img", { name: /SDK-owned child runtime process/ }).isVisible(),
+            ).toBe(true);
+            expect(
+                await placements
+                    .getByRole("img", { name: /separately operated runtime service/ })
+                    .isVisible(),
+            ).toBe(true);
+            expect(
+                await placements.getByRole("img", { name: /share one application process/ }).isVisible(),
+            ).toBe(true);
+            await placements.getByText("Native in-process runtime", { exact: true }).click();
             await expect.poll(async () => (await stored(page)).target.runtime).toBe("inprocess");
             expect(await page.getByRole("textbox", { name: "Contents of README.md" }).inputValue()).toContain(
                 "Install the project dependencies",

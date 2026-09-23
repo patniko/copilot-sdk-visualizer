@@ -24,7 +24,7 @@ const providerLabels = {
     azure: "Azure OpenAI",
     anthropic: "Anthropic",
 };
-const decisionLabels = { host: "Host", review: "Review", gap: "Boundary" };
+const decisionLabels = { host: "Host work", review: "Choice", gap: "Boundary" };
 
 export function PlanInspector({
     plan,
@@ -95,10 +95,8 @@ export function PlanInspector({
                     </div>
                 </div>
             </section>
-            <section className="hb-inspector-section">
-                <div className="hb-inspector-section-heading">
-                    <h3>At a glance</h3>
-                </div>
+            <details className="hb-inspector-section hb-inspector-disclosure">
+                <summary>At a glance</summary>
                 <dl className="hb-plan-summary-grid">
                     <div>
                         <dt>Tool policy</dt>
@@ -113,7 +111,7 @@ export function PlanInspector({
                         <dd>{contracts.length}</dd>
                     </div>
                     <div>
-                        <dt>Open decisions</dt>
+                        <dt>Plan implications</dt>
                         <dd>{decisions.length}</dd>
                     </div>
                 </dl>
@@ -125,13 +123,13 @@ export function PlanInspector({
                         retain them.
                     </p>
                 )}
-            </section>
+            </details>
             {decisions.length > 0 && (
-                <section className="hb-inspector-section">
-                    <div className="hb-inspector-section-heading">
-                        <h3>Needs attention</h3>
+                <details className="hb-inspector-section hb-inspector-disclosure">
+                    <summary>
+                        <span>What your choices mean</span>
                         <Badge>{decisions.length}</Badge>
-                    </div>
+                    </summary>
                     <div className="hb-decision-list">
                         {decisions.slice(0, 3).map((decision) => (
                             <DecisionButton key={decision.id} decision={decision} onEvidence={onEvidence} />
@@ -151,7 +149,7 @@ export function PlanInspector({
                             </div>
                         </details>
                     )}
-                </section>
+                </details>
             )}
             <details className="hb-inspector-technical">
                 <summary>

@@ -201,6 +201,13 @@ it("collapses the desktop navigation and restores the preference on reload", asy
 it("collapses the live plan and restores the preference on reload", async () => {
     await exercise("collapsed-live-plan", async (page) => {
         const workspace = page.locator(".hb-workspace");
+        const disclosures = page.locator(".hb-inspector-disclosure");
+        expect(await disclosures.count()).toBe(2);
+        for (const disclosure of await disclosures.all()) {
+            expect(await disclosure.evaluate((element) => element.hasAttribute("open"))).toBe(false);
+        }
+        await disclosures.first().locator("summary").click();
+        expect(await disclosures.first().evaluate((element) => element.hasAttribute("open"))).toBe(true);
         await page.getByRole("button", { name: "Collapse live plan", exact: true }).click();
         await expect
             .poll(() => workspace.evaluate((element) => element.classList.contains("hb-plan-collapsed")))
@@ -444,6 +451,7 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
         expect(plan.policy.preToolHook).toBe(true);
         expect(plan.session.largeOutput).toBe(true);
         expect(plan.evaluation).toBe("Every answer cites an authorized document.");
+        await page.getByText("What your choices mean", { exact: true }).click();
         expect(
             await page.getByRole("button", { name: /Large results may still write temporary files/ }).count(),
         ).toBe(1);

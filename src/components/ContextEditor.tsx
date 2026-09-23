@@ -6,6 +6,7 @@ import { Badge, Button, LineListField, Notice, Panel, TextField, ToggleField } f
 import { SettingHelp } from "./SettingHelp";
 import { contextToggleHelp } from "../content/context-help";
 import { valueHelp } from "../content/setting-help";
+import { SkillProviderPreview } from "./SkillProviderPreview";
 
 export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
     return (
@@ -169,6 +170,7 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     </Button>
                 </Notice>
             </Panel>
+            <SkillProviderPreview onEvidence={onEvidence} />
         </div>
     );
 }

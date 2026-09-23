@@ -1,8 +1,57 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { ArrowRight, Code2, Cpu } from "lucide-react";
 import { LANGUAGES, RUNTIME_OPTIONS } from "../domain/target";
-import type { BootstrapTarget } from "../domain/target";
+import type { BootstrapTarget, RuntimeKind } from "../domain/target";
 import { Badge, Notice } from "./ui";
+
+const topologyLabels: Record<RuntimeKind, string> = {
+    managed: "Host and SDK connect over standard input and output to an SDK-owned child runtime process.",
+    external: "Host and SDK connect over TCP to a separately operated runtime service.",
+    inprocess: "Host, SDK, and runtime share one application process.",
+};
+
+export function RuntimeTopologyPreview({ runtime }: { runtime: RuntimeKind }) {
+    return (
+        <span
+            className={`hb-runtime-topology hb-runtime-topology-${runtime}`}
+            role="img"
+            aria-label={topologyLabels[runtime]}
+        >
+            {runtime === "inprocess" ? (
+                <span className="hb-runtime-topology-boundary hb-runtime-topology-shared">
+                    <span className="hb-runtime-topology-node">
+                        <Code2 size={14} aria-hidden="true" />
+                        Host + SDK
+                    </span>
+                    <span className="hb-runtime-topology-join">+</span>
+                    <span className="hb-runtime-topology-node hb-runtime-topology-runtime">
+                        <Cpu size={14} aria-hidden="true" />
+                        Runtime
+                    </span>
+                </span>
+            ) : (
+                <>
+                    <span className="hb-runtime-topology-boundary">
+                        <span className="hb-runtime-topology-node">
+                            <Code2 size={14} aria-hidden="true" />
+                            Host + SDK
+                        </span>
+                    </span>
+                    <span className="hb-runtime-topology-link">
+                        <ArrowRight size={15} aria-hidden="true" />
+                        <small>{runtime === "managed" ? "stdio" : "TCP"}</small>
+                    </span>
+                    <span className="hb-runtime-topology-boundary hb-runtime-topology-runtime-boundary">
+                        <span className="hb-runtime-topology-node hb-runtime-topology-runtime">
+                            <Cpu size={14} aria-hidden="true" />
+                            {runtime === "managed" ? "Child runtime" : "Runtime service"}
+                        </span>
+                    </span>
+                </>
+            )}
+        </span>
+    );
+}
 
 export function RuntimePlacement({
     target,

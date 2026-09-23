@@ -87,22 +87,12 @@
     font-size: 11px;
 }
 
-.hb-brand .hb-planner-badge {
-    margin-left: 8px;
-}
-
-.hb-local-badge,
 .hb-save-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     color: var(--cp-text-muted);
     font-size: 11px;
-}
-
-.hb-local-badge {
-    margin-right: 6px;
-    white-space: nowrap;
 }
 
 .hb-header-divider {
@@ -1258,6 +1248,110 @@
     white-space: nowrap;
 }
 
+.hb-coming-soon {
+    border-style: dashed;
+}
+
+.hb-coming-soon-note {
+    margin-bottom: 16px;
+    color: var(--cp-text-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.hb-coming-soon-fields {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.hb-coming-soon-fields * {
+    cursor: not-allowed;
+}
+
+.hb-skill-catalog {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    margin-top: 18px;
+    container-type: inline-size;
+}
+
+.hb-skill-catalog-head,
+.hb-skill-catalog-row {
+    display: grid;
+    grid-template-columns: minmax(130px, 1fr) minmax(200px, 2fr) minmax(110px, 0.8fr) 88px 88px;
+    align-items: center;
+    gap: 8px;
+}
+
+.hb-skill-catalog-head {
+    color: var(--cp-text-soft);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.hb-skill-check {
+    display: flex;
+    justify-content: center;
+}
+
+.hb-skill-check input {
+    accent-color: var(--cp-accent);
+}
+
+@container (max-width: 640px) {
+    .hb-skill-catalog-head {
+        display: none;
+    }
+
+    .hb-skill-catalog-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--cp-border);
+    }
+
+    .hb-skill-catalog-row > input {
+        grid-column: 1 / -1;
+    }
+
+    .hb-skill-catalog-row > .hb-skill-check {
+        justify-content: flex-start;
+        gap: 6px;
+        font-size: 11px;
+    }
+
+    .hb-skill-catalog-row > .hb-skill-check .hb-sr-only {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+    }
+}
+
+.hb-skill-catalog-add {
+    justify-self: start;
+}
+
+.hb-coming-soon-limits {
+    display: grid;
+    gap: 6px;
+    margin: 18px 0 12px;
+    padding-left: 18px;
+    color: var(--cp-text-muted);
+    font-size: 12px;
+    line-height: 1.65;
+    list-style: disc;
+}
+
 .hb-toggle-list {
     display: grid;
 }
@@ -1786,6 +1880,35 @@
 
 .hb-inspector-section-heading .hb-badge {
     font-size: 9px;
+}
+
+.hb-inspector-disclosure > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--cp-text);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.hb-inspector-disclosure > summary::marker {
+    color: var(--cp-text-soft);
+}
+
+.hb-inspector-disclosure > summary .hb-badge {
+    margin-left: auto;
+    font-size: 9px;
+}
+
+.hb-inspector-disclosure[open] > summary {
+    margin-bottom: 12px;
+}
+
+.hb-inspector-disclosure[open] .hb-plan-summary-grid,
+.hb-inspector-disclosure[open] > .hb-decision-list {
+    margin-top: 0;
 }
 
 .hb-plan-summary-grid {
@@ -2801,10 +2924,6 @@
 }
 
 @media (max-width: 960px) {
-    .hb-planner-badge {
-        display: none;
-    }
-
     .hb-workspace {
         grid-template-columns: 176px minmax(0, 1fr);
         gap: 22px;
@@ -2870,10 +2989,6 @@
     .hb-header-actions {
         width: 100%;
         gap: 8px;
-    }
-
-    .hb-local-badge {
-        margin-right: auto;
     }
 
     .hb-draft-bar {
@@ -3142,10 +3257,6 @@
     }
 }
 
-.hb-build-cta {
-    white-space: nowrap;
-}
-
 .hb-overview-target,
 .hb-project-summary {
     display: flex;
@@ -3244,6 +3355,86 @@
     color: var(--cp-text-muted);
     font-size: 12px;
     line-height: 1.7;
+}
+
+.hb-runtime-topology {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 7px;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--cp-border);
+    border-radius: 9px;
+    background: var(--cp-surface);
+}
+
+.hb-runtime-topology-boundary {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 7px;
+    border: 1px dashed var(--cp-border-strong);
+    border-radius: 7px;
+}
+
+.hb-runtime-topology-runtime-boundary {
+    border-color: var(--cp-accent);
+}
+
+.hb-runtime-topology-node {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    width: 100%;
+    color: var(--cp-text);
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.hb-runtime-topology-node svg {
+    flex-shrink: 0;
+    color: var(--cp-text-muted);
+}
+
+.hb-runtime-topology-runtime,
+.hb-runtime-topology-runtime svg {
+    color: var(--cp-accent);
+}
+
+.hb-runtime-topology-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1px;
+    color: var(--cp-text-soft);
+}
+
+.hb-runtime-topology-link small {
+    font-size: 8px;
+    line-height: 1.2;
+}
+
+.hb-runtime-topology-shared {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 6px;
+    border-style: solid;
+    border-color: var(--cp-accent);
+    background: var(--cp-accent-soft);
+}
+
+.hb-runtime-topology-join {
+    align-self: center;
+    color: var(--cp-accent);
+    font-size: 12px;
+    font-weight: 700;
 }
 
 .hb-runtime-option-channel {
@@ -4091,10 +4282,6 @@
 }
 
 @media (max-width: 1100px) {
-    .hb-brand .hb-planner-badge {
-        display: none;
-    }
-
     .hb-header {
         flex-wrap: wrap;
         padding-block: 16px;
@@ -4108,17 +4295,12 @@
 @media (max-width: 760px) {
     .hb-header-actions {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
         gap: 8px;
     }
 
-    .hb-header-actions > .hb-local-badge {
-        grid-column: 1 / span 2;
-    }
-
     .hb-header-actions > .hb-button-icon {
-        grid-column: 3;
-        justify-self: end;
+        grid-column: 1;
     }
 
     .hb-header-actions > .hb-header-divider {
@@ -4126,14 +4308,10 @@
     }
 
     .hb-import-action {
-        grid-column: 1;
-    }
-
-    .hb-plan-export-action {
         grid-column: 2;
     }
 
-    .hb-build-cta {
+    .hb-plan-export-action {
         grid-column: 3;
     }
 

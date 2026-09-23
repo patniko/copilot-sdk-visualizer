@@ -19,7 +19,7 @@ import type { RuntimeKind } from "../domain/target";
 import { sdkDocsForView } from "../content/sdk-docs";
 import { createPreset } from "../domain/presets";
 import { BootstrapProjectPanel } from "./BootstrapProjectPanel";
-import { RuntimePlacement } from "./RuntimePlacement";
+import { RuntimeTopologyPreview } from "./RuntimePlacement";
 import { issueFor, viewForPath } from "./editor";
 import type { EditorProps, ViewId } from "./editor";
 import { Badge, Button, ChoiceField, Notice, Panel, TextField } from "./ui";
@@ -100,6 +100,7 @@ export function BootstrapEditor({
                                             <Badge>{option.tag}</Badge>
                                         </span>
                                         <strong>{option.title}</strong>
+                                        <RuntimeTopologyPreview runtime={option.id} />
                                         <span className="hb-runtime-option-description">
                                             {option.description}
                                         </span>
@@ -111,7 +112,6 @@ export function BootstrapEditor({
                         })}
                     </div>
                 </fieldset>
-                <RuntimePlacement target={plan.target} />
                 {runtime && (
                     <Notice
                         title={

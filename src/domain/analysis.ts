@@ -74,7 +74,7 @@ export function analyzePlan(plan: HarnessPlan): Decision[] {
         decisions.push({
             id: "inprocess-runtime",
             kind: "review",
-            title: "The runtime shares your application's process",
+            title: "In-process runtime shares the application process",
             detail: "Use a matching native bundle and the language's experimental opt-in. Clients share process state and one loaded native library version; stopping a client is not a guarantee that the library unloads.",
             sources: ["sdk-inprocess-guide"],
         });
