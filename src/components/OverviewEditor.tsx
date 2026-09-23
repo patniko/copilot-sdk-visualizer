@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { ArrowRight, Box, Check, Code2, FileCheck2, Layers3, ShieldCheck, Unplug } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Check, Columns3, FileCheck2, ShieldCheck, Unplug } from "lucide-react";
 import { PRESETS, SCENARIOS, changedAxes } from "../domain/presets";
 import type { ScenarioId } from "../domain/presets";
 import type { PresetId } from "../domain/plan";
@@ -11,28 +12,27 @@ import type { EditorProps, ViewId } from "./editor";
 import { Badge, Button, ChoiceField, Panel } from "./ui";
 import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
+import { ProfileCompareDialog } from "./ProfileCompareDialog";
+import { profileIcons } from "./profile-ui";
 import "../tool-catalog.css";
 
 const profileDetails = {
     empty: {
-        icon: Box,
         inventory: "Explicit inventory; no inherited tools",
         prompt: "Your prompt, end to end",
         footer: "Build from explicit decisions",
     },
     minimal: {
-        icon: Layers3,
         inventory: "Explicit: 2 selected session names",
         prompt: "A small, editable prompt",
         footer: "A proposed composition, not an SDK mode",
     },
     copilot: {
-        icon: Code2,
         inventory: "Runtime-default selection",
         prompt: "Coding guidance, extended",
         footer: "An opinionated coding starting point",
     },
-} satisfies Record<PresetId, { icon: typeof Box; inventory: string; prompt: string; footer: string }>;
+} satisfies Record<PresetId, { inventory: string; prompt: string; footer: string }>;
 
 const scenarioIcons = {
     "workspace-free": Unplug,
@@ -88,12 +88,21 @@ export function BaseProfileEditor({
     onNavigate: (view: ViewId) => void;
 }) {
     const changes = changedAxes(plan);
+    const [comparing, setComparing] = useState<PresetId | null>(null);
     return (
         <div className="hb-editor-stack">
+            {comparing && (
+                <ProfileCompareDialog
+                    focus={comparing}
+                    current={plan.preset}
+                    onClose={() => setComparing(null)}
+                    onApply={onApplyPreset}
+                />
+            )}
             <div className="hb-profile-grid">
                 {PRESETS.map((preset) => {
                     const details = profileDetails[preset.id];
-                    const Icon = details.icon;
+                    const Icon = profileIcons[preset.id];
                     const selected = plan.preset === preset.id;
                     return (
                         <article
@@ -132,7 +141,18 @@ export function BaseProfileEditor({
                                 Apply {preset.label}
                                 <ArrowRight size={15} aria-hidden="true" />
                             </Button>
-                            <p className="hb-profile-footnote">{details.footer}</p>
+                            <div className="hb-profile-footer">
+                                <p className="hb-profile-footnote">{details.footer}</p>
+                                <Button
+                                    variant="ghost"
+                                    size="small"
+                                    onClick={() => setComparing(preset.id)}
+                                    aria-label={`Compare ${preset.label} with other profiles`}
+                                >
+                                    <Columns3 size={14} aria-hidden="true" />
+                                    Compare
+                                </Button>
+                            </div>
                         </article>
                     );
                 })}

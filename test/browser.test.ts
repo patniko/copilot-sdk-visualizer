@@ -165,6 +165,27 @@ it("applies and undoes actual profile and scenario decisions", async () => {
     });
 });
 
+it("compares profile configurations on demand and applies from the comparison", async () => {
+    await exercise("profile-comparison", async (page) => {
+        await navigate(page, /^Base Profile\b/);
+        expect(await page.getByRole("dialog", { name: "Compare starting profiles" }).count()).toBe(0);
+        await page.getByRole("button", { name: "Compare Copilot with other profiles" }).click();
+        const compare = page.getByRole("dialog", { name: "Compare starting profiles" });
+        expect(await compare.getByRole("columnheader", { name: /Copilot/ }).isVisible()).toBe(true);
+        expect(await compare.getByRole("rowheader", { name: /Project workspace/ }).isVisible()).toBe(true);
+        expect(await compare.getByRole("rowheader", { name: /Permission decisions/ }).isVisible()).toBe(true);
+        await compare.getByRole("checkbox", { name: "Show differences only" }).check();
+        expect(await compare.getByRole("rowheader", { name: /Permission decisions/ }).count()).toBe(0);
+        expect(await compare.getByRole("rowheader", { name: /Project workspace/ }).isVisible()).toBe(true);
+        await compare
+            .getByRole("button", { name: /^Apply/ })
+            .last()
+            .click();
+        await expect.poll(async () => (await savedPlan(page)).preset).toBe("copilot");
+        expect(await compare.count()).toBe(0);
+    });
+});
+
 it("collapses the desktop navigation and restores the preference on reload", async () => {
     await exercise("collapsed-navigation", async (page) => {
         const workspace = page.locator(".hb-workspace");
