@@ -441,28 +441,6 @@
 .rt-bottom-line strong {
     color: var(--cp-text);
 }
-.hb-runtime-entry {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 16px 24px;
-    border: 1px solid var(--cp-highlight);
-    border-radius: 16px;
-    background: var(--cp-accent-soft);
-}
-.hb-runtime-entry h3 {
-    margin: 4px 0 0;
-    font-size: 22px;
-    letter-spacing: -0.035em;
-}
-.hb-runtime-entry p:not(.hb-kicker) {
-    max-width: 520px;
-    color: var(--cp-text-muted);
-    font-size: 13px;
-}
-
 @container (max-width: 1120px) {
     .rt-atlas-layout {
         grid-template-columns: minmax(0, 1fr) 280px;

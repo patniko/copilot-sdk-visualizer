@@ -369,7 +369,7 @@
 }
 
 .hb-page-heading h2 {
-    margin: 12px 0 10px;
+    margin: 0 0 10px;
     font-size: clamp(29px, 2.65vw, 40px);
     font-weight: 620;
     letter-spacing: -1.4px;
@@ -1817,7 +1817,7 @@
 }
 
 .hb-inspector-header h2 {
-    margin-top: 4px;
+    margin-top: 0;
     font-size: 19px;
     font-weight: 650;
     letter-spacing: -0.5px;

@@ -39,7 +39,6 @@ export function PlanInspector({
         <aside className="hb-inspector" aria-labelledby="live-plan-heading" tabIndex={0}>
             <div className="hb-inspector-header">
                 <div>
-                    <p className="hb-kicker">Your composition</p>
                     <h2 id="live-plan-heading">Live plan</h2>
                 </div>
                 <button

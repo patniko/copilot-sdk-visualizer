@@ -86,63 +86,52 @@ const navigation = [
 const SIDEBAR_STORAGE_KEY = "harness-builder:sidebar-collapsed";
 const PLAN_STORAGE_KEY = "harness-builder:plan-collapsed";
 
-const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description: string }> = {
+const viewHeadings: Record<ViewId, { title: string; description: string }> = {
     overview: {
-        eyebrow: "Start here",
         title: "Understand the harness.",
         description: "See what the shared runtime provides, what you compose, and what your host owns.",
     },
     runtime: {
-        eyebrow: "Meet the runtime",
         title: "Meet the engine behind your harness.",
         description:
             "Explore the shared machinery, the configuration seams, and the authority your host keeps.",
     },
     "base-profile": {
-        eyebrow: "01 / Starting point",
         title: "Compose the behavior.",
         description: "Keep the engine. Choose a starting point, then make each boundary your own.",
     },
     prompt: {
-        eyebrow: "02 / Instructions",
         title: "Give the work a frame.",
         description: "Choose how much of the system prompt you own, and make the operating rules explicit.",
     },
     tools: {
-        eyebrow: "03 / Capabilities",
         title: "Same tool. Your implementation.",
         description: "Separate what the model can see from what the host actually does.",
     },
     context: {
-        eyebrow: "04 / Inputs",
         title: "Be deliberate about context.",
         description:
             "Supply the project, instructions, and capability packs your future host should make available.",
     },
     agents: {
-        eyebrow: "05 / Delegation",
         title: "Give every role a purpose.",
         description:
             "Define focused specialists without confusing tool visibility, model preference, and authority.",
     },
     models: {
-        eyebrow: "06 / Connection",
         title: "Choose the model. Own the identity.",
         description: "Plan the provider and credential bindings without putting secrets in the browser.",
     },
     policy: {
-        eyebrow: "07 / Host responsibilities",
         title: "Make the boundaries real.",
         description: "Keep permissions, persistence, observations, and your quality bar explicit.",
     },
     bootstrap: {
-        eyebrow: "08 / Bring it to your host",
         title: "Build the project. Wire the host.",
         description:
             "Configure behavior, choose runtime and language, install dependencies, integrate the host, then preflight and run locally.",
     },
     reference: {
-        eyebrow: "09 / Source-backed learning",
         title: "Understand the seams.",
         description: "Look up the supported surface, the lifecycle, and the limits behind each decision.",
     },
@@ -416,7 +405,6 @@ export default function App() {
                 <main id="builder-main" tabIndex={-1} className="hb-main" aria-labelledby="editor-heading">
                     {view !== "runtime" && (
                         <div className="hb-page-heading">
-                            <p className="hb-kicker">{heading.eyebrow}</p>
                             <h2 id="editor-heading" tabIndex={-1}>
                                 {heading.title}
                             </h2>

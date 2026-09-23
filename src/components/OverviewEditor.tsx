@@ -35,15 +35,6 @@ const axisViews: Record<string, ViewId> = {
 export function OverviewEditor({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
     return (
         <div className="hb-editor-stack">
-            <section className="hb-runtime-entry" aria-labelledby="runtime-entry-title">
-                <div>
-                    <p className="hb-kicker">Meet the engine</p>
-                    <h3 id="runtime-entry-title">What does the runtime give you?</h3>
-                </div>
-                <Button onClick={() => onNavigate("runtime")}>
-                    Explore the runtime <ArrowRight size={15} aria-hidden="true" />
-                </Button>
-            </section>
             <HarnessPrimer onNavigate={onNavigate} />
         </div>
     );

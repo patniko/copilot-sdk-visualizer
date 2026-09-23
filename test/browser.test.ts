@@ -132,11 +132,7 @@ it("edits a real override, preserves invalid drafts, exports it, and restores it
 it("applies and undoes actual profile decisions", async () => {
     await exercise("profiles", async (page) => {
         await page.getByRole("textbox", { name: "Draft name" }).fill("Keep my draft");
-        expect(
-            await page
-                .getByRole("heading", { name: "What is a harness, and how do you build one?" })
-                .isVisible(),
-        ).toBe(true);
+        expect(await page.getByRole("heading", { name: "What is a harness?" }).isVisible()).toBe(true);
         expect(await page.getByRole("button", { name: "Apply Copilot", exact: true }).count()).toBe(0);
         await navigate(page, /^Base Profile\b/);
         expect(await page.getByRole("heading", { name: "Compose the behavior." }).isVisible()).toBe(true);
