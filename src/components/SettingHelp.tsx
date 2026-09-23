@@ -105,10 +105,6 @@ export function SettingHelp(props: SettingHelpProps) {
                         <strong>What this does not control</strong>
                         <p>{help.boundary}</p>
                     </div>
-                    <p className="hb-setting-help-scope">
-                        These explanations distinguish planner choices, SDK options, and required host code. A
-                        valid configuration is not an authorization or deployment-readiness guarantee.
-                    </p>
                     <Popover.Arrow className="hb-setting-help-arrow" />
                 </Popover.Content>
             </Popover.Portal>

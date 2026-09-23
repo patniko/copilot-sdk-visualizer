@@ -18,10 +18,12 @@ export function BuiltinToolDetail({
     onEvidence,
     headingRef,
     onInspectAlias,
+    showReferenceDetails = true,
 }: EditorProps & {
     name: BuiltinName;
     headingRef: Ref<HTMLHeadingElement>;
     onInspectAlias: (name: string) => void;
+    showReferenceDetails?: boolean;
 }) {
     const spec = BUILTIN_SPECS[name];
     const settings = plan.tools[name];
@@ -98,67 +100,71 @@ export function BuiltinToolDetail({
                 </Notice>
             )}
             <section className="hb-tool-description">
-                <h5>Descriptor description</h5>
+                <h5>{showReferenceDetails ? "Descriptor description" : "What it does"}</h5>
                 <p>{spec.description}</p>
             </section>
-            <section className="hb-tool-reference-default">
-                <div>
-                    <h5>Reference coding default</h5>
-                    <Badge accent={spec.defaultStatus === "baseline-enabled"}>
-                        {DEFAULT_STATUS_LABELS[spec.defaultStatus]}
-                    </Badge>
-                </div>
-                <p>{spec.defaultReason}</p>
-                <p className="hb-field-hint">
-                    This describes the pinned reference profile, not the current plan or a live enabled-tool
-                    inventory.
-                </p>
-            </section>
-            <dl className="hb-tool-contract-facts">
-                <div>
-                    <dt>Native input kind</dt>
-                    <dd>
-                        <strong>{inputKindLabels[spec.inputKind]}</strong>
-                        <code>{spec.inputKind}</code>
-                        <p>{toolCatalog.context.inputKindDefinitions[spec.inputKind]}</p>
-                    </dd>
-                </div>
-                <div>
-                    <dt>External override route</dt>
-                    <dd>
-                        <strong>
-                            {spec.overrideable
-                                ? "Verified in this snapshot"
-                                : name === "catalog_search"
-                                  ? "Explicitly reserved"
-                                  : "Not verified in this snapshot"}
-                        </strong>
-                        <p>
-                            {spec.overrideable
-                                ? "Override support does not enable a disabled tool or bypass permissions."
-                                : name === "catalog_search"
-                                  ? "This descriptor cannot be declared or overridden as an external tool."
-                                  : "New Override choices are disabled conservatively, not as a universal SDK capability claim."}
+            {showReferenceDetails && (
+                <>
+                    <section className="hb-tool-reference-default">
+                        <div>
+                            <h5>Reference coding default</h5>
+                            <Badge accent={spec.defaultStatus === "baseline-enabled"}>
+                                {DEFAULT_STATUS_LABELS[spec.defaultStatus]}
+                            </Badge>
+                        </div>
+                        <p>{spec.defaultReason}</p>
+                        <p className="hb-field-hint">
+                            This describes the pinned reference profile, not the current plan or a live
+                            enabled-tool inventory.
                         </p>
-                    </dd>
-                </div>
-                <div>
-                    <dt>Workspace review flag</dt>
-                    <dd>
-                        <strong>
-                            {spec.workspace
-                                ? "Host / project effects require review"
-                                : "No direct workspace flag"}
-                        </strong>
-                        <p>
-                            False does not mean no network, storage, incidental filesystem I/O, or permission
-                            checks. Review the default reason and source for this tool.
-                        </p>
-                    </dd>
-                </div>
-            </dl>
-            {name === "tool_search_tool" && <ToolSearchProtocol />}
-            {!spec.overrideable && !legacyOverride && (
+                    </section>
+                    <dl className="hb-tool-contract-facts">
+                        <div>
+                            <dt>Native input kind</dt>
+                            <dd>
+                                <strong>{inputKindLabels[spec.inputKind]}</strong>
+                                <code>{spec.inputKind}</code>
+                                <p>{toolCatalog.context.inputKindDefinitions[spec.inputKind]}</p>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>External override route</dt>
+                            <dd>
+                                <strong>
+                                    {spec.overrideable
+                                        ? "Verified in this snapshot"
+                                        : name === "catalog_search"
+                                          ? "Explicitly reserved"
+                                          : "Not verified in this snapshot"}
+                                </strong>
+                                <p>
+                                    {spec.overrideable
+                                        ? "Override support does not enable a disabled tool or bypass permissions."
+                                        : name === "catalog_search"
+                                          ? "This descriptor cannot be declared or overridden as an external tool."
+                                          : "New Override choices are disabled conservatively, not as a universal SDK capability claim."}
+                                </p>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Workspace review flag</dt>
+                            <dd>
+                                <strong>
+                                    {spec.workspace
+                                        ? "Host / project effects require review"
+                                        : "No direct workspace flag"}
+                                </strong>
+                                <p>
+                                    False does not mean no network, storage, incidental filesystem I/O, or
+                                    permission checks. Review the default reason and source for this tool.
+                                </p>
+                            </dd>
+                        </div>
+                    </dl>
+                    {name === "tool_search_tool" && <ToolSearchProtocol />}
+                </>
+            )}
+            {showReferenceDetails && !spec.overrideable && !legacyOverride && (
                 <div className="hb-tool-override-unavailable">
                     {name === "catalog_search" ? (
                         <LockKeyhole size={16} aria-hidden="true" />
@@ -262,7 +268,7 @@ export function BuiltinToolDetail({
                     </div>
                 </section>
             )}
-            {aliases.length > 0 && (
+            {showReferenceDetails && aliases.length > 0 && (
                 <section className="hb-tool-related-aliases">
                     <h5>Selection aliases mentioning this descriptor</h5>
                     <div className="hb-chip-list">

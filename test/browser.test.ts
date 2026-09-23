@@ -129,8 +129,8 @@ it("edits a real override, preserves invalid drafts, exports it, and restores it
     });
 });
 
-it("applies and undoes actual profile and scenario decisions", async () => {
-    await exercise("profiles-and-scenarios", async (page) => {
+it("applies and undoes actual profile decisions", async () => {
+    await exercise("profiles", async (page) => {
         await page.getByRole("textbox", { name: "Draft name" }).fill("Keep my draft");
         expect(
             await page
@@ -148,20 +148,6 @@ it("applies and undoes actual profile and scenario decisions", async () => {
         await expect.poll(async () => (await savedPlan(page)).name).toBe("Keep my draft");
         await page.getByRole("button", { name: "Redo", exact: true }).click();
         await expect.poll(async () => (await savedPlan(page)).preset).toBe("copilot");
-
-        await page.getByRole("button", { name: "Apply No project workspace", exact: true }).click();
-        await expect.poll(async () => (await savedPlan(page)).clientMode).toBe("empty");
-        const workspaceFree = await savedPlan(page);
-        expect(workspaceFree.context.workspace).toBe("");
-        expect(workspaceFree.session.storage).toBe("virtual");
-        expect(workspaceFree.tools.bash.action).toBe("remove");
-        await page.getByRole("button", { name: "Apply Tenant document assistant", exact: true }).click();
-        await page
-            .getByRole("dialog", { name: "Apply Tenant document assistant?" })
-            .getByRole("button", { name: "Apply Tenant document assistant", exact: true })
-            .click();
-        await expect.poll(async () => (await savedPlan(page)).tools.view.action).toBe("override");
-        expect((await savedPlan(page)).prompt.content).toContain("tenant's authorized documents");
     });
 });
 
@@ -505,6 +491,10 @@ it("configures the eligible GitHub App S2S route without storing or exporting cr
 it("keeps editable identities stable across custom tools, MCP names, and agent renames", async () => {
     await exercise("tools-mcp-agents", async (page) => {
         await navigate(page, /^Tools\b/);
+        await page
+            .getByRole("tablist", { name: "Tool configuration areas", exact: true })
+            .getByRole("tab", { name: /Custom tools/ })
+            .click();
         await page.getByRole("button", { name: "Add custom tool", exact: true }).click();
         const name = page.getByRole("textbox", { name: "Custom tool name", exact: true });
         const id = (await savedPlan(page)).customTools[0]?.id;
@@ -513,7 +503,12 @@ it("keeps editable identities stable across custom tools, MCP names, and agent r
         expect(await name.inputValue()).toBe("lookup_customer_record");
         expect((await savedPlan(page)).customTools[0]?.id).toBe(id);
 
+        await page
+            .getByRole("tablist", { name: "Tool configuration areas", exact: true })
+            .getByRole("tab", { name: /MCP servers/ })
+            .click();
         await page.getByRole("button", { name: "Add MCP server", exact: true }).click();
+        await page.locator("details.hb-mcp-server-card > summary").click();
         await page
             .getByRole("textbox", { name: "Canonical runtime wire name", exact: true })
             .fill("verified-runtime-search");

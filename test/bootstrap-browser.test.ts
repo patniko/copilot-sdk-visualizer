@@ -206,44 +206,52 @@ it("provides every language's files and explains Java's virtual-storage boundary
     });
 });
 
-it("shows every built-in and its qualified defaults without changing plan selections", async () => {
-    await usePage("complete-tool-catalog", async (page) => {
-        await page
-            .getByRole("navigation", { name: "Harness workflow" })
-            .getByRole("button", { name: /^Tools\b/ })
-            .click();
-        const descriptors = page.getByRole("tablist", { name: "Built-in tool descriptors", exact: true });
-        expect(await descriptors.getByRole("tab").count()).toBe(59);
-        const original = await stored(page);
-        await page.getByLabel("Reference default state", { exact: true }).selectOption("baseline-enabled");
-        expect(await descriptors.getByRole("tab").count()).toBe(6);
-        expect(await stored(page)).toEqual(original);
-        await page.getByLabel("Reference default state", { exact: true }).selectOption("platform-specific");
-        expect(await descriptors.getByRole("tab").count()).toBe(8);
-        await page.getByLabel("Reference default state", { exact: true }).selectOption("all");
-        await descriptors.getByRole("tab", { name: /^catalog_search;/ }).click();
-        const reserved = page.getByRole("group", { name: "catalog_search action", exact: true });
-        expect(await reserved.getByRole("radio", { name: "Override", exact: true }).isDisabled()).toBe(true);
-        await descriptors.getByRole("tab", { name: /^tool_search_tool;/ }).click();
-        const specialized = page.getByRole("group", { name: "tool_search_tool action", exact: true });
-        expect(await specialized.getByRole("radio", { name: "Override", exact: true }).isEnabled()).toBe(
-            true,
-        );
-        expect(
+it("focuses tool planning on user-facing capabilities while preserving hidden settings", async () => {
+    const plan = createPreset("minimal");
+    await usePage(
+        "focused-tool-catalog",
+        async (page) => {
             await page
-                .getByText("Verified, but specialized: tool-search overrides", { exact: true })
-                .isVisible(),
-        ).toBe(true);
-        await page
-            .getByRole("tablist", { name: "Tool catalog views", exact: true })
-            .getByRole("tab", { name: /Selection aliases/ })
-            .click();
-        expect(await page.getByRole("article", { name: /selection alias$/ }).count()).toBe(33);
-        await page.getByRole("searchbox", { name: "Search selection aliases", exact: true }).fill("shell");
-        expect(
-            await page.getByRole("article", { name: "shell selection alias", exact: true }).isVisible(),
-        ).toBe(true);
-        await page.setViewportSize({ width: 390, height: 844 });
-        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    });
+                .getByRole("navigation", { name: "Harness workflow" })
+                .getByRole("button", { name: /^Tools\b/ })
+                .click();
+            const original = await stored(page);
+            expect(
+                await page.getByRole("list", { name: "Visible built-in tools" }).getByRole("button").count(),
+            ).toBe(18);
+            expect(await page.getByText("catalog_search", { exact: true }).count()).toBe(0);
+            expect(await page.getByText("task_complete", { exact: true }).count()).toBe(0);
+            expect(await page.getByText("generic_tool_search", { exact: true }).count()).toBe(0);
+            expect(
+                await page.getByText("1 specialized tool setting is retained", { exact: true }).isVisible(),
+            ).toBe(true);
+
+            await page
+                .getByRole("group", { name: "Built-in tool view", exact: true })
+                .getByText("Advanced capabilities", { exact: true })
+                .click();
+            expect(
+                await page.getByRole("list", { name: "Visible built-in tools" }).getByRole("button").count(),
+            ).toBe(8);
+            await page.getByRole("button", { name: /tool_search_tool/ }).click();
+            const specialized = page.getByRole("group", { name: "tool_search_tool action", exact: true });
+            expect(await specialized.getByRole("radio", { name: "Override", exact: true }).isEnabled()).toBe(
+                true,
+            );
+            expect(await stored(page)).toEqual(original);
+
+            await page
+                .getByRole("tablist", { name: "Tool configuration areas", exact: true })
+                .getByRole("tab", { name: "Reference", exact: true })
+                .click();
+            expect(await page.getByText("33", { exact: true }).isVisible()).toBe(true);
+            expect(await page.getByText("Internal descriptors hidden", { exact: true }).isVisible()).toBe(
+                true,
+            );
+            expect(await stored(page)).toEqual(original);
+            await page.setViewportSize({ width: 390, height: 844 });
+            expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        },
+        JSON.stringify(plan),
+    );
 });

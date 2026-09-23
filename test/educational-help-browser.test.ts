@@ -153,6 +153,26 @@ it("uses the same help interaction for choices and inputs in every configuration
         ];
         for (const example of cases) {
             await visit(page, example.view);
+            if (example.title === "SDK client baseline")
+                await page.getByText("Advanced: SDK client baseline").click();
+            if (example.title === "Tool parameter schema" || example.title === "Terminal tool") {
+                await page
+                    .getByRole("tablist", { name: "Tool configuration areas", exact: true })
+                    .getByRole("tab", { name: /Custom tools/ })
+                    .click();
+                const advanced = page.locator("details.hb-tool-advanced-config").first();
+                if (!(await advanced.evaluate((element) => element.hasAttribute("open"))))
+                    await advanced.locator("summary").click();
+            }
+            if (example.title === "Canonical runtime wire name") {
+                await page
+                    .getByRole("tablist", { name: "Tool configuration areas", exact: true })
+                    .getByRole("tab", { name: /MCP servers/ })
+                    .click();
+                const server = page.locator("details.hb-mcp-server-card").first();
+                if (!(await server.evaluate((element) => element.hasAttribute("open"))))
+                    await server.locator("summary").click();
+            }
             await inspectHelp(page, example.title, example.heading);
         }
         await page.setViewportSize({ width: 390, height: 844 });

@@ -9,7 +9,8 @@ import {
     parsePlan,
     schemaError,
 } from "./plan";
-import { applyScenario, changedAxes, createPreset } from "./presets";
+import { BUILTIN_SPECS } from "../content/builtin-tools";
+import { changedAxes, createPreset } from "./presets";
 import { analyzePlan, hostContracts, toolSummary } from "./analysis";
 import { reference } from "../content/reference";
 
@@ -149,21 +150,14 @@ describe("harness plan and presets", () => {
     });
 });
 
-describe("scenario decisions", () => {
-    it("makes workspace-free changes without discarding existing custom tools", () => {
-        const plan = createPreset("copilot");
-        plan.customTools.push(createCustomTool("lookup"));
-        const changed = applyScenario(plan, "workspace-free");
-        expect(plan.clientMode).toBe("copilot-cli");
-        expect(changed.clientMode).toBe("empty");
-        expect(changed.customTools).toEqual(plan.customTools);
-        expect(changed.session.storage).toBe("virtual");
-        expect(toolSummary(changed).kept).not.toContain("bash");
-        expect(HarnessPlanSchema.safeParse(changed).success).toBe(true);
-    });
-
-    it("replaces native view in a tenant scenario rather than enabling host disk", () => {
-        const plan = applyScenario(createPreset("empty"), "tenant-documents");
+describe("plan decisions", () => {
+    it("treats an overridden view as a host handler rather than enabling host disk", () => {
+        const plan = createPreset("empty");
+        plan.tools.view = {
+            action: "override",
+            description: "Read only documents authorized for the current tenant and principal.",
+            parameters: BUILTIN_SPECS.view.parameters,
+        };
         expect(toolSummary(plan).overridden).toEqual(["view"]);
         expect(analyzePlan(plan).some((decision) => decision.id === "workspace-tools")).toBe(false);
         expect(hostContracts(plan)).toContain("Tool handler: view");

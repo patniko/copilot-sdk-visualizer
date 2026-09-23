@@ -82,7 +82,7 @@ Build a purpose-specific agent experience without rebuilding the engine.
 
 # Meet the runtime
 
-**Live demo: Runtime map**
+**Live demo: Runtime**
 
 Trace one turn:
 

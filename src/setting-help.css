@@ -47,11 +47,6 @@
     font-size: 16px;
     font-weight: 650;
 }
-.hb-setting-help-scope {
-    margin: 0 0 12px;
-    color: var(--cp-text-muted);
-    font-size: 11px;
-}
 .hb-setting-help-option {
     display: inline-block;
     padding: 5px 8px;

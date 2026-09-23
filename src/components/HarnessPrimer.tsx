@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { useState } from "react";
 import {
     ArrowRight,
-    Boxes,
     Code2,
     Cpu,
     ExternalLink,
-    Layers,
     PackageOpen,
     ServerCog,
     SlidersHorizontal,
@@ -14,8 +11,6 @@ import {
 import { SDK_GETTING_STARTED } from "../content/sdk-docs";
 import type { ViewId } from "./editor";
 import { Button } from "./ui";
-
-const STORAGE_KEY = "harness-builder:primer-collapsed";
 
 const layers = [
     {
@@ -55,49 +50,15 @@ const steps: { label: string; view?: ViewId }[] = [
 ];
 
 export function HarnessPrimer({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
-    const [collapsed, setCollapsed] = useState(() => globalThis.localStorage?.getItem(STORAGE_KEY) === "1");
-
-    function setState(next: boolean) {
-        setCollapsed(next);
-        try {
-            globalThis.localStorage?.setItem(STORAGE_KEY, next ? "1" : "0");
-        } catch {
-            /* storage is best-effort */
-        }
-    }
-
-    if (collapsed) {
-        return (
-            <div className="hb-primer-collapsed">
-                <Layers size={16} aria-hidden="true" />
-                <span>New here? Read how a harness is built on the shared runtime.</span>
-                <Button size="small" variant="ghost" onClick={() => setState(false)}>
-                    Show guide
-                    <ArrowRight size={13} aria-hidden="true" />
-                </Button>
-            </div>
-        );
-    }
-
     return (
         <section className="hb-primer" aria-labelledby="hb-primer-title">
-            <div className="hb-primer-head">
-                <div>
-                    <p className="hb-kicker">
-                        <Boxes size={14} aria-hidden="true" /> Start here
-                    </p>
-                    <h2 id="hb-primer-title">What is a harness, and how do you build one?</h2>
-                    <p className="hb-primer-lead">
-                        One shared <strong>runtime engine</strong> can power many agents. A{" "}
-                        <strong>harness</strong> is the configuration on top of it — prompt, tools, context,
-                        agents, and policy. This workbench helps you compose that harness and hand your{" "}
-                        <strong>host</strong> a project to run it. Nothing runs in the browser.
-                    </p>
-                </div>
-                <Button size="small" variant="ghost" onClick={() => setState(true)}>
-                    Hide guide
-                </Button>
-            </div>
+            <h2 id="hb-primer-title">What is a harness, and how do you build one?</h2>
+            <p className="hb-primer-lead">
+                One shared <strong>runtime engine</strong> can power many agents. A <strong>harness</strong>{" "}
+                is the configuration on top of it — prompt, tools, context, agents, and policy. This workbench
+                helps you compose that harness and hand your <strong>host</strong> a project to run it.
+                Nothing runs in the browser.
+            </p>
 
             <ol className="hb-primer-layers" aria-label="The four layers">
                 {layers.map((layer) => {

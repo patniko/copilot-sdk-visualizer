@@ -146,7 +146,7 @@ function AgentRow({ agent, index, edit, issues }: EditorProps & { agent: Agent; 
                     <Trash2 size={16} aria-hidden="true" />
                 </Button>
             </div>
-            <div className="hb-field-grid">
+            <div className="hb-field-grid hb-agent-identity-grid">
                 <TextField
                     label="Agent name"
                     value={agent.name}

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { describe, expect, it } from "vitest";
-import { createPreset, applyScenario } from "./presets";
+import { createPreset } from "./presets";
 import { HarnessPlanSchema, parsePlan } from "./plan";
 import { defaultTarget, runtimeEndpoint } from "./target";
 import { loadDraft, STORAGE_KEY } from "./storage";
@@ -56,11 +56,9 @@ describe("runtime target and legacy draft migration", () => {
         }
     });
 
-    it("keeps the deployment choice when applying a scenario and explains its boundary", () => {
-        const plan = createPreset("minimal");
-        plan.target = { ...defaultTarget(), language: "python", runtime: "inprocess" };
-        const next = applyScenario(plan, "tenant-documents");
-        expect(next.target).toEqual(plan.target);
+    it("explains the boundary of each deployment choice", () => {
+        const next = createPreset("minimal");
+        next.target = { ...defaultTarget(), language: "python", runtime: "inprocess" };
         expect(analyzePlan(next).map((decision) => decision.id)).toContain("inprocess-runtime");
         next.target.runtime = "external";
         expect(analyzePlan(next).map((decision) => decision.id)).toContain("external-runtime");

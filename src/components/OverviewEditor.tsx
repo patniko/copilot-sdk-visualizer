@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { useState } from "react";
-import { ArrowRight, Check, Columns3, FileCheck2, ShieldCheck, Unplug } from "lucide-react";
-import { PRESETS, SCENARIOS, changedAxes } from "../domain/presets";
-import type { ScenarioId } from "../domain/presets";
+import { ArrowRight, Check, ChevronRight, Columns3 } from "lucide-react";
+import { PRESETS, changedAxes } from "../domain/presets";
 import type { PresetId } from "../domain/plan";
 import { LANGUAGES, RUNTIME_OPTIONS } from "../domain/target";
-import { BUILTIN_NAMES, toolCatalog } from "../content/builtin-tools";
-import { referenceBaselineNames } from "./tool-catalog-ui";
+import { BUILTIN_NAMES } from "../content/builtin-tools";
 import { HarnessPrimer } from "./HarnessPrimer";
 import type { EditorProps, ViewId } from "./editor";
 import { Badge, Button, ChoiceField, Panel } from "./ui";
@@ -14,31 +12,7 @@ import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
 import { ProfileCompareDialog } from "./ProfileCompareDialog";
 import { profileIcons } from "./profile-ui";
-import "../tool-catalog.css";
 
-const profileDetails = {
-    empty: {
-        inventory: "Explicit inventory; no inherited tools",
-        prompt: "Your prompt, end to end",
-        footer: "Build from explicit decisions",
-    },
-    minimal: {
-        inventory: "Explicit: 2 selected session names",
-        prompt: "A small, editable prompt",
-        footer: "A proposed composition, not an SDK mode",
-    },
-    copilot: {
-        inventory: "Runtime-default selection",
-        prompt: "Coding guidance, extended",
-        footer: "An opinionated coding starting point",
-    },
-} satisfies Record<PresetId, { inventory: string; prompt: string; footer: string }>;
-
-const scenarioIcons = {
-    "workspace-free": Unplug,
-    "tenant-documents": FileCheck2,
-    "governed-workflow": ShieldCheck,
-};
 const axisViews: Record<string, ViewId> = {
     "Runtime & language": "bootstrap",
     "Client baseline": "base-profile",
@@ -62,13 +36,9 @@ export function OverviewEditor({ onNavigate }: { onNavigate: (view: ViewId) => v
                 <div>
                     <p className="hb-kicker">Meet the engine</p>
                     <h3 id="runtime-entry-title">What does the runtime give you?</h3>
-                    <p>
-                        Explore how plugins, skills, tools, inference, and state connect—and which parts your
-                        harness and host still own.
-                    </p>
                 </div>
                 <Button onClick={() => onNavigate("runtime")}>
-                    Explore the runtime map <ArrowRight size={15} aria-hidden="true" />
+                    Explore the runtime <ArrowRight size={15} aria-hidden="true" />
                 </Button>
             </section>
             <HarnessPrimer onNavigate={onNavigate} />
@@ -80,15 +50,14 @@ export function BaseProfileEditor({
     plan,
     edit,
     onApplyPreset,
-    onApplyScenario,
     onNavigate,
 }: EditorProps & {
     onApplyPreset: (id: PresetId) => void;
-    onApplyScenario: (id: ScenarioId) => void;
     onNavigate: (view: ViewId) => void;
 }) {
     const changes = changedAxes(plan);
     const [comparing, setComparing] = useState<PresetId | null>(null);
+    const currentLabel = PRESETS.find((preset) => preset.id === plan.preset)?.label ?? plan.preset;
     return (
         <div className="hb-editor-stack">
             {comparing && (
@@ -101,7 +70,6 @@ export function BaseProfileEditor({
             )}
             <div className="hb-profile-grid">
                 {PRESETS.map((preset) => {
-                    const details = profileDetails[preset.id];
                     const Icon = profileIcons[preset.id];
                     const selected = plan.preset === preset.id;
                     return (
@@ -124,25 +92,14 @@ export function BaseProfileEditor({
                                 <h3>{preset.label}</h3>
                                 <p className="hb-profile-description">{preset.description}</p>
                             </div>
-                            <div className="hb-profile-facts">
-                                <span>
-                                    <Check size={14} aria-hidden="true" />
-                                    {details.inventory}
-                                </span>
-                                <span>
-                                    <Check size={14} aria-hidden="true" />
-                                    {details.prompt}
-                                </span>
-                            </div>
-                            <Button
-                                variant={selected ? "primary" : "secondary"}
-                                onClick={() => onApplyPreset(preset.id)}
-                            >
-                                Apply {preset.label}
-                                <ArrowRight size={15} aria-hidden="true" />
-                            </Button>
-                            <div className="hb-profile-footer">
-                                <p className="hb-profile-footnote">{details.footer}</p>
+                            <div className="hb-profile-actions">
+                                <Button
+                                    variant={selected ? "primary" : "secondary"}
+                                    onClick={() => onApplyPreset(preset.id)}
+                                >
+                                    Apply {preset.label}
+                                    <ArrowRight size={15} aria-hidden="true" />
+                                </Button>
                                 <Button
                                     variant="ghost"
                                     size="small"
@@ -150,7 +107,7 @@ export function BaseProfileEditor({
                                     aria-label={`Compare ${preset.label} with other profiles`}
                                 >
                                     <Columns3 size={14} aria-hidden="true" />
-                                    Compare
+                                    Compare profiles
                                 </Button>
                             </div>
                         </article>
@@ -158,122 +115,79 @@ export function BaseProfileEditor({
                 })}
             </div>
             <p className="hb-inline-note">
-                Profiles compose a <strong>new session</strong>. They do not switch a running SDK session or
-                change the shared runtime engine. Applying a behavior profile keeps your runtime and language
-                choices.
+                A profile is a starting point for a <strong>new session</strong>. It keeps your runtime and
+                language, and every setting stays editable. Not sure which one?{" "}
+                <button className="hb-text-button" onClick={() => setComparing(plan.preset)}>
+                    Compare them side by side
+                </button>{" "}
+                or{" "}
+                <button className="hb-text-button" onClick={() => onNavigate("tools")}>
+                    browse all {BUILTIN_NAMES.length} built-in tools
+                </button>
+                .
             </p>
-            <div className="hb-overview-tool-catalog">
-                <div>
-                    <strong>Runtime defaults are a selection policy, not all tools switched on.</strong>
-                    <p>
-                        Empty and Minimal start with explicit inventories. Copilot preserves runtime model,
-                        platform, capability, and experiment choices. The full catalog has{" "}
-                        {BUILTIN_NAMES.length} descriptors and {toolCatalog.context.aliases.length} separate
-                        selection aliases.
-                    </p>
-                    <p>
-                        The illustrative online, local root coding reference uses split editing with no added
-                        filters: {referenceBaselineNames.length} baseline entries (
-                        {referenceBaselineNames.join(", ")}). Shell families are platform-specific; explicit
-                        selections still have gates.
-                    </p>
-                </div>
-                <Button size="small" onClick={() => onNavigate("tools")}>
-                    Browse all {BUILTIN_NAMES.length} built-ins
-                    <ArrowRight size={14} aria-hidden="true" />
-                </Button>
-            </div>
             <Panel
-                title="Make it fit your workload"
-                description="Apply a concrete recipe, then inspect what changed. Every application can be undone."
-            >
-                <div className="hb-scenario-list">
-                    {SCENARIOS.map((scenario) => {
-                        const Icon = scenarioIcons[scenario.id];
-                        return (
-                            <article className="hb-scenario" key={scenario.id}>
-                                <span className="hb-scenario-icon">
-                                    <Icon size={20} aria-hidden="true" />
-                                </span>
-                                <div>
-                                    <h4>{scenario.title}</h4>
-                                    <p>{scenario.description}</p>
-                                </div>
-                                <Button
-                                    size="small"
-                                    onClick={() => onApplyScenario(scenario.id)}
-                                    aria-label={`Apply ${scenario.title}`}
-                                >
-                                    Apply
-                                    <ArrowRight size={14} aria-hidden="true" />
-                                </Button>
-                            </article>
-                        );
-                    })}
-                </div>
-            </Panel>
-            <Panel
-                title="Your composition, not a new engine"
-                description="The baseline is a comparison point. Each setting below and in the sidebar remains independently editable."
+                title={`Changes from ${currentLabel}`}
+                description={
+                    changes.length
+                        ? "Jump to any area you've changed since applying the profile."
+                        : "Nothing yet. Your plan still matches the profile; use the editors to make it yours."
+                }
                 action={
                     <Badge>
-                        {changes.length} changed {changes.length === 1 ? "axis" : "axes"}
+                        {changes.length} changed {changes.length === 1 ? "area" : "areas"}
                     </Badge>
                 }
             >
-                <ChoiceField
-                    label="SDK client baseline"
-                    help={<SettingHelp help={valueHelp.clientMode} value={plan.clientMode} />}
-                    value={plan.clientMode}
-                    options={[
-                        { value: "empty", label: "Empty", description: "Explicit host-owned composition" },
-                        {
-                            value: "copilot-cli",
-                            label: "Copilot CLI",
-                            description: "Coding-oriented foundation",
-                        },
-                    ]}
-                    onValueChange={(value) =>
-                        edit((draft) => {
-                            draft.clientMode = value;
-                            if (value === "empty") draft.inventory = "explicit";
-                        })
-                    }
-                    hint="Choosing Empty also makes the inventory explicit. Neither client baseline is an operating-system sandbox."
-                />
-                <div className="hb-baseline-diff">
-                    <p className="hb-small-label">
-                        Differences from the{" "}
-                        {plan.preset === "copilot"
-                            ? "Copilot"
-                            : plan.preset === "minimal"
-                              ? "Minimal"
-                              : "Empty"}{" "}
-                        preset
-                    </p>
-                    {changes.length ? (
-                        <div className="hb-chip-list">
-                            {changes.map((axis) => (
-                                <button
-                                    className="hb-diff-chip"
-                                    key={axis}
-                                    onClick={() => onNavigate(axisViews[axis] ?? "overview")}
-                                >
-                                    {axis}
-                                    <ArrowRight size={12} aria-hidden="true" />
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="hb-muted-copy">
-                            The configuration matches this starting profile. Use the editors to make it yours.
-                        </p>
-                    )}
-                </div>
+                {changes.length > 0 && (
+                    <div className="hb-chip-list">
+                        {changes.map((axis) => (
+                            <button
+                                className="hb-diff-chip"
+                                key={axis}
+                                onClick={() => onNavigate(axisViews[axis] ?? "overview")}
+                            >
+                                {axis}
+                                <ArrowRight size={12} aria-hidden="true" />
+                            </button>
+                        ))}
+                    </div>
+                )}
+                <details className="hb-profile-advanced">
+                    <summary>
+                        <ChevronRight size={14} aria-hidden="true" />
+                        Advanced: SDK client baseline
+                        <span>{plan.clientMode === "copilot-cli" ? "Copilot CLI" : "Empty"}</span>
+                    </summary>
+                    <ChoiceField
+                        label="SDK client baseline"
+                        help={<SettingHelp help={valueHelp.clientMode} value={plan.clientMode} />}
+                        value={plan.clientMode}
+                        options={[
+                            {
+                                value: "empty",
+                                label: "Empty",
+                                description: "Explicit host-owned composition",
+                            },
+                            {
+                                value: "copilot-cli",
+                                label: "Copilot CLI",
+                                description: "Coding-oriented foundation",
+                            },
+                        ]}
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.clientMode = value;
+                                if (value === "empty") draft.inventory = "explicit";
+                            })
+                        }
+                        hint="Profiles set this for you. Choosing Empty also makes the tool inventory explicit. Neither option is an operating-system sandbox."
+                    />
+                </details>
             </Panel>
             <Panel
-                title="Next: turn this composition into a project"
-                description="Choose a deployment target, inspect the actual dependency and entrypoint files, then integrate and run them in your host."
+                title="Next: turn this into a project"
+                description="Pick a runtime and language, then inspect the generated dependency and entrypoint files."
             >
                 <div className="hb-overview-target">
                     <div className="hb-chip-list">
@@ -291,10 +205,6 @@ export function BaseProfileEditor({
                         <ArrowRight size={15} aria-hidden="true" />
                     </Button>
                 </div>
-                <p className="hb-field-hint">
-                    This is independent of Empty, Minimal, or Copilot behavior. Host TODOs, environment
-                    requirements, and packaging limits stay explicit.
-                </p>
             </Panel>
         </div>
     );

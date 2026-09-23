@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema, ToolMapSchema, defaultToolSettings } from "./plan";
+import { BUILTIN_NAMES, HarnessPlanSchema, ToolMapSchema, defaultToolSettings } from "./plan";
 import type { HarnessPlan, PresetId } from "./plan";
 import { defaultTarget } from "./target";
 import { TOOL_CATALOG_REVISION } from "../content/builtin-tools";
@@ -9,19 +9,19 @@ export const PRESETS = [
         id: "empty",
         label: "Empty",
         tag: "Own the harness",
-        description: "Explicit prompt, tools, context, and host policy. No inherited coding inventory.",
+        description: "Start blank. You supply the prompt, every tool, and the host policy.",
     },
     {
         id: "minimal",
         label: "Minimal",
         tag: "Proposed starter",
-        description: "A concise general-purpose prompt and two selected session tools. No project workspace.",
+        description: "A short general-purpose prompt and two session tools. No project workspace.",
     },
     {
         id: "copilot",
         label: "Copilot",
         tag: "Coding baseline",
-        description: "Keep the coding-oriented defaults, then deliberately adapt the tools and context.",
+        description: "The runtime's coding defaults: its prompt, tools, and workspace context.",
     },
 ] as const;
 
@@ -94,68 +94,6 @@ export function createPreset(preset: PresetId): HarnessPlan {
         evaluation:
             "Define representative tasks, expected tool behavior, authority checks, and measurable acceptance criteria before shipping.",
     });
-}
-
-export const SCENARIOS = [
-    {
-        id: "workspace-free",
-        title: "No project workspace",
-        description:
-            "Remove native workspace tools, disable ambient discovery, and choose host-provided session storage.",
-    },
-    {
-        id: "tenant-documents",
-        title: "Tenant document assistant",
-        description:
-            "Replace view with an authorized service-backed reader, retaining the shared runtime loop.",
-    },
-    {
-        id: "governed-workflow",
-        title: "Governed workflow",
-        description: "Add host policy hooks, explicit session identity, and observable decisions.",
-    },
-] as const;
-export type ScenarioId = (typeof SCENARIOS)[number]["id"];
-
-export function applyScenario(plan: HarnessPlan, scenario: ScenarioId): HarnessPlan {
-    const next = structuredClone(plan);
-    if (scenario === "governed-workflow") {
-        next.policy.preToolHook = true;
-        next.policy.postToolHook = true;
-        next.events.observer = true;
-        next.identity = "host-token";
-        return next;
-    }
-    next.clientMode = "empty";
-    next.inventory = "explicit";
-    next.context = {
-        workspace: "",
-        discovery: false,
-        skills: false,
-        fileHooks: false,
-        hostGit: false,
-        skillDirectories: [],
-        pluginDirectories: [],
-    };
-    next.session.storage = "virtual";
-    next.session.largeOutput = false;
-    next.identity = "host-token";
-    for (const name of BUILTIN_NAMES) {
-        if (BUILTIN_SPECS[name].workspace && next.tools[name].action === "keep")
-            next.tools[name].action = "remove";
-    }
-    if (scenario === "tenant-documents") {
-        next.tools.view = {
-            action: "override",
-            description: "Read only documents authorized for the current tenant and principal.",
-            parameters: BUILTIN_SPECS.view.parameters,
-        };
-        next.tools.ask_user.action = "keep";
-        next.prompt.mode = "replace";
-        next.prompt.content =
-            "Answer from the tenant's authorized documents. Use view to retrieve evidence. Do not infer access rights from the user's wording.";
-    }
-    return next;
 }
 
 export function changedAxes(plan: HarnessPlan): string[] {

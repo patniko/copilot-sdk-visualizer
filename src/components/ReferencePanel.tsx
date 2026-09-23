@@ -13,7 +13,7 @@ const visibleSdkDocs = SDK_DOC_MAP.filter((group) => group.view !== "advanced");
 
 const viewLabels: Record<ViewId, string> = {
     overview: "Overview",
-    runtime: "Runtime map",
+    runtime: "Runtime",
     "base-profile": "Base Profile",
     prompt: "Prompt",
     tools: "Tools",

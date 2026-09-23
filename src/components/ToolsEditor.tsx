@@ -1,4 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+import * as Tabs from "@radix-ui/react-tabs";
 import { Plus, Trash2, Wrench } from "lucide-react";
 import { BUILTIN_NAMES, createCustomTool } from "../domain/plan";
 import type { CustomTool } from "../domain/plan";
@@ -9,8 +10,8 @@ import type { EditorProps } from "./editor";
 import { McpEditor } from "./McpEditor";
 import { SettingHelp } from "./SettingHelp";
 import { toggleHelp, valueHelp } from "../content/setting-help";
-import { ToolCatalogBrowser } from "./ToolCatalogBrowser";
-import { Button, ChoiceField, EmptyState, Panel, TextAreaField, TextField, ToggleField } from "./ui";
+import { ToolCatalogBrowser, ToolCatalogReference } from "./ToolCatalogBrowser";
+import { Badge, Button, ChoiceField, EmptyState, Panel, TextAreaField, TextField, ToggleField } from "./ui";
 import "../tool-catalog.css";
 
 export function ToolsEditor(props: EditorProps) {
@@ -79,45 +80,70 @@ export function ToolsEditor(props: EditorProps) {
                     descriptors on.
                 </p>
             </Panel>
-            <ToolCatalogBrowser {...props} />
-            <Panel
-                title="Custom host tools"
-                description="Declare a capability the host will implement. This app never invokes its handler."
-                action={
-                    <Button
-                        size="small"
-                        disabled={plan.customTools.length >= 20}
-                        onClick={() => {
-                            const tool = createCustomTool(
-                                crypto.randomUUID(),
-                                uniqueName("lookup_record", [
-                                    ...BUILTIN_NAMES,
-                                    ...plan.customTools.map((entry) => entry.name),
-                                ]),
-                            );
-                            edit((draft) => {
-                                draft.customTools.push(tool);
-                            });
-                        }}
+            <Tabs.Root defaultValue="built-in" className="hb-tools-tabs">
+                <Tabs.List className="hb-tabs-list" aria-label="Tool configuration areas">
+                    <Tabs.Trigger className="hb-tab" value="built-in">
+                        Built-in tools
+                    </Tabs.Trigger>
+                    <Tabs.Trigger className="hb-tab" value="custom">
+                        Custom tools <Badge>{plan.customTools.length}</Badge>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger className="hb-tab" value="mcp">
+                        MCP servers <Badge>{plan.mcpServers.length}</Badge>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger className="hb-tab" value="reference">
+                        Reference
+                    </Tabs.Trigger>
+                </Tabs.List>
+                <Tabs.Content value="built-in" className="hb-tab-content">
+                    <ToolCatalogBrowser {...props} />
+                </Tabs.Content>
+                <Tabs.Content value="custom" className="hb-tab-content">
+                    <Panel
+                        title="Custom host tools"
+                        description="Declare a capability the host will implement. This app never invokes its handler."
+                        action={
+                            <Button
+                                size="small"
+                                disabled={plan.customTools.length >= 20}
+                                onClick={() => {
+                                    const tool = createCustomTool(
+                                        crypto.randomUUID(),
+                                        uniqueName("lookup_record", [
+                                            ...BUILTIN_NAMES,
+                                            ...plan.customTools.map((entry) => entry.name),
+                                        ]),
+                                    );
+                                    edit((draft) => {
+                                        draft.customTools.push(tool);
+                                    });
+                                }}
+                            >
+                                <Plus size={15} aria-hidden="true" />
+                                Add custom tool
+                            </Button>
+                        }
                     >
-                        <Plus size={15} aria-hidden="true" />
-                        Add custom tool
-                    </Button>
-                }
-            >
-                {plan.customTools.length === 0 && (
-                    <EmptyState icon={<Wrench size={23} />} title="Your domain, your handler">
-                        Add a record lookup, document service, or bounded workflow action without inheriting a
-                        native implementation.
-                    </EmptyState>
-                )}
-                <div className="hb-item-list">
-                    {plan.customTools.map((tool, index) => (
-                        <CustomToolRow key={tool.id} tool={tool} index={index} {...props} />
-                    ))}
-                </div>
-            </Panel>
-            <McpEditor {...props} />
+                        {plan.customTools.length === 0 && (
+                            <EmptyState icon={<Wrench size={23} />} title="Your domain, your handler">
+                                Add a record lookup, document service, or bounded workflow action without
+                                inheriting a native implementation.
+                            </EmptyState>
+                        )}
+                        <div className="hb-item-list">
+                            {plan.customTools.map((tool, index) => (
+                                <CustomToolRow key={tool.id} tool={tool} index={index} {...props} />
+                            ))}
+                        </div>
+                    </Panel>
+                </Tabs.Content>
+                <Tabs.Content value="mcp" className="hb-tab-content">
+                    <McpEditor {...props} />
+                </Tabs.Content>
+                <Tabs.Content value="reference" className="hb-tab-content">
+                    <ToolCatalogReference />
+                </Tabs.Content>
+            </Tabs.Root>
         </div>
     );
 }
@@ -175,35 +201,38 @@ function CustomToolRow({ tool, index, edit, issues }: EditorProps & { tool: Cust
                 }
                 error={issueFor(issues, `customTools.${index}.description`)}
             />
-            <TextAreaField
-                label="Custom tool parameters (JSON)"
-                help={<SettingHelp help={valueHelp.toolSchema} />}
-                monospace
-                spellCheck={false}
-                rows={7}
-                maxLength={12000}
-                value={tool.parameters}
-                onValueChange={(value) =>
-                    editTool((target) => {
-                        target.parameters = value;
-                    })
-                }
-                error={issueFor(issues, `customTools.${index}.parameters`)}
-                hint={
-                    'Use a JSON object schema with top-level "type": "object". The host must validate its own semantics.'
-                }
-            />
-            <ToggleField
-                label="Terminal tool"
-                help={<SettingHelp help={toggleHelp.terminal} enabled={tool.terminal} />}
-                description="Mark successful execution as terminal. This is not a cancellation or failure-handling policy."
-                checked={tool.terminal}
-                onCheckedChange={(checked) =>
-                    editTool((target) => {
-                        target.terminal = checked;
-                    })
-                }
-            />
+            <details className="hb-tool-advanced-config">
+                <summary>Advanced configuration</summary>
+                <TextAreaField
+                    label="Custom tool parameters (JSON)"
+                    help={<SettingHelp help={valueHelp.toolSchema} />}
+                    monospace
+                    spellCheck={false}
+                    rows={7}
+                    maxLength={12000}
+                    value={tool.parameters}
+                    onValueChange={(value) =>
+                        editTool((target) => {
+                            target.parameters = value;
+                        })
+                    }
+                    error={issueFor(issues, `customTools.${index}.parameters`)}
+                    hint={
+                        'Use a JSON object schema with top-level "type": "object". The host must validate its own semantics.'
+                    }
+                />
+                <ToggleField
+                    label="Terminal tool"
+                    help={<SettingHelp help={toggleHelp.terminal} enabled={tool.terminal} />}
+                    description="Mark successful execution as terminal. This is not a cancellation or failure-handling policy."
+                    checked={tool.terminal}
+                    onCheckedChange={(checked) =>
+                        editTool((target) => {
+                            target.terminal = checked;
+                        })
+                    }
+                />
+            </details>
         </article>
     );
 }

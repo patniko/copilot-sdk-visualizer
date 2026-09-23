@@ -29,8 +29,7 @@ import {
     X,
 } from "lucide-react";
 import { useHarness } from "./hooks/useHarness";
-import { PRESETS, SCENARIOS, applyScenario, changedAxes, createPreset } from "./domain/presets";
-import type { ScenarioId } from "./domain/presets";
+import { PRESETS, changedAxes, createPreset } from "./domain/presets";
 import type { HarnessPlan, PresetId } from "./domain/plan";
 import { AgentsEditor } from "./components/AgentsEditor";
 import { BootstrapEditor } from "./components/BootstrapEditor";
@@ -54,8 +53,8 @@ import "./builder.css";
 
 const navigation = [
     { id: "overview", label: "Overview", detail: "How the harness fits together", icon: LayoutDashboard },
-    { id: "runtime", label: "Runtime map", detail: "What the engine gives you", icon: Network },
-    { id: "base-profile", label: "Base Profile", detail: "Profiles & scenarios", icon: Layers3 },
+    { id: "runtime", label: "Runtime", detail: "What the engine gives you", icon: Network },
+    { id: "base-profile", label: "Base Profile", detail: "Starting profiles", icon: Layers3 },
     { id: "prompt", label: "Prompt", detail: "Behavior & instructions", icon: FileText },
     { id: "tools", label: "Tools", detail: "Inventory & implementations", icon: Wrench },
     { id: "context", label: "Context & packs", detail: "Inputs & discovery", icon: FolderOpen },
@@ -142,12 +141,10 @@ const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description
     },
 };
 
-type CompositionChange = { kind: "preset" | "recovery"; id: PresetId } | { kind: "scenario"; id: ScenarioId };
+type CompositionChange = { kind: "preset" | "recovery"; id: PresetId };
 
 function changeLabel(change: CompositionChange) {
-    return change.kind === "scenario"
-        ? (SCENARIOS.find((scenario) => scenario.id === change.id)?.title ?? change.id)
-        : (PRESETS.find((preset) => preset.id === change.id)?.label ?? change.id);
+    return PRESETS.find((preset) => preset.id === change.id)?.label ?? change.id;
 }
 
 function viewFromLocation(): ViewId {
@@ -190,7 +187,17 @@ export default function App() {
     const [evidence, setEvidence] = useState<Evidence | null>(null);
     const [importOpen, setImportOpen] = useState(false);
     const [exportOpen, setExportOpen] = useState(false);
-    const [feedback, setFeedback] = useState<string | null>(null);
+    const [feedback, setFeedbackState] = useState<string | null>(null);
+    const [feedbackId, setFeedbackId] = useState(0);
+    function setFeedback(message: string | null) {
+        setFeedbackState(message);
+        if (message) setFeedbackId((current) => current + 1);
+    }
+    useEffect(() => {
+        if (!feedback) return;
+        const timer = window.setTimeout(() => setFeedbackState(null), 5000);
+        return () => window.clearTimeout(timer);
+    }, [feedback, feedbackId]);
     const heading = viewHeadings[view];
     const exportDisabled = blocked || issues.length > 0;
     const changes = changedAxes(plan);
@@ -250,7 +257,7 @@ export default function App() {
     }
 
     function applyChange(change: CompositionChange) {
-        const next = change.kind === "scenario" ? applyScenario(plan, change.id) : createPreset(change.id);
+        const next = createPreset(change.id);
         if (change.kind === "preset") next.target = structuredClone(plan.target);
         replace(
             next,
@@ -520,20 +527,6 @@ export default function App() {
                             </details>
                         </div>
                     )}
-                    {feedback && (
-                        <div className="hb-action-feedback" role="status">
-                            <Check size={15} aria-hidden="true" />
-                            <span>{feedback}</span>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Dismiss draft update"
-                                onClick={() => setFeedback(null)}
-                            >
-                                <X size={14} aria-hidden="true" />
-                            </Button>
-                        </div>
-                    )}
                     {view === "runtime" ? (
                         <RuntimeExplorer onNavigate={navigate} />
                     ) : view === "reference" ? (
@@ -548,7 +541,6 @@ export default function App() {
                                 <BaseProfileEditor
                                     {...editorProps}
                                     onApplyPreset={(id) => requestChange({ kind: "preset", id })}
-                                    onApplyScenario={(id) => requestChange({ kind: "scenario", id })}
                                     onNavigate={navigate}
                                 />
                             )}
@@ -607,11 +599,9 @@ export default function App() {
                             : `Apply ${changeLabel(pending)}?`
                     }
                     description={
-                        pending.kind === "scenario"
-                            ? "This recipe changes the relevant controls in your existing composition. Unrelated settings are retained."
-                            : pending.kind === "recovery"
-                              ? "This explicitly starts a fresh Empty profile with the default TypeScript / managed-child target and replaces the unreadable saved data."
-                              : "This replaces the behavior composition and draft name. Your runtime placement, language, and connection settings are preserved."
+                        pending.kind === "recovery"
+                            ? "This explicitly starts a fresh Empty profile with the default TypeScript / managed-child target and replaces the unreadable saved data."
+                            : "This replaces the behavior composition and draft name. Your runtime placement, language, and connection settings are preserved."
                     }
                 >
                     <div className="hb-editor-stack">
@@ -664,6 +654,22 @@ export default function App() {
             {evidence && (
                 <EvidenceDialog evidence={evidence} onClose={() => setEvidence(null)} onNavigate={navigate} />
             )}
+            <div className="hb-toast-region" role="status" aria-live="polite">
+                {feedback && (
+                    <div className="hb-action-feedback" key={feedbackId}>
+                        <Check size={15} aria-hidden="true" />
+                        <span>{feedback}</span>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Dismiss draft update"
+                            onClick={() => setFeedback(null)}
+                        >
+                            <X size={14} aria-hidden="true" />
+                        </Button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

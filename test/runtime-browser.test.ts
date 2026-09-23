@@ -22,7 +22,7 @@ async function saved(page: Page) {
 async function openRuntime(page: Page) {
     await page
         .getByRole("navigation", { name: "Harness workflow" })
-        .getByRole("button", { name: /^Runtime map/ })
+        .getByRole("button", { name: /^Runtime\b/ })
         .click();
     await page.getByRole("heading", { name: "Meet the engine behind your harness." }).waitFor();
     await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe("editor-heading");
@@ -38,7 +38,7 @@ it("explores every capability and the configurator without modifying the draft",
                 style.getPropertyValue(name).trim(),
             );
         });
-        await page.getByRole("button", { name: "Explore the runtime map", exact: true }).click();
+        await page.getByRole("button", { name: "Explore the runtime", exact: true }).click();
         expect(
             await page.locator(".harness-builder").evaluate((element) => {
                 const style = getComputedStyle(element);

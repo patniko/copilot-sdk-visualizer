@@ -33,7 +33,7 @@ By the end, participants should be able to:
 
 **Facilitator**
 
-- Run this repository locally and verify the Runtime map, tenant-document scenario, Export dialog, and Build & run flow.
+- Run this repository locally and verify the Runtime page, the tenant-document configuration below, Export dialog, and Build & run flow.
 - Prepare a small starter repository in the primary audience language. TypeScript is the shortest path for a live demo.
 - Ensure the starter application has one real service boundary that can back the overridden `view` tool.
 - Preinstall dependencies or provide a branch with dependencies cached in case network access is unreliable.
@@ -54,7 +54,7 @@ By the end, participants should be able to:
 | 0:00-0:03 | Why this workshop              | Talk                           | Shift the question from “how do I call a model?” to “what experience am I deliberately building?”                            |
 | 0:03-0:07 | Runtime/SDK journey            | Diagram and narrative          | Show the movement from a complete CLI experience to reusable runtime machinery exposed through language SDKs.                |
 | 0:07-0:10 | Terms and ownership            | Layer diagram                  | Establish the vocabulary used for the rest of the workshop.                                                                  |
-| 0:10-0:18 | Meet the runtime               | Live Runtime map               | Identify the agent loop, tools, context, inference, permissions, sessions, and events that teams do not rebuild.             |
+| 0:10-0:18 | Meet the runtime               | Live Runtime                    | Identify the agent loop, tools, context, inference, permissions, sessions, and events that teams do not rebuild.             |
 | 0:18-0:25 | Frame the use case             | Audience prompts               | Define user, job, trusted data, allowed actions, failure behavior, and measurable success for the tenant document assistant. |
 | 0:25-0:48 | Configure the harness          | Guided Harness Builder demo    | Select a baseline and configure prompt, `view` override, context, model/identity, policy, state, and evaluation.             |
 | 0:48-0:58 | Read the consequences          | Plan inspector and Build & run | Review host contracts, runtime placement, language choice, blockers, and generated project structure.                        |
@@ -89,9 +89,9 @@ Use these definitions consistently:
 | Tool             | A capability visible to the model plus an implementation that can perform an effect.                                     | Authorization simply because it is visible.      |
 | MCP              | A protocol for connecting external capability providers.                                                                 | A grant of trust or tenant access.               |
 
-### 0:10-0:25 — Runtime map and use-case framing
+### 0:10-0:25 — Runtime and use-case framing
 
-In the Runtime map, select the nodes in execution order: configuration → context → inference → permission → tool execution → event/session continuation. At each node ask:
+In the Runtime page, select the nodes in execution order: configuration → context → inference → permission → tool execution → event/session continuation. At each node ask:
 
 - What do we reuse?
 - What must the harness configure?
@@ -110,18 +110,17 @@ Then define the use case on one slide:
 
 Recommended live configuration:
 
-1. Start with **Minimal** to make each capability explicit.
-2. Apply **Tenant document assistant**.
-3. Rename the plan to `Tenant evidence assistant`.
-4. Keep the replacement prompt concise and state the evidence/authorization rule.
-5. Inspect the `view` override description and schema. Explain that the same model-facing name can use a host implementation.
-6. Keep `ask_user` only if the interaction genuinely needs clarification.
-7. Disable ambient project context for this non-coding use case.
-8. Use host-provided identity and a real permission callback for the production-shaped path. For a tightly scoped local demo, explicitly discuss—but do not silently select—allow-all.
-9. Keep event observation enabled.
-10. Set evaluation to cover citation, tenant isolation, denied access, and unsupported questions.
-11. In **Build & run**, choose the starter repository's language and the managed child process for the shortest local path.
-12. Read every host requirement and any compatibility blocker before exporting.
+1. Start with **Minimal** to make each capability explicit. Use **Compare profiles** to show what it leaves out.
+2. Rename the plan to `Tenant evidence assistant`.
+3. In **Prompt**, replace the prompt with a concise evidence/authorization rule, for example: "Answer from the tenant's authorized documents. Use view to retrieve evidence. Do not infer access rights from the user's wording."
+4. In **Tools**, set `view` to **Override** and describe it as reading only documents authorized for the current tenant and principal. Explain that the same model-facing name can use a host implementation.
+5. Keep `ask_user` only if the interaction genuinely needs clarification.
+6. Disable ambient project context for this non-coding use case.
+7. Use host-provided identity and a real permission callback for the production-shaped path. For a tightly scoped local demo, explicitly discuss—but do not silently select—allow-all.
+8. Keep event observation enabled.
+9. Set evaluation to cover citation, tenant isolation, denied access, and unsupported questions.
+10. In **Build & run**, choose the starter repository's language and the managed child process for the shortest local path.
+11. Read every host requirement and any compatibility blocker before exporting.
 
 ### 0:58-1:23 — Export and integrate
 

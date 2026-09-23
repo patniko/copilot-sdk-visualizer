@@ -3,6 +3,35 @@
     container-type: inline-size;
 }
 
+.hb-tools-tabs {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.hb-tool-browser-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.35fr);
+    gap: 12px;
+}
+
+.hb-tool-visibility-counts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hb-tool-visibility-counts > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px;
+    border-right: 1px solid var(--cp-border);
+    text-align: center;
+}
+
+.hb-tool-visibility-counts > div:last-child {
+    border-right: 0;
+}
+
 .hb-tool-reference-profile {
     display: grid;
     gap: 14px;
@@ -209,7 +238,13 @@
     background: var(--cp-accent-soft);
 }
 
-.hb-tool-index-item[data-state="active"] > code {
+.hb-tool-index-item-active {
+    border-color: var(--cp-accent);
+    background: var(--cp-accent-soft);
+}
+
+.hb-tool-index-item[data-state="active"] > code,
+.hb-tool-index-item-active > code {
     color: var(--cp-accent);
 }
 
@@ -479,6 +514,71 @@
     gap: 10px;
 }
 
+.hb-tool-advanced-config {
+    padding-top: 12px;
+    border-top: 1px solid var(--cp-border);
+}
+
+.hb-tool-advanced-config > summary {
+    color: var(--cp-accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.hb-tool-advanced-config[open] > summary {
+    margin-bottom: 18px;
+}
+
+.hb-tool-advanced-config > * + * {
+    margin-top: 18px;
+}
+
+.hb-mcp-server-card > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.hb-mcp-server-card > summary::marker {
+    color: var(--cp-accent);
+}
+
+.hb-mcp-server-card > summary .hb-item-title {
+    flex: 1;
+}
+
+.hb-mcp-server-card > summary .hb-item-title > span {
+    display: grid;
+    gap: 2px;
+}
+
+.hb-mcp-server-card > summary strong {
+    font-size: 13px;
+}
+
+.hb-mcp-server-card > summary small {
+    color: var(--cp-text-muted);
+    font-size: 10px;
+}
+
+.hb-mcp-server-card[open] > summary {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--cp-border);
+}
+
+.hb-mcp-server-body {
+    display: grid;
+    gap: 18px;
+    padding-top: 18px;
+}
+
+.hb-mcp-server-actions {
+    margin-top: 16px;
+}
+
 .hb-tool-evidence {
     padding-top: 12px;
     border-top: 1px solid var(--cp-border);
@@ -635,37 +735,11 @@
     line-height: 1.75;
 }
 
-.hb-overview-tool-catalog {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-    padding: 18px;
-    border: 1px solid var(--cp-border);
-    border-radius: 12px;
-    background: var(--cp-bg-elevated);
-}
-
-.hb-overview-tool-catalog > div {
-    flex: 1 1 290px;
-    min-width: 0;
-}
-
-.hb-overview-tool-catalog strong {
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.7;
-}
-
-.hb-overview-tool-catalog p {
-    margin-top: 7px;
-    color: var(--cp-text-muted);
-    font-size: 11px;
-    line-height: 1.8;
-}
-
 @container (max-width: 620px) {
+    .hb-tool-browser-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .hb-tool-workbench {
         grid-template-columns: minmax(0, 1fr);
     }
