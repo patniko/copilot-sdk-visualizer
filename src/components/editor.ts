@@ -14,7 +14,6 @@ export type ViewId =
     | "agents"
     | "models"
     | "policy"
-    | "advanced"
     | "bootstrap"
     | "reference";
 

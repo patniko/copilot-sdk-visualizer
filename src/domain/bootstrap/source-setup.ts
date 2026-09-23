@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { reference } from "../../content/reference";
+import { SDK_SOURCE_REVISION } from "./revisions";
 
 export function sourceSetupScript(commands: string[]): string {
     return [
@@ -18,7 +18,7 @@ export function sourceSetupScript(commands: string[]): string {
         'if [ "$#" -eq 0 ] || [ "${1:-}" = "--help" ]; then usage; exit 0; fi',
         'if [ "$#" -ne 1 ] || [ "$1" != "--run" ]; then usage >&2; exit 2; fi',
         'cd "$(dirname "$0")"',
-        `SDK_REVISION=${reference.revisions.sdk}`,
+        `SDK_REVISION=${SDK_SOURCE_REVISION}`,
         "SDK_DIRECTORY=.sdk-source/copilot-sdk",
         'if [ -L .sdk-source ] || [ -L "$SDK_DIRECTORY" ]; then',
         '  printf "Refusing SDK setup through a symlink.\\n" >&2',

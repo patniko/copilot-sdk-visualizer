@@ -48,10 +48,7 @@ it("explains every context switch without toggling it, and restores keyboard foc
             expect(await popover.getByText("When off", { exact: true }).isVisible()).toBe(true);
             expect(await popover.getByText(help.example, { exact: true }).isVisible()).toBe(true);
             expect(await popover.getByText(`${help.option}: false`, { exact: true }).isVisible()).toBe(true);
-            expect(
-                await popover.locator('a[href^="https://github.com/"]').count(),
-                help.title,
-            ).toBeGreaterThan(0);
+            expect(await popover.locator('a[href^="https://github.com/"]').count(), help.title).toBe(0);
             expect(await page.evaluate((storageKey) => localStorage.getItem(storageKey), STORAGE_KEY)).toBe(
                 before,
             );

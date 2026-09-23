@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema } from "./plan";
 import type { HarnessPlan } from "./plan";
-import { reference } from "../content/reference";
 import { analyzePlan, hostContracts, toolSummary } from "./analysis";
 import { LANGUAGES, RUNTIME_OPTIONS, runtimeEndpoint } from "./target";
 
@@ -165,7 +164,7 @@ export function generateCopilotCliInstructions(input: HarnessPlan): string {
         "- Run the smallest relevant formatter, linter, type-check/build, and tests. Fix failures caused by this integration.",
         "- At completion, summarize changed files, the runtime boundary, host-owned TODOs, and the exact commands run.",
         "",
-        `Configuration provenance: Harness Builder plan schema v${plan.schemaVersion}; SDK source snapshot ${reference.revisions.sdk}; runtime source snapshot ${reference.revisions.runtime}. Reconcile differences with the dependency actually used by this repository.`,
+        `Configuration provenance: Harness Builder plan schema v${plan.schemaVersion}; behavior was derived from maintained private SDK/runtime research snapshots. Reconcile differences with the dependency actually used by this repository.`,
         "",
     ].join("\n");
 }
@@ -364,7 +363,7 @@ export function generateSdkCode(input: HarnessPlan): string {
     return [
         "// Copyright (c) Microsoft Corporation. All rights reserved.",
         "// Generated integration sketch. Supply host implementations; review before execution.",
-        `// Source snapshot: SDK ${reference.revisions.sdk}; runtime ${reference.revisions.runtime}.`,
+        "// Behavior reference: maintained private SDK/runtime research snapshots.",
         "// Client modes configure new sessions. This is not a live configuration patch.",
         ...(plan.model.provider === "copilot" && plan.identity === "s2s-installation"
             ? plan.target.runtime === "external"

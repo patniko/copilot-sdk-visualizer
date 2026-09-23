@@ -5,6 +5,7 @@ import { Check, ClipboardPaste, Copy, Download, FileCode2, FileJson2 } from "luc
 import { downloadName, exportPlan, generateCopilotCliInstructions, generateSdkCode } from "../domain/export";
 import { analyzePlan, hostContracts } from "../domain/analysis";
 import type { HarnessPlan, PlanIssue } from "../domain/plan";
+import { downloadBlob } from "../browser/download";
 import { Badge, Button, Modal, Notice } from "./ui";
 
 interface GeneratedOutput {
@@ -107,17 +108,7 @@ export function ExportDialog({
                           ? "text/markdown;charset=utf-8"
                           : "application/json;charset=utf-8",
             });
-            const url = URL.createObjectURL(blob);
-            const anchor = document.createElement("a");
-            try {
-                anchor.href = url;
-                anchor.download = name;
-                document.body.append(anchor);
-                anchor.click();
-            } finally {
-                anchor.remove();
-                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }
+            downloadBlob(blob, name);
             setFeedback({ error: false, message: `Download requested: ${name}` });
         } catch (error) {
             setFeedback({

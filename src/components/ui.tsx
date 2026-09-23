@@ -2,34 +2,32 @@
 import { useId, useRef, useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { cva } from "class-variance-authority";
-import type { VariantProps } from "class-variance-authority";
 import { clsx } from "clsx";
 import { X } from "lucide-react";
-import { twMerge } from "tailwind-merge";
 import { splitLines } from "../domain/plan";
 
-const buttonStyles = cva("hb-button", {
-    variants: {
-        variant: {
-            primary: "hb-button-primary",
-            secondary: "hb-button-secondary",
-            ghost: "hb-button-ghost",
-            danger: "hb-button-danger",
-        },
-        size: { default: "", small: "hb-button-small", icon: "hb-button-icon" },
-    },
-    defaultVariants: { variant: "secondary", size: "default" },
-});
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonSize = "default" | "small" | "icon";
 
 export function Button({
-    variant,
-    size,
+    variant = "secondary",
+    size = "default",
     className,
     type = "button",
     ...props
-}: ComponentProps<"button"> & VariantProps<typeof buttonStyles>) {
-    return <button type={type} className={twMerge(buttonStyles({ variant, size }), className)} {...props} />;
+}: ComponentProps<"button"> & { variant?: ButtonVariant; size?: ButtonSize }) {
+    return (
+        <button
+            type={type}
+            className={clsx(
+                "hb-button",
+                `hb-button-${variant}`,
+                size !== "default" && `hb-button-${size}`,
+                className,
+            )}
+            {...props}
+        />
+    );
 }
 
 export function Badge({

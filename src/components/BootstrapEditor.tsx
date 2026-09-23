@@ -22,6 +22,7 @@ import { BootstrapProjectPanel } from "./BootstrapProjectPanel";
 import { RuntimePlacement } from "./RuntimePlacement";
 import { issueFor, viewForPath } from "./editor";
 import type { EditorProps, ViewId } from "./editor";
+import "../bootstrap.css";
 import { Badge, Button, ChoiceField, Notice, Panel, TextField } from "./ui";
 
 type Generation =

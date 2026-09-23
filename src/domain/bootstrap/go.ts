@@ -3,9 +3,10 @@ import type { HarnessPlan } from "../plan";
 import { runtimeEndpoint } from "../target";
 import { commonRequirements, sessionData } from "./common";
 import { goCsharpToolData } from "./go-csharp-data";
+import { SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 
-const sdkRevision = "f45c46fd1812f8bed5b4cbc250f47177c83068f0";
+const sdkRevision = SDK_SOURCE_REVISION;
 const json = (value: unknown) => JSON.stringify(value, null, 2) + "\n";
 const shellQuote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
 

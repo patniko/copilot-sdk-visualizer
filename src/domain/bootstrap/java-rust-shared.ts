@@ -2,9 +2,10 @@
 import type { HarnessPlan } from "../plan";
 import { runtimeEndpoint } from "../target";
 import { commonRequirements, sessionData, toolDefinitions } from "./common";
+import { SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapBlocker, BootstrapFile, BootstrapRequirement } from "./types";
 
-export const JAVA_RUST_SDK_REVISION = "f45c46fd1812f8bed5b4cbc250f47177c83068f0";
+export const JAVA_RUST_SDK_REVISION = SDK_SOURCE_REVISION;
 
 export function javaRustSources(plan: HarnessPlan): string[] {
     return [

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
     ArrowDown,
@@ -52,6 +52,10 @@ export function RuntimeExplorer({ onNavigate }: { onNavigate: (view: ViewId) => 
     const active = new Set<RuntimeCapabilityId>(
         currentStep?.active ?? [selected, "loop", ...capability.related],
     );
+
+    useEffect(() => {
+        window.requestAnimationFrame(() => document.getElementById("editor-heading")?.focus());
+    }, []);
 
     function select(id: RuntimeCapabilityId) {
         setSelected(id);

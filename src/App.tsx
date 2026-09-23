@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
     ArrowRight,
     BookOpen,
@@ -29,27 +29,40 @@ import {
     X,
 } from "lucide-react";
 import { useHarness } from "./hooks/useHarness";
+import { useStoredBoolean } from "./hooks/useStoredBoolean";
+import { useViewNavigation } from "./hooks/useViewNavigation";
 import { PRESETS, changedAxes, createPreset } from "./domain/presets";
 import type { HarnessPlan, PresetId } from "./domain/plan";
 import { AgentsEditor } from "./components/AgentsEditor";
-import { BootstrapEditor } from "./components/BootstrapEditor";
 import { ContextEditor } from "./components/ContextEditor";
 import { CopilotMark } from "./components/CopilotMark";
 import { EvidenceDialog } from "./components/EvidenceDialog";
-import { ExportDialog } from "./components/ExportDialog";
-import { ImportDialog } from "./components/ImportDialog";
 import { ModelsEditor } from "./components/ModelsEditor";
 import { BaseProfileEditor, OverviewEditor } from "./components/OverviewEditor";
 import { PlanInspector } from "./components/PlanInspector";
 import { PolicyEditor } from "./components/PolicyEditor";
 import { PromptEditor } from "./components/PromptEditor";
-import { ReferencePanel } from "./components/ReferencePanel";
-import { RuntimeExplorer } from "./components/RuntimeExplorer";
 import { ToolsEditor } from "./components/ToolsEditor";
 import { viewForPath } from "./components/editor";
 import type { EditorProps, Evidence, ViewId } from "./components/editor";
 import { Badge, Button, Modal, Notice } from "./components/ui";
 import "./builder.css";
+
+const BootstrapEditor = lazy(() =>
+    import("./components/BootstrapEditor").then((module) => ({ default: module.BootstrapEditor })),
+);
+const ExportDialog = lazy(() =>
+    import("./components/ExportDialog").then((module) => ({ default: module.ExportDialog })),
+);
+const ImportDialog = lazy(() =>
+    import("./components/ImportDialog").then((module) => ({ default: module.ImportDialog })),
+);
+const ReferencePanel = lazy(() =>
+    import("./components/ReferencePanel").then((module) => ({ default: module.ReferencePanel })),
+);
+const RuntimeExplorer = lazy(() =>
+    import("./components/RuntimeExplorer").then((module) => ({ default: module.RuntimeExplorer })),
+);
 
 const navigation = [
     { id: "overview", label: "Overview", detail: "How the harness fits together", icon: LayoutDashboard },
@@ -122,20 +135,14 @@ const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description
         title: "Make the boundaries real.",
         description: "Keep permissions, persistence, observations, and your quality bar explicit.",
     },
-    advanced: {
-        eyebrow: "08 / Runtime depth",
-        title: "See what exists below.",
-        description:
-            "Explore source-backed controls that may become configurable after their contracts and safety boundaries mature.",
-    },
     bootstrap: {
-        eyebrow: "09 / Bring it to your host",
+        eyebrow: "08 / Bring it to your host",
         title: "Build the project. Wire the host.",
         description:
             "Configure behavior, choose runtime and language, install dependencies, integrate the host, then preflight and run locally.",
     },
     reference: {
-        eyebrow: "10 / Source-backed learning",
+        eyebrow: "09 / Source-backed learning",
         title: "Understand the seams.",
         description: "Look up the supported surface, the lifecycle, and the limits behind each decision.",
     },
@@ -147,38 +154,12 @@ function changeLabel(change: CompositionChange) {
     return PRESETS.find((preset) => preset.id === change.id)?.label ?? change.id;
 }
 
-function viewFromLocation(): ViewId {
-    return navigation.find((entry) => `#${entry.id}` === window.location.hash)?.id ?? "overview";
-}
-
 export default function App() {
     const harness = useHarness();
     const { plan, issues, blocked, saveError, canUndo, canRedo } = harness;
-    const [view, setView] = useState<ViewId>(viewFromLocation);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-        try {
-            return globalThis.localStorage?.getItem(SIDEBAR_STORAGE_KEY) === "1";
-        } catch {
-            return false;
-        }
-    });
-    const [planCollapsed, setPlanCollapsed] = useState(() => {
-        try {
-            return globalThis.localStorage?.getItem(PLAN_STORAGE_KEY) === "1";
-        } catch {
-            return false;
-        }
-    });
-    useEffect(() => {
-        const onHashChange = () => {
-            if (window.location.hash && !navigation.some((entry) => `#${entry.id}` === window.location.hash))
-                return;
-            setView(viewFromLocation());
-            window.requestAnimationFrame(() => document.getElementById("editor-heading")?.focus());
-        };
-        window.addEventListener("hashchange", onHashChange);
-        return () => window.removeEventListener("hashchange", onHashChange);
-    }, []);
+    const { view, navigate } = useViewNavigation(navigation);
+    const [sidebarCollapsed, toggleSidebar] = useStoredBoolean(SIDEBAR_STORAGE_KEY);
+    const [planCollapsed, togglePlan] = useStoredBoolean(PLAN_STORAGE_KEY);
     const [theme, setTheme] = useState(() =>
         document.documentElement.dataset.theme === "dark" ? "dark" : "light",
     );
@@ -215,37 +196,6 @@ export default function App() {
         harness.update((current) => {
             const next = structuredClone(current);
             recipe(next);
-            return next;
-        });
-    }
-
-    function navigate(next: ViewId) {
-        const destination = next === "advanced" ? "overview" : next;
-        setView(destination);
-        if (window.location.hash !== `#${destination}`) window.history.pushState(null, "", `#${destination}`);
-        window.requestAnimationFrame(() => document.getElementById("editor-heading")?.focus());
-    }
-
-    function toggleSidebar() {
-        setSidebarCollapsed((current) => {
-            const next = !current;
-            try {
-                globalThis.localStorage?.setItem(SIDEBAR_STORAGE_KEY, next ? "1" : "0");
-            } catch {
-                /* storage is best-effort */
-            }
-            return next;
-        });
-    }
-
-    function togglePlan() {
-        setPlanCollapsed((current) => {
-            const next = !current;
-            try {
-                globalThis.localStorage?.setItem(PLAN_STORAGE_KEY, next ? "1" : "0");
-            } catch {
-                /* storage is best-effort */
-            }
             return next;
         });
     }
@@ -527,34 +477,50 @@ export default function App() {
                             </details>
                         </div>
                     )}
-                    {view === "runtime" ? (
-                        <RuntimeExplorer onNavigate={navigate} />
-                    ) : view === "reference" ? (
-                        <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
-                    ) : (
-                        <fieldset className="hb-editor-fields" disabled={blocked} key={`${view}-${revision}`}>
-                            <legend className="hb-sr-only">
-                                {navigation.find((entry) => entry.id === view)?.label} editor
-                            </legend>
-                            {view === "overview" && <OverviewEditor onNavigate={navigate} />}
-                            {view === "base-profile" && (
-                                <BaseProfileEditor
-                                    {...editorProps}
-                                    onApplyPreset={(id) => requestChange({ kind: "preset", id })}
-                                    onNavigate={navigate}
-                                />
-                            )}
-                            {view === "prompt" && <PromptEditor {...editorProps} />}
-                            {view === "tools" && <ToolsEditor {...editorProps} />}
-                            {view === "context" && <ContextEditor {...editorProps} />}
-                            {view === "agents" && <AgentsEditor {...editorProps} />}
-                            {view === "models" && <ModelsEditor {...editorProps} />}
-                            {view === "policy" && <PolicyEditor {...editorProps} />}
-                            {view === "bootstrap" && (
-                                <BootstrapEditor {...editorProps} blocked={blocked} onNavigate={navigate} />
-                            )}
-                        </fieldset>
-                    )}
+                    <Suspense
+                        fallback={
+                            <div className="hb-loading" role="status">
+                                Loading view…
+                            </div>
+                        }
+                    >
+                        {view === "runtime" ? (
+                            <RuntimeExplorer onNavigate={navigate} />
+                        ) : view === "reference" ? (
+                            <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
+                        ) : (
+                            <fieldset
+                                className="hb-editor-fields"
+                                disabled={blocked}
+                                key={`${view}-${revision}`}
+                            >
+                                <legend className="hb-sr-only">
+                                    {navigation.find((entry) => entry.id === view)?.label} editor
+                                </legend>
+                                {view === "overview" && <OverviewEditor onNavigate={navigate} />}
+                                {view === "base-profile" && (
+                                    <BaseProfileEditor
+                                        {...editorProps}
+                                        onApplyPreset={(id) => requestChange({ kind: "preset", id })}
+                                        onNavigate={navigate}
+                                    />
+                                )}
+                                {view === "prompt" && <PromptEditor {...editorProps} />}
+                                {view === "tools" && <ToolsEditor {...editorProps} />}
+                                {view === "context" && <ContextEditor {...editorProps} />}
+                                {view === "agents" && <AgentsEditor {...editorProps} />}
+                                {view === "models" && <ModelsEditor {...editorProps} />}
+                                {view === "policy" && <PolicyEditor {...editorProps} />}
+                                {view === "bootstrap" && (
+                                    <BootstrapEditor
+                                        {...editorProps}
+                                        blocked={blocked}
+                                        onNavigate={navigate}
+                                    />
+                                )}
+                            </fieldset>
+                        )}
+                    </Suspense>
                     {view !== "runtime" && (
                         <footer className="hb-editor-footer">
                             <LockKeyhole size={13} aria-hidden="true" />
@@ -629,27 +595,31 @@ export default function App() {
                 </Modal>
             )}
             {importOpen && (
-                <ImportDialog
-                    blocked={blocked}
-                    onClose={() => setImportOpen(false)}
-                    onImport={(imported) => {
-                        replace(imported, `Imported ${imported.name}. No data was uploaded.`);
-                        setImportOpen(false);
-                        navigate("overview");
-                    }}
-                />
+                <Suspense fallback={null}>
+                    <ImportDialog
+                        blocked={blocked}
+                        onClose={() => setImportOpen(false)}
+                        onImport={(imported) => {
+                            replace(imported, `Imported ${imported.name}. No data was uploaded.`);
+                            setImportOpen(false);
+                            navigate("overview");
+                        }}
+                    />
+                </Suspense>
             )}
             {exportOpen && (
-                <ExportDialog
-                    plan={plan}
-                    issues={issues}
-                    blocked={blocked}
-                    onClose={() => setExportOpen(false)}
-                    onBuild={() => {
-                        setExportOpen(false);
-                        navigate("bootstrap");
-                    }}
-                />
+                <Suspense fallback={null}>
+                    <ExportDialog
+                        plan={plan}
+                        issues={issues}
+                        blocked={blocked}
+                        onClose={() => setExportOpen(false)}
+                        onBuild={() => {
+                            setExportOpen(false);
+                            navigate("bootstrap");
+                        }}
+                    />
+                </Suspense>
             )}
             {evidence && (
                 <EvidenceDialog evidence={evidence} onClose={() => setEvidence(null)} onNavigate={navigate} />

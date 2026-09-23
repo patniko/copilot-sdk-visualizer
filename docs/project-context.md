@@ -94,13 +94,13 @@ Default-deny is not a substitute for validating resource access inside the effec
 
 Use the shared [`SettingHelp`](../src/components/SettingHelp.tsx) popover through the field's `help` prop. Every configuration `ToggleField` requires that prop; add it to other fields when the choice has runtime, host, or deployment consequences. Keep help buttons outside input labels so opening an explanation cannot change the value. Simple metadata and search/filter fields do not need decorative icons.
 
-Define explanations in [`setting-help.ts`](../src/content/setting-help.ts), with the existing Context switch entries in [`context-help.ts`](../src/content/context-help.ts). [`help-types.ts`](../src/content/help-types.ts) distinguishes switch behavior from choice/input detail sections. Include the option or planner concept, scope, example, boundary, and pinned sources. Host-callback switches must describe a required binding, not a fictitious SDK boolean.
+Define explanations in [`setting-help.ts`](../src/content/setting-help.ts), with the existing Context switch entries in [`context-help.ts`](../src/content/context-help.ts). [`help-types.ts`](../src/content/help-types.ts) distinguishes switch behavior from choice/input detail sections. Include the option or planner concept, scope, example, and boundary. Private research can retain pinned sources, but generated public content must omit their locations. Host-callback switches must describe a required binding, not a fictitious SDK boolean.
 
 Preserve keyboard opening, Escape/close behavior, focus restoration, and viewport-bounded scrolling on narrow screens. Browser checks must wait for navigation to transfer focus before opening help, and for close-time focus restoration before opening another popover. They also verify that reading help leaves the persisted plan unchanged.
 
 ### Evidence, not assumed SDK parity
 
-The application consumes materialized reference data with pinned source links. It must not infer identical feature availability merely because six SDKs share protocol concepts.
+The application consumes sanitized materialized reference data generated from a private pinned snapshot. It must not infer identical feature availability merely because six SDKs share protocol concepts, and the public build must not expose private source locations or revisions.
 
 Examples of boundaries already encountered:
 
