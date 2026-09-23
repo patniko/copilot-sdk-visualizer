@@ -9,6 +9,7 @@ import type { Evidence, ViewId } from "./editor";
 import { Badge, Button, EmptyState, Notice, SelectField, TextField } from "./ui";
 
 const catalogScopes = Array.from(new Set(reference.controls.flatMap((control) => control.scopes)));
+const visibleSdkDocs = SDK_DOC_MAP.filter((group) => group.view !== "advanced");
 
 const viewLabels: Record<ViewId, string> = {
     overview: "Overview",
@@ -60,7 +61,7 @@ export function ReferencePanel({
                         Boundaries &amp; gaps<Badge>{reference.gaps.length}</Badge>
                     </Tabs.Trigger>
                     <Tabs.Trigger className="hb-tab" value="sdk-docs">
-                        Map to SDK docs<Badge>{SDK_DOC_MAP.length}</Badge>
+                        Map to SDK docs<Badge>{visibleSdkDocs.length}</Badge>
                     </Tabs.Trigger>
                 </Tabs.List>
                 <Tabs.Content value="catalog" className="hb-tab-content">
@@ -170,7 +171,7 @@ export function ReferencePanel({
                         </a>
                     </Notice>
                     <div className="hb-docmap-grid">
-                        {SDK_DOC_MAP.map((group) => (
+                        {visibleSdkDocs.map((group) => (
                             <section className="hb-docmap-card" key={group.view}>
                                 <header className="hb-docmap-head">
                                     <div>

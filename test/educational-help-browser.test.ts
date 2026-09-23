@@ -165,7 +165,6 @@ it("uses the same help interaction for choices and inputs in every configuration
             /^Agents\b/,
             /^Models & identity\b/,
             /^Policy & state\b/,
-            /^Advanced\b/,
             /^Build & run\b/,
         ]) {
             await visit(page, view);

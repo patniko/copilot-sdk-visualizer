@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import type { Page } from "playwright";
-import { advancedControls } from "../src/content/advanced-controls";
 import { parsePlan } from "../src/domain/plan";
 import type { HarnessPlan } from "../src/domain/plan";
 import { createPreset } from "../src/domain/presets";
@@ -163,6 +162,53 @@ it("applies and undoes actual profile and scenario decisions", async () => {
             .click();
         await expect.poll(async () => (await savedPlan(page)).tools.view.action).toBe("override");
         expect((await savedPlan(page)).prompt.content).toContain("tenant's authorized documents");
+    });
+});
+
+it("collapses the desktop navigation and restores the preference on reload", async () => {
+    await exercise("collapsed-navigation", async (page) => {
+        const workspace = page.locator(".hb-workspace");
+        await page.getByRole("button", { name: "Collapse navigation", exact: true }).click();
+        await expect
+            .poll(() => workspace.evaluate((element) => element.classList.contains("hb-sidebar-collapsed")))
+            .toBe(true);
+        expect(await page.getByRole("button", { name: "Expand navigation", exact: true }).isVisible()).toBe(
+            true,
+        );
+        await navigate(page, /^Tools\b/);
+        expect(await page.getByRole("heading", { name: "Same tool. Your implementation." }).isVisible()).toBe(
+            true,
+        );
+
+        await page.reload({ waitUntil: "domcontentloaded" });
+        expect(await page.getByRole("button", { name: "Expand navigation", exact: true }).isVisible()).toBe(
+            true,
+        );
+        await page.getByRole("button", { name: "Expand navigation", exact: true }).click();
+        await expect
+            .poll(() => workspace.evaluate((element) => element.classList.contains("hb-sidebar-collapsed")))
+            .toBe(false);
+    });
+});
+
+it("keeps advanced runtime details out of the demo UI", async () => {
+    await exercise("advanced-hidden", async (page) => {
+        expect(
+            await page
+                .getByRole("navigation", { name: "Harness workflow" })
+                .getByRole("button", { name: /^Advanced\b/ })
+                .count(),
+        ).toBe(0);
+
+        await navigate(page, /^Learn \/ reference\b/);
+        await page.getByRole("tab", { name: /Map to SDK docs/ }).click();
+        expect(await page.getByText("Advanced runtime surfaces", { exact: true }).count()).toBe(0);
+
+        await page.evaluate(() => {
+            window.location.hash = "#advanced";
+        });
+        await page.reload({ waitUntil: "domcontentloaded" });
+        expect(await page.getByRole("heading", { name: "Understand the harness." }).isVisible()).toBe(true);
     });
 });
 
@@ -490,46 +536,6 @@ it("preserves corrupt data until explicit recovery and exposes searchable eviden
     );
 });
 
-it("shows source-backed advanced controls without making runtime internals editable", async () => {
-    await exercise("advanced-controls", async (page) => {
-        await navigate(page, /^Advanced\b/);
-        expect(await page.getByRole("heading", { name: "See what exists below." }).isVisible()).toBe(true);
-        expect(await page.locator(".hb-advanced-summary strong").first().textContent()).toBe(
-            String(advancedControls.length),
-        );
-        expect(await page.getByRole("radio").count()).toBe(0);
-        expect(await page.getByRole("checkbox").count()).toBe(0);
-
-        await page.getByLabel("Category", { exact: true }).selectOption("Limits & throughput");
-        await page
-            .getByRole("searchbox", { name: "Search advanced controls", exact: true })
-            .fill("view and read");
-        const viewLimits = page.locator(".hb-advanced-card").filter({ hasText: "View and read size limits" });
-        expect(await viewLimits.isVisible()).toBe(true);
-        expect(await viewLimits.getByText(/Soft cutoff: 20 KiB/).isVisible()).toBe(true);
-        expect(await page.locator('a[href*="copilot-agent-runtime"]').count()).toBeGreaterThan(0);
-
-        await page.getByLabel("Category", { exact: true }).selectOption("all");
-        await page
-            .getByRole("searchbox", { name: "Search advanced controls", exact: true })
-            .fill("compaction thresholds");
-        const compaction = page
-            .locator(".hb-advanced-card")
-            .filter({ hasText: "Infinite-session compaction thresholds" });
-        expect(await compaction.getByText(/Background compaction 0.80/).isVisible()).toBe(true);
-
-        await page.getByLabel("Support level", { exact: true }).selectOption("Documented SDK");
-        expect(await compaction.isVisible()).toBe(true);
-        await page.getByLabel("Support level", { exact: true }).selectOption("Experimental");
-        expect(await page.getByText("No matching advanced controls", { exact: true }).isVisible()).toBe(true);
-        await page.getByLabel("Support level", { exact: true }).selectOption("Runtime contract");
-        await page.getByRole("searchbox", { name: "Search advanced controls", exact: true }).fill("");
-        expect(await page.getByRole("heading", { name: "Per-turn structured output" }).isVisible()).toBe(
-            true,
-        );
-    });
-});
-
 it("keeps all editors and export dialogs usable on a narrow screen", async () => {
     await exercise("mobile", async (page) => {
         await page.setViewportSize({ width: 390, height: 844 });
@@ -542,7 +548,6 @@ it("keeps all editors and export dialogs usable on a narrow screen", async () =>
             /^Agents\b/,
             /^Models & identity\b/,
             /^Policy & state\b/,
-            /^Advanced\b/,
             /^Build & run\b/,
             /^Learn \/ reference\b/,
         ]) {

@@ -6,7 +6,6 @@ import {
     Check,
     ChevronRight,
     CircleAlert,
-    Code2,
     Download,
     FileText,
     FolderOpen,
@@ -16,8 +15,9 @@ import {
     Moon,
     Network,
     PackageOpen,
+    PanelLeftClose,
+    PanelLeftOpen,
     Redo2,
-    Settings2,
     ShieldCheck,
     SlidersHorizontal,
     Sun,
@@ -31,7 +31,6 @@ import { useHarness } from "./hooks/useHarness";
 import { PRESETS, SCENARIOS, applyScenario, changedAxes, createPreset } from "./domain/presets";
 import type { ScenarioId } from "./domain/presets";
 import type { HarnessPlan, PresetId } from "./domain/plan";
-import { AdvancedEditor } from "./components/AdvancedEditor";
 import { AgentsEditor } from "./components/AgentsEditor";
 import { BootstrapEditor } from "./components/BootstrapEditor";
 import { ContextEditor } from "./components/ContextEditor";
@@ -67,10 +66,11 @@ const navigation = [
         icon: SlidersHorizontal,
     },
     { id: "policy", label: "Policy & state", detail: "Permissions & lifecycle", icon: ShieldCheck },
-    { id: "advanced", label: "Advanced", detail: "Future runtime controls", icon: Settings2 },
     { id: "bootstrap", label: "Build & run", detail: "Language, files & host setup", icon: PackageOpen },
     { id: "reference", label: "Learn / reference", detail: "Source-backed boundaries", icon: BookOpen },
 ] as const;
+
+const SIDEBAR_STORAGE_KEY = "harness-builder:sidebar-collapsed";
 
 const viewHeadings: Record<ViewId, { eyebrow: string; title: string; description: string }> = {
     overview: {
@@ -156,6 +156,13 @@ export default function App() {
     const harness = useHarness();
     const { plan, issues, blocked, saveError, canUndo, canRedo } = harness;
     const [view, setView] = useState<ViewId>(viewFromLocation);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+        try {
+            return globalThis.localStorage?.getItem(SIDEBAR_STORAGE_KEY) === "1";
+        } catch {
+            return false;
+        }
+    });
     useEffect(() => {
         const onHashChange = () => {
             if (window.location.hash && !navigation.some((entry) => `#${entry.id}` === window.location.hash))
@@ -197,9 +204,22 @@ export default function App() {
     }
 
     function navigate(next: ViewId) {
-        setView(next);
-        if (window.location.hash !== `#${next}`) window.history.pushState(null, "", `#${next}`);
+        const destination = next === "advanced" ? "overview" : next;
+        setView(destination);
+        if (window.location.hash !== `#${destination}`) window.history.pushState(null, "", `#${destination}`);
         window.requestAnimationFrame(() => document.getElementById("editor-heading")?.focus());
+    }
+
+    function toggleSidebar() {
+        setSidebarCollapsed((current) => {
+            const next = !current;
+            try {
+                globalThis.localStorage?.setItem(SIDEBAR_STORAGE_KEY, next ? "1" : "0");
+            } catch {
+                /* storage is best-effort */
+            }
+            return next;
+        });
     }
 
     function replace(next: HarnessPlan, message: string) {
@@ -368,9 +388,25 @@ export default function App() {
                     </div>
                 </div>
             )}
-            <div className="hb-workspace">
+            <div className={`hb-workspace${sidebarCollapsed ? " hb-sidebar-collapsed" : ""}`}>
                 <div className="hb-sidebar">
-                    <p className="hb-nav-label">Compose your harness</p>
+                    <div className="hb-sidebar-header">
+                        <p className="hb-nav-label">Compose your harness</p>
+                        <button
+                            className="hb-sidebar-toggle"
+                            type="button"
+                            aria-label={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
+                            aria-expanded={!sidebarCollapsed}
+                            title={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
+                            onClick={toggleSidebar}
+                        >
+                            {sidebarCollapsed ? (
+                                <PanelLeftOpen size={18} aria-hidden="true" />
+                            ) : (
+                                <PanelLeftClose size={18} aria-hidden="true" />
+                            )}
+                        </button>
+                    </div>
                     <nav aria-label="Harness workflow" className="hb-navigation">
                         {navigation.map((entry) => {
                             const Icon = entry.icon;
@@ -382,6 +418,7 @@ export default function App() {
                                     className={`hb-nav-item${active ? " hb-nav-active" : ""}`}
                                     aria-current={active ? "page" : undefined}
                                     aria-controls="builder-main"
+                                    title={sidebarCollapsed ? `${entry.label} — ${entry.detail}` : undefined}
                                     onClick={() => navigate(entry.id)}
                                 >
                                     <Icon size={18} aria-hidden="true" />
@@ -404,18 +441,6 @@ export default function App() {
                             );
                         })}
                     </nav>
-                    <div className="hb-sidebar-note">
-                        <Code2 size={20} aria-hidden="true" />
-                        <strong>Compose, don&apos;t execute.</strong>
-                        <p>
-                            No agents, model calls, or MCP connections start here. Credential values stay out
-                            of the plan.
-                        </p>
-                        <button onClick={() => navigate("reference")}>
-                            Explore the source catalog
-                            <ArrowRight size={13} aria-hidden="true" />
-                        </button>
-                    </div>
                 </div>
                 <main id="builder-main" tabIndex={-1} className="hb-main" aria-labelledby="editor-heading">
                     {view !== "runtime" && (
@@ -488,8 +513,6 @@ export default function App() {
                         <RuntimeExplorer onNavigate={navigate} onEvidence={setEvidence} />
                     ) : view === "reference" ? (
                         <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
-                    ) : view === "advanced" ? (
-                        <AdvancedEditor />
                     ) : (
                         <fieldset className="hb-editor-fields" disabled={blocked} key={`${view}-${revision}`}>
                             <legend className="hb-sr-only">
