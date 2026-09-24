@@ -5,7 +5,7 @@ import { Badge, Button, ChoiceField, Notice, Panel, SelectField, TextField } fro
 import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
 import { ExternalLink } from "lucide-react";
-import { S2S_AUTH_DOCS } from "../content/sdk-docs";
+import { S2S_AUTH_AVAILABILITY, S2S_AUTH_DOCS } from "../content/sdk-docs";
 import { copilotModelOptions } from "../content/models";
 
 const endpointExamples = {
@@ -164,8 +164,8 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                             {
                                 value: "s2s-installation",
                                 label: "GitHub App service identity",
-                                description:
-                                    "For eligible service-to-service or high-volume workloads using a short-lived installation token.",
+                                badge: "Coming soon",
+                                description: "Feature-flagged; available only to accounts enabled by GitHub.",
                             },
                         ]}
                         onValueChange={(value) =>
@@ -176,46 +176,13 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     />
                     {plan.identity === "s2s-installation" ? (
                         <>
-                            <Notice title="Selection configures generation only" tone="accent">
-                                This option does not grant GitHub App installation authentication, billing
-                                approval, model access, or any fixed or higher rate limit. GitHub must enable
-                                the account or organization separately.
+                            <Notice title="Coming soon - feature-flagged" tone="accent">
+                                {S2S_AUTH_AVAILABILITY} Selection configures generation only; it does not
+                                grant billing approval, model access, or higher rate limits.
                             </Notice>
-                            <div
-                                className="hb-setup-docs"
-                                role="note"
-                                aria-label="GitHub App setup checklist"
-                            >
-                                <p className="hb-small-label">Eligible GitHub App setup checklist</p>
-                                <ol className="hb-s2s-checklist">
-                                    <li>
-                                        Create a GitHub App with the repository permission{" "}
-                                        <strong>Copilot Requests: Read &amp; write</strong>.
-                                    </li>
-                                    <li>
-                                        Install it on the billing and attribution account. The account or
-                                        organization must be enabled for installation authentication, and the
-                                        current permission check requires <strong>All repositories</strong>.
-                                    </li>
-                                    <li>
-                                        In trusted host code, use the app private key and installation ID to
-                                        create an app JWT and mint an installation token. The mint request
-                                        must include at least one <code>repository_ids</code> entry and{" "}
-                                        <code>permissions.copilot_requests = write</code>.
-                                    </li>
-                                    <li>
-                                        Pass only the minted installation token to the runtime as{" "}
-                                        <code>COPILOT_GITHUB_TOKEN</code> and disable logged-in-user fallback.
-                                        Do not use the per-session GitHub token callback.
-                                    </li>
-                                    <li>
-                                        Installation tokens expire after one hour. Mint a replacement, restart
-                                        or reconfigure the runtime with the new environment, then resume the
-                                        session when appropriate; callback refresh is not supported.
-                                    </li>
-                                </ol>
+                            <div className="hb-setup-docs">
                                 <a href={S2S_AUTH_DOCS} target="_blank" rel="noopener noreferrer">
-                                    Read GitHub’s server-to-server authentication guide
+                                    GitHub App setup guide
                                     <ExternalLink size={12} aria-hidden="true" />
                                 </a>
                             </div>

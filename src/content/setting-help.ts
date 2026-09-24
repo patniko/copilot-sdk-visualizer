@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { getSource } from "./reference";
 import type { HelpSource, ToggleHelp, ValueHelp } from "./help-types";
+import { S2S_AUTH_AVAILABILITY } from "./sdk-docs";
 
 const sessionScope =
     "A new-session configuration choice. Editing this planner does not change a running agent.";
@@ -575,12 +576,12 @@ export const valueHelp = {
                 text: "Permit the future local runtime to use its developer login; an external service owns its own identity.",
             },
             {
-                title: "GitHub App service identity",
+                title: "GitHub App service identity (coming soon)",
                 value: "s2s-installation",
-                text: "For accounts GitHub has separately enabled for GitHub App installation authentication. The runtime receives a one-hour installation token through COPILOT_GITHUB_TOKEN with logged-in-user fallback disabled; there is no session callback refresh.",
+                text: `${S2S_AUTH_AVAILABILITY} The runtime receives a one-hour installation token through COPILOT_GITHUB_TOKEN with logged-in-user fallback disabled; there is no session callback refresh.`,
             },
         ],
-        "Use scoped session identity for a shared service, or the eligible GitHub App route when service-owned attribution is required.",
+        "Use scoped session identity for shared services. The GitHub App route also requires feature-flag enablement.",
         "The stored choice is inactive for the planner's BYOK inference route. Selection does not enable an account, approve billing, grant model access, promise rate limits, or authorize tools, MCP, and downstream services. Never store app keys, JWTs, installation tokens, or expiry here.",
         refs("sdk-auth", "sdk-s2s-auth", "sdk-default", "sdk-existing-runtime"),
         "Host/session authentication; runtime process ownership still matters.",

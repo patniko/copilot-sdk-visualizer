@@ -21,6 +21,10 @@ One shared runtime engine can power many agents. A **harness** is the configurat
 
 Selecting a capability here is not the same as enabling every prerequisite or granting authority. Runtime capability, model, platform, and experiment gates still determine actual availability.
 
+**GitHub App service identity is coming soon and behind a feature flag.** It remains selectable for
+planning, but GitHub must enable the account or organization before it can be used. The app links to the
+official setup guide rather than displaying an inline installation checklist.
+
 ## Build a harness in seven steps
 
 1. Understand the four layers above — you keep the engine and compose the harness.

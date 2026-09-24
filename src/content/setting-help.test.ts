@@ -8,6 +8,13 @@ import { generateSdkCode } from "../domain/export";
 import { sessionData } from "../domain/bootstrap/common";
 
 describe("shared educational help", () => {
+    it("marks GitHub App identity as coming soon and feature-flagged", () => {
+        const identity = valueHelp.identity.details.find((detail) => detail.value === "s2s-installation");
+        expect(identity?.title).toContain("coming soon");
+        expect(identity?.text).toContain("behind a feature flag");
+        expect(identity?.text).toContain("GitHub enablement for your account or organization");
+    });
+
     it("provides behavior, examples, boundaries, and provenance for every explanation", () => {
         for (const help of [
             ...Object.values(contextToggleHelp),

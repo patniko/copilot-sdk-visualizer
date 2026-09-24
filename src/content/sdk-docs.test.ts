@@ -24,6 +24,13 @@ describe("reference source integrity", () => {
 });
 
 describe("SDK docs map", () => {
+    it("discloses feature-flagged availability alongside the S2S setup guide", () => {
+        const guide = sdkDocsForView("models")?.links.find((link) => link.url === S2S_AUTH_DOCS);
+        expect(guide?.note).toContain("Coming soon");
+        expect(guide?.note).toContain("behind a feature flag");
+        expect(reference.sources["sdk-s2s-auth"]?.label).toContain("coming soon");
+    });
+
     it("covers each builder view once with valid https links", () => {
         const views = SDK_DOC_MAP.map((group) => group.view);
         expect(new Set(views).size).toBe(views.length);

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import type { HarnessPlan } from "../domain/plan";
 import type { RuntimeKind } from "../domain/target";
+import { S2S_AUTH_AVAILABILITY } from "./sdk-docs";
 
 /**
  * Educational content for the "Host & deploy" page: four hosting options, each with a reference
@@ -447,9 +448,12 @@ export const hostingRungs: HostingRung[] = [
                     role: "Key vault and workload identity",
                     purpose:
                         "Issue short-lived, per-session credentials and attach them at the gateways, so they never enter the agent's context, images, or plans.",
-                    watchOut:
-                        "Static secrets live in environment variables that any tool call can read and leak.",
-                    seams: ["gitHubTokenProvider", "GitHub App installation tokens", "Managed identity"],
+                    watchOut: `${S2S_AUTH_AVAILABILITY} Keep static secrets out of environments accessible to tools.`,
+                    seams: [
+                        "gitHubTokenProvider",
+                        "GitHub App installation tokens (coming soon)",
+                        "Managed identity",
+                    ],
                 },
                 {
                     id: "state",

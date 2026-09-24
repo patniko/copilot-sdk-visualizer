@@ -179,6 +179,8 @@ describe("plan decisions", () => {
         plan.identity = "s2s-installation";
         expect(hostContracts(plan)).toContain("GitHub App installation-token runtime environment");
         const managed = analyzePlan(plan).find((decision) => decision.id === "s2s-installation-identity");
+        expect(managed?.title).toContain("coming soon");
+        expect(managed?.detail).toContain("behind a feature flag");
         expect(managed?.detail).toContain("managed child");
         expect(managed?.detail).toContain("one-hour expiry");
         plan.target.runtime = "external";

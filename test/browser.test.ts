@@ -456,34 +456,53 @@ it("connects prompt, provider, identity, and state editors to the exported plan"
     });
 });
 
-it("configures the eligible GitHub App S2S route without storing or exporting credentials", async () => {
+it("marks the GitHub App S2S route as coming soon with a setup link instead of an inline checklist", async () => {
     await exercise("s2s-installation-auth", async (page) => {
         await navigate(page, /^Models & identity\b/);
-        await page
-            .getByRole("group", { name: "GitHub credential ownership", exact: true })
-            .getByText("GitHub App service identity", { exact: true })
-            .click();
+        const ownership = page.getByRole("group", { name: "GitHub credential ownership", exact: true });
+        const identity = ownership.locator("label").filter({ hasText: "GitHub App service identity" });
+        expect(await identity.getByText("Coming soon", { exact: true }).isVisible()).toBe(true);
+        expect(await identity.getByText(/Feature-flagged/).isVisible()).toBe(true);
+        expect(await identity.getByRole("radio").isEnabled()).toBe(true);
+        await identity.click();
         await expect.poll(async () => (await savedPlan(page)).identity).toBe("s2s-installation");
+        await page.reload();
+        await ownership.waitFor();
+        const availability = page.locator(".hb-notice").filter({ hasText: "Coming soon - feature-flagged" });
+        expect(await availability.isVisible()).toBe(true);
+        expect(await availability.textContent()).toContain("behind a feature flag");
+        expect(await availability.textContent()).toContain(
+            "GitHub enablement for your account or organization",
+        );
+        expect(await page.getByText("Eligible GitHub App setup checklist", { exact: true }).count()).toBe(0);
+        expect(await page.locator(".hb-s2s-checklist").count()).toBe(0);
         expect(
-            await page.getByText("Selection configures generation only", { exact: true }).isVisible(),
-        ).toBe(true);
-        const checklist = page.getByRole("note", { name: "GitHub App setup checklist" });
-        expect(await checklist.getByText(/Copilot Requests: Read & write/).isVisible()).toBe(true);
-        expect(await checklist.getByText(/All repositories/).isVisible()).toBe(true);
-        expect(await checklist.getByText(/repository_ids/).isVisible()).toBe(true);
-        expect(await checklist.getByText(/one hour/).isVisible()).toBe(true);
-        expect(
-            await checklist
-                .getByRole("link", { name: /server-to-server authentication guide/ })
+            await page
+                .getByRole("link", { name: "GitHub App setup guide", exact: true })
                 .getAttribute("href"),
         ).toBe("https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens");
 
+        await page.getByRole("button", { name: "Explain Copilot credential ownership", exact: true }).click();
+        const help = page.getByRole("dialog", { name: "Copilot credential ownership", exact: true });
+        expect(
+            await help.getByText("GitHub App service identity (coming soon)", { exact: true }).isVisible(),
+        ).toBe(true);
+        expect(await help.getByText(/behind a feature flag/).isVisible()).toBe(true);
+        await page.keyboard.press("Escape");
+
+        await page
+            .locator("section.hb-panel")
+            .filter({ hasText: "Connect a GitHub Copilot account" })
+            .screenshot({
+                path: ".test-artifacts/browser/github-app-coming-soon.png",
+            });
         await page.getByRole("button", { name: "Export", exact: true }).click();
         const dialog = page.getByRole("dialog", { name: "Export plan, code & CLI instructions" });
         const code = await dialog
             .getByRole("textbox", { name: "SDK TypeScript integration sketch" })
             .inputValue();
         expect(code).toContain("COPILOT_GITHUB_TOKEN");
+        expect(code).toContain("Coming soon: GitHub App service identity is behind a feature flag");
         expect(code).toContain("useLoggedInUser: false");
         expect(code).not.toContain("gitHubTokenProvider");
         expect(code).not.toContain("GITHUB_TOKEN_EXPIRES_AT");

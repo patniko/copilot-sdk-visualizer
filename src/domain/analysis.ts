@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { BUILTIN_NAMES, BUILTIN_SPECS } from "./plan";
 import type { HarnessPlan } from "./plan";
+import { S2S_AUTH_AVAILABILITY } from "../content/sdk-docs";
 
 export interface Decision {
     id: string;
@@ -211,13 +212,14 @@ export function analyzePlan(plan: HarnessPlan): Decision[] {
         decisions.push({
             id: "s2s-installation-identity",
             kind: "host",
-            title: "Operate an eligible GitHub App installation identity",
+            title: "GitHub App service identity is coming soon",
             detail:
-                plan.target.runtime === "external"
-                    ? "GitHub must separately enable the billing/attribution account. The independently operated runtime must receive COPILOT_GITHUB_TOKEN and disable logged-in-user fallback; this connecting client must not inject the installation token. Mint a replacement before the one-hour expiry, restart or reconfigure that runtime, and resume the session as appropriate."
+                `${S2S_AUTH_AVAILABILITY} ` +
+                (plan.target.runtime === "external"
+                    ? "The independently operated runtime must receive COPILOT_GITHUB_TOKEN and disable logged-in-user fallback; this connecting client must not inject the installation token. Mint a replacement before the one-hour expiry, restart or reconfigure that runtime, and resume the session as appropriate."
                     : plan.target.runtime === "inprocess"
-                      ? "GitHub must separately enable the billing/attribution account. Mint the installation token in trusted host code, set COPILOT_GITHUB_TOKEN before loading the in-process runtime, and disable logged-in-user fallback. Replace the token before its one-hour expiry by restarting the host runtime, then resume the session as appropriate."
-                      : "GitHub must separately enable the billing/attribution account. Mint the installation token in trusted host code, inject it into the managed child as COPILOT_GITHUB_TOKEN, and disable logged-in-user fallback. Replace the token before its one-hour expiry by restarting the SDK client with the new child environment, then resume the session as appropriate.",
+                      ? "Mint the installation token in trusted host code, set COPILOT_GITHUB_TOKEN before loading the in-process runtime, and disable logged-in-user fallback. Replace the token before its one-hour expiry by restarting the host runtime, then resume the session as appropriate."
+                      : "Mint the installation token in trusted host code, inject it into the managed child as COPILOT_GITHUB_TOKEN, and disable logged-in-user fallback. Replace the token before its one-hour expiry by restarting the SDK client with the new child environment, then resume the session as appropriate."),
             sources: ["sdk-s2s-auth", "sdk-auth"],
         });
     return decisions;

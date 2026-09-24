@@ -3,6 +3,7 @@ import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema } from "./plan";
 import type { HarnessPlan } from "./plan";
 import { analyzePlan, hostContracts, toolSummary } from "./analysis";
 import { LANGUAGES, RUNTIME_OPTIONS, runtimeEndpoint } from "./target";
+import { S2S_AUTH_AVAILABILITY } from "../content/sdk-docs";
 
 function json(value: unknown): string {
     if (Array.isArray(value)) return `[${value.map(json).join(", ")}]`;
@@ -369,6 +370,7 @@ export function generateSdkCode(input: HarnessPlan): string {
         "// Generated integration sketch. Supply host implementations; review before execution.",
         "// Behavior reference: maintained private SDK/runtime research snapshots.",
         "// Client modes configure new sessions. This is not a live configuration patch.",
+        ...(s2s ? [`// ${S2S_AUTH_AVAILABILITY}`] : []),
         ...(plan.model.provider === "copilot" && plan.identity === "s2s-installation"
             ? plan.target.runtime === "external"
                 ? [

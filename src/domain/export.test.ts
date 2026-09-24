@@ -161,6 +161,7 @@ describe("plan and SDK exports", () => {
             plan.target.runtime = runtime;
             const code = generateSdkCode(plan);
             const fields = inspectConfiguration(code);
+            expect(code).toContain("// Coming soon: GitHub App service identity is behind a feature flag");
             expect(code).not.toContain("GITHUB_TOKEN_EXPIRES_AT");
             expect(code).not.toContain("gitHubTokenProvider");
             expect(fields.session.has("gitHubTokenProvider")).toBe(false);

@@ -21,7 +21,7 @@ type Section = { title: string; rows: Row[] };
 const identityLabels: Record<HarnessPlan["identity"], string> = {
     "host-token": "Per-session token callback",
     developer: "Developer login",
-    "s2s-installation": "GitHub App service identity",
+    "s2s-installation": "GitHub App service identity (coming soon; feature-flagged)",
 };
 
 const keptTools = (plan: HarnessPlan) => BUILTIN_NAMES.filter((name) => plan.tools[name].action !== "remove");

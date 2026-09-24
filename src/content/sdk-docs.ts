@@ -17,6 +17,8 @@ export const SDK_DOCS_HOME = `${base}/docs/README.md`;
 export const SDK_GETTING_STARTED = `${base}/docs/getting-started.md`;
 export const S2S_AUTH_DOCS =
     "https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens";
+export const S2S_AUTH_AVAILABILITY =
+    "Coming soon: GitHub App service identity is behind a feature flag and requires GitHub enablement for your account or organization.";
 
 export type SdkDocLink = { label: string; url: string; note: string };
 export type SdkDocGroup = { view: ViewId; title: string; summary: string; links: SdkDocLink[] };
@@ -184,7 +186,7 @@ export const SDK_DOC_MAP: SdkDocGroup[] = [
             {
                 label: "Server-to-server authentication",
                 url: S2S_AUTH_DOCS,
-                note: "GitHub App installation eligibility, token minting, runtime environment, expiry, and billing attribution.",
+                note: S2S_AUTH_AVAILABILITY,
             },
             {
                 label: "Azure managed identity",

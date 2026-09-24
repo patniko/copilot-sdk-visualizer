@@ -2,6 +2,7 @@
 import { BUILTIN_NAMES } from "../plan";
 import type { HarnessPlan } from "../plan";
 import { reference } from "../../content/reference";
+import { S2S_AUTH_AVAILABILITY } from "../../content/sdk-docs";
 import { SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapFile, BootstrapProject, BootstrapRequirement } from "./types";
 
@@ -223,8 +224,8 @@ export function commonRequirements(plan: HarnessPlan, hostFile: string): Bootstr
         });
         items.push({
             id: "s2s-eligibility",
-            title: "Confirm GitHub App Copilot eligibility and installation",
-            detail: "GitHub must separately enable the billing/attribution account or organization. Configure Copilot Requests read/write, install on that account, and currently select All repositories. This selection does not grant enablement, billing approval, model access, or a fixed higher rate limit.",
+            title: "GitHub App service identity: coming soon",
+            detail: `${S2S_AUTH_AVAILABILITY} Configure Copilot Requests read/write, install on that account, and currently select All repositories. This selection does not grant enablement, billing approval, model access, or a fixed higher rate limit.`,
             file: "README.md",
             kind: "review",
         });

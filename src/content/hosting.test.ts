@@ -59,6 +59,14 @@ describe("hosting content", () => {
     it("is cross-linked from the SDK docs map", () => {
         expect(sdkDocsForView("deploy")?.links.some((link) => /backend-services/.test(link.url))).toBe(true);
     });
+
+    it("distinguishes coming-soon GitHub App tokens from generally available credential options", () => {
+        const broker = rungNodes(hostingRung("production")).find((node) => node.id === "secrets");
+        expect(broker?.watchOut).toContain("Coming soon: GitHub App service identity");
+        expect(broker?.watchOut).toContain("behind a feature flag");
+        expect(broker?.seams).toContain("GitHub App installation tokens (coming soon)");
+        expect(broker?.seams).toContain("Managed identity");
+    });
 });
 
 describe("hosting architecture layouts", () => {

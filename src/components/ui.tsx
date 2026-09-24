@@ -223,6 +223,7 @@ export interface Option<T extends string> {
     value: T;
     label: string;
     description?: string;
+    badge?: string;
     disabled?: boolean;
 }
 
@@ -309,6 +310,7 @@ export function ChoiceField<T extends string>({
                         />
                         <span className="hb-choice-body">
                             <span className="hb-choice-label">{option.label}</span>
+                            {option.badge && <Badge accent>{option.badge}</Badge>}
                             {option.description && (
                                 <span className="hb-choice-description">{option.description}</span>
                             )}

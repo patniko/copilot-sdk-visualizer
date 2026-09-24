@@ -192,6 +192,8 @@ describe("integrated language project contracts", () => {
                     .join("\n");
                 const client = files.get(clientFiles[language]) ?? "";
                 const env = files.get(".env.example") ?? "";
+                expect(files.get("README.md")).toContain("Coming soon: GitHub App service identity");
+                expect(files.get("README.md")).toContain("behind a feature flag");
                 expect(all).not.toContain("GITHUB_TOKEN_EXPIRES_AT");
                 expect(code).not.toMatch(
                     /gitHubTokenProvider|github_token_provider|GitHubTokenProvider|GitHubEnvironmentProvider|AcquireGitHubToken|acquireGitHubToken/,

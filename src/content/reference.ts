@@ -126,8 +126,8 @@ export const reference = ReferenceSchema.parse({
             url: `${sdkBase}/docs/features/client-info.md`,
         },
         "sdk-s2s-auth": {
-            label: "GitHub App server-to-server authentication",
-            scope: "copilot-sdk · docs/auth/server-to-server-tokens.md · eligibility, installation token minting, runtime environment placement, expiry, and billing attribution",
+            label: "GitHub App server-to-server authentication (coming soon)",
+            scope: "copilot-sdk · docs/auth/server-to-server-tokens.md · feature-flagged eligibility, installation token minting, runtime environment placement, expiry, and billing attribution",
             url: `${sdkBase}/docs/auth/server-to-server-tokens.md`,
         },
         "sdk-context-clearing": {

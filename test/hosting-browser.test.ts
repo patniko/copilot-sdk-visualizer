@@ -48,6 +48,16 @@ it("selects a hosting option and explains each architecture component without mo
                     true,
                 );
                 expect(await detail.getByText(node.purpose, { exact: true }).isVisible()).toBe(true);
+                if (node.id === "secrets") {
+                    expect(await detail.locator(".hg-watch").textContent()).toContain(
+                        "behind a feature flag",
+                    );
+                    expect(
+                        await detail
+                            .getByText("GitHub App installation tokens (coming soon)", { exact: true })
+                            .isVisible(),
+                    ).toBe(true);
+                }
                 expect(await diagram.getByRole("button", { pressed: true }).count()).toBe(1);
                 const connected = hostingDiagrams[rung.id].connections.filter(
                     (edge) => edge.from[0] === node.id || edge.to[0] === node.id,
