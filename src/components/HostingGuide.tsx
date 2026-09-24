@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, Cloud, Container, Laptop, Server } from "lucide-react";
+import { Cloud, Container, Laptop, Server } from "lucide-react";
 import { hostingRung, hostingRungs, planHostingRung, rungNodes } from "../content/hosting";
-import type { ArchitectureZone, HostingRungId } from "../content/hosting";
+import type { HostingRungId } from "../content/hosting";
+import { hostingDiagrams } from "../content/hosting-diagrams";
 import type { HarnessPlan } from "../domain/plan";
+import { HostingDiagram, HostingNodeIcon } from "./HostingDiagram";
 import { Badge } from "./ui";
 import "../hosting-guide.css";
 
@@ -26,31 +28,7 @@ export function HostingGuide({ plan }: { plan: HarnessPlan }) {
         [...rung.zones, ...(rung.band ? [rung.band] : [])].find((zone) =>
             zone.nodes.some((entry) => entry.id === id),
         );
-
-    function renderZone(zone: ArchitectureZone, band = false) {
-        return (
-            <div key={zone.id} className={band ? "hg-zone hg-zone-band" : "hg-zone"} data-tone={zone.tone}>
-                <span className="hg-zone-label">{zone.label}</span>
-                <div className="hg-zone-nodes">
-                    {zone.nodes.map((entry) => (
-                        <button
-                            key={entry.id}
-                            type="button"
-                            className="hg-node"
-                            aria-pressed={node.id === entry.id}
-                            aria-controls="hosting-node-detail"
-                            onClick={() =>
-                                setSelectedNodes((current) => ({ ...current, [rung.id]: entry.id }))
-                            }
-                        >
-                            <strong>{entry.name}</strong>
-                            <small>{entry.role}</small>
-                        </button>
-                    ))}
-                </div>
-            </div>
-        );
-    }
+    const diagramNode = hostingDiagrams[rung.id].nodes.find((entry) => entry.id === node.id)!;
 
     return (
         <div className="hb-editor-stack hg-guide">
@@ -90,28 +68,30 @@ export function HostingGuide({ plan }: { plan: HarnessPlan }) {
                     {rung.id === match.id && <p className="hg-match">{match.reason}</p>}
                 </header>
 
-                <div className="hg-diagram" role="group" aria-label={`${rung.title} architecture`}>
-                    <div className="hg-flow">
-                        {rung.zones.map((zone, index) => (
-                            <Fragment key={zone.id}>
-                                {index > 0 && (
-                                    <ArrowRight className="hg-arrow" size={18} aria-hidden="true" />
-                                )}
-                                {renderZone(zone)}
-                            </Fragment>
-                        ))}
-                    </div>
-                    {rung.band && renderZone(rung.band, true)}
-                </div>
+                <HostingDiagram
+                    key={rung.id}
+                    rung={rung}
+                    selectedNode={node.id}
+                    onSelectNode={(id) => setSelectedNodes((current) => ({ ...current, [rung.id]: id }))}
+                />
 
                 <article id="hosting-node-detail" className="hg-detail" aria-live="polite">
-                    <p className="hb-kicker">{zoneOf(node.id)?.label}</p>
-                    <h4>{node.name}</h4>
-                    <p>{node.purpose}</p>
-                    <p className="hg-watch">
-                        <strong>Watch out: </strong>
-                        {node.watchOut}
-                    </p>
+                    <header className="hg-detail-heading">
+                        <span className="hg-detail-icon">
+                            <HostingNodeIcon icon={diagramNode.icon} />
+                        </span>
+                        <div>
+                            <p className="hb-kicker">{zoneOf(node.id)?.label}</p>
+                            <h4>{node.name}</h4>
+                        </div>
+                    </header>
+                    <div className="hg-detail-body">
+                        <p>{node.purpose}</p>
+                        <p className="hg-watch">
+                            <strong>Watch out</strong>
+                            {node.watchOut}
+                        </p>
+                    </div>
                     <div className="hg-seams">
                         <span>Where it shows up</span>
                         <ul className="hb-chip-list">

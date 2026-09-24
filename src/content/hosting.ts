@@ -36,9 +36,9 @@ export interface HostingRung {
     title: string;
     tagline: string;
     summary: string;
-    /** Zones left to right, connected by the request path. */
+    /** Content grouped by responsibility; hosting-diagrams defines the physical topology. */
     zones: ArchitectureZone[];
-    /** Optional services every zone relies on, drawn as a band underneath. */
+    /** Optional services shared across the architecture. */
     band?: ArchitectureZone;
 }
 

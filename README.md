@@ -33,6 +33,11 @@ Selecting a capability here is not the same as enabling every prerequisite or gr
 
 The builder itself never runs that agent. Each step maps to an official SDK guide; see [Map to the GitHub Copilot SDK docs](#map-to-the-github-copilot-sdk-docs).
 
+Finish in **Host & deploy** to compare personal, local-container, managed-cloud, and production hosting.
+Each option has an interactive reference architecture with hosting boundaries and labeled connections.
+Select a component to highlight its connections and read its responsibilities and cautions; this page does
+not change your harness configuration.
+
 ## Quickstart (run the builder locally)
 
 Use Node.js 22.12 or newer and pnpm 11.19 (pinned in `package.json`).
