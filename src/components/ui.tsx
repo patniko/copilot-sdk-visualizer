@@ -271,6 +271,7 @@ export function ChoiceField<T extends string>({
     options,
     onValueChange,
     compact = false,
+    hideLabel = false,
     hint,
     help,
     error,
@@ -279,6 +280,7 @@ export function ChoiceField<T extends string>({
     options: readonly Option<T>[];
     onValueChange: (value: T) => void;
     compact?: boolean;
+    hideLabel?: boolean;
 }) {
     const id = useId();
     return (
@@ -286,7 +288,9 @@ export function ChoiceField<T extends string>({
             className={clsx("hb-choice-field", compact && "hb-choice-compact")}
             aria-describedby={describedBy(id, hint, error)}
         >
-            <legend id={`${id}-label`}>{label}</legend>
+            <legend id={`${id}-label`} className={clsx(hideLabel && "hb-sr-only")}>
+                {label}
+            </legend>
             {help && <div className="hb-choice-help">{help}</div>}
             <div className="hb-choices">
                 {options.map((option) => (

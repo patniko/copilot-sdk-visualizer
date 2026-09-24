@@ -46,13 +46,18 @@ const SECTIONS: Section[] = [
             {
                 label: "Prompt mode",
                 value: (plan) =>
-                    plan.prompt.mode === "append"
-                        ? "Append to built-in prompt"
-                        : plan.prompt.mode === "replace"
-                          ? "Replace built-in prompt"
-                          : "Customize sections",
+                    plan.prompt.mode === "default"
+                        ? "Built-in prompt, unchanged"
+                        : plan.prompt.mode === "append"
+                          ? "Append to built-in prompt"
+                          : plan.prompt.mode === "replace"
+                            ? "Replace built-in prompt"
+                            : "Customize sections",
             },
-            { label: "Starter prompt", value: (plan) => ({ quote: plan.prompt.content }) },
+            {
+                label: "Starter prompt",
+                value: (plan) => (plan.prompt.mode === "default" ? "None" : { quote: plan.prompt.content }),
+            },
         ],
     },
     {

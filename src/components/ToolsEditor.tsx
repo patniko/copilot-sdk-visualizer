@@ -22,10 +22,11 @@ export function ToolsEditor(props: EditorProps) {
             <Panel
                 title="Choose the tool selection policy"
                 description="Current plan decisions are not a live enabled-tool inventory. Availability, implementation, and authority remain separate."
+                action={<SettingHelp help={valueHelp.inventory} value={plan.inventory} />}
             >
                 <ChoiceField
                     label="Tool inventory"
-                    help={<SettingHelp help={valueHelp.inventory} value={plan.inventory} />}
+                    hideLabel
                     value={plan.inventory}
                     options={[
                         {
@@ -74,11 +75,6 @@ export function ToolsEditor(props: EditorProps) {
                         <strong>{summary.mcpTools}</strong> MCP declarations
                     </span>
                 </div>
-                <p className="hb-field-hint">
-                    Switching inventory policy retains your Keep / Override / Remove choices. In inherited
-                    mode, Keep is labeled Runtime default and never forces all {BUILTIN_NAMES.length}{" "}
-                    descriptors on.
-                </p>
             </Panel>
             <Tabs.Root defaultValue="built-in" className="hb-tools-tabs">
                 <Tabs.List className="hb-tabs-list" aria-label="Tool configuration areas">

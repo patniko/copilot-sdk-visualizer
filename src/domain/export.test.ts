@@ -60,6 +60,17 @@ describe("plan and SDK exports", () => {
         },
     );
 
+    it("omits systemMessage when the built-in prompt is kept unchanged", () => {
+        const plan = createPreset("copilot");
+        plan.prompt.mode = "default";
+        const code = generateSdkCode(plan);
+        expect(inspectConfiguration(code).session.has("systemMessage")).toBe(false);
+        expect(code).not.toContain(plan.prompt.content);
+        const task = generateCopilotCliInstructions(plan);
+        expect(task).toContain("Prompt mode: default. Do not set systemMessage");
+        expect(task).not.toContain(plan.prompt.content);
+    });
+
     it("distinguishes an explicit empty inventory from omitted coding defaults", () => {
         expect(
             inspectConfiguration(generateSdkCode(createPreset("empty"))).session.get("availableTools"),

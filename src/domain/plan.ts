@@ -173,7 +173,7 @@ export const HarnessPlanSchema = z
         inventory: z.enum(["explicit", "coding-defaults"]),
         prompt: z
             .object({
-                mode: z.enum(["replace", "append", "customize"]),
+                mode: z.enum(["default", "replace", "append", "customize"]),
                 content: boundedText,
                 sections: z
                     .array(

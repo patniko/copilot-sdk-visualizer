@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { capabilitySides, runtimeCapability, turnWalkthrough } from "../content/runtime-map";
 import type { RuntimeCapabilityId } from "../content/runtime-map";
-import type { ViewId } from "./editor";
 import { Button } from "./ui";
 import "../runtime-explorer.css";
 
@@ -43,7 +42,7 @@ const icons: Record<RuntimeCapabilityId, LucideIcon> = {
     sessions: Database,
 };
 
-export function RuntimeExplorer({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
+export function RuntimeExplorer() {
     const [selected, setSelected] = useState<RuntimeCapabilityId>("loop");
     const [step, setStep] = useState<number | null>(null);
     const capability = runtimeCapability(selected);
@@ -102,9 +101,6 @@ export function RuntimeExplorer({ onNavigate }: { onNavigate: (view: ViewId) => 
         <div className="rt-explorer">
             <section className="rt-hero" aria-labelledby="editor-heading">
                 <div>
-                    <p className="hb-kicker">
-                        <Network size={14} aria-hidden="true" /> Meet the Copilot runtime
-                    </p>
                     <h2 id="editor-heading" tabIndex={-1}>
                         Meet the engine behind your harness.
                     </h2>
@@ -113,40 +109,27 @@ export function RuntimeExplorer({ onNavigate }: { onNavigate: (view: ViewId) => 
                         behavior; your application keeps product logic, identity, and authority.
                     </p>
                 </div>
-                <Button onClick={() => onNavigate("base-profile")}>
-                    Configure your harness <ArrowRight size={15} aria-hidden="true" />
-                </Button>
+                <div className="rt-mode-switch" role="group" aria-label="Map exploration mode">
+                    <Button
+                        size="small"
+                        variant={step === null ? "primary" : "ghost"}
+                        aria-pressed={step === null}
+                        onClick={() => setStep(null)}
+                    >
+                        <Network size={14} aria-hidden="true" /> Explore
+                    </Button>
+                    <Button
+                        size="small"
+                        variant={step !== null ? "primary" : "ghost"}
+                        aria-pressed={step !== null}
+                        onClick={() => trace(0)}
+                    >
+                        <Play size={14} aria-hidden="true" /> Trace a turn
+                    </Button>
+                </div>
             </section>
 
-            <section className="rt-atlas" aria-labelledby="runtime-map-title">
-                <div className="rt-section-heading">
-                    <div>
-                        <h3 id="runtime-map-title">Explore the shared engine</h3>
-                        <p>
-                            Select a capability to see what the runtime provides and what your application
-                            still owns.
-                        </p>
-                    </div>
-                    <div className="rt-mode-switch" role="group" aria-label="Map exploration mode">
-                        <Button
-                            size="small"
-                            variant={step === null ? "primary" : "ghost"}
-                            aria-pressed={step === null}
-                            onClick={() => setStep(null)}
-                        >
-                            <Network size={14} aria-hidden="true" /> Explore
-                        </Button>
-                        <Button
-                            size="small"
-                            variant={step !== null ? "primary" : "ghost"}
-                            aria-pressed={step !== null}
-                            onClick={() => trace(0)}
-                        >
-                            <Play size={14} aria-hidden="true" /> Trace a turn
-                        </Button>
-                    </div>
-                </div>
-
+            <section className="rt-atlas" aria-label="Runtime capability map">
                 {currentStep && step !== null && (
                     <section className="rt-walkthrough" aria-label="Illustrative turn walkthrough">
                         <div className="rt-walkthrough-top">
@@ -290,58 +273,6 @@ export function RuntimeExplorer({ onNavigate }: { onNavigate: (view: ViewId) => 
                             <p>{capability.boundary}</p>
                         </div>
                     </section>
-                </div>
-            </section>
-
-            <section className="rt-takeaway" aria-labelledby="runtime-takeaway-title">
-                <div className="rt-section-heading">
-                    <div>
-                        <h3 id="runtime-takeaway-title">Reuse the machinery. Own the meaning.</h3>
-                        <p>
-                            Standard interfaces reduce integration work. They do not remove your product
-                            decisions.
-                        </p>
-                    </div>
-                </div>
-                <div className="rt-ownership-cards">
-                    <article>
-                        <Cpu size={22} aria-hidden="true" />
-                        <h4>Runtime machinery</h4>
-                        <p>
-                            The agent loop, capability loading, provider adaptation, dispatch, context
-                            handling, and lifecycle events.
-                        </p>
-                        <strong>One engine you reuse.</strong>
-                    </article>
-                    <article>
-                        <SlidersHorizontal size={22} aria-hidden="true" />
-                        <h4>Harness configuration</h4>
-                        <p>
-                            Instructions, selected tools, skills, plugins, specialist roles, model choices,
-                            and policy bindings.
-                        </p>
-                        <strong>The behavior you compose.</strong>
-                    </article>
-                    <article>
-                        <ShieldCheck size={22} aria-hidden="true" />
-                        <h4>Application authority</h4>
-                        <p>
-                            Product UX, user identity, tenant authorization, secret management, deployment
-                            isolation, and evaluation.
-                        </p>
-                        <strong>The responsibility you keep.</strong>
-                    </article>
-                </div>
-                <div className="rt-bottom-line">
-                    <p>
-                        <strong>The configurator is the design surface—not the runtime.</strong>
-                        <br />
-                        It produces a plan and integration scaffold. Your host binds real callbacks and runs
-                        the engine.
-                    </p>
-                    <Button onClick={() => onNavigate("bootstrap")}>
-                        See how it runs <ArrowRight size={15} aria-hidden="true" />
-                    </Button>
                 </div>
             </section>
         </div>

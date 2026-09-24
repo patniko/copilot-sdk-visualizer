@@ -439,6 +439,34 @@
     color: var(--cp-text-soft);
 }
 
+.hb-panel-collapsible > summary {
+    justify-content: flex-start;
+    gap: 10px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.hb-panel-collapsible > summary::-webkit-details-marker {
+    display: none;
+}
+
+.hb-panel-collapsible > summary > svg {
+    margin-top: 4px;
+    transition: transform 120ms ease-out;
+}
+
+.hb-panel-collapsible[open] > summary > svg {
+    transform: rotate(90deg);
+}
+
+.hb-panel-collapsible > summary > .hb-badge {
+    margin-left: auto;
+}
+
+.hb-panel-collapsible > summary:hover h3 {
+    color: var(--cp-accent);
+}
+
 .hb-panel h3,
 .hb-evidence-section h3 {
     font-size: 15px;
@@ -2228,21 +2256,6 @@
     padding-inline: 12px;
 }
 
-.hb-editor-footer {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-top: 28px;
-    padding-inline: 2px;
-    color: var(--cp-text-soft);
-    font-size: 10px;
-    line-height: 1.7;
-}
-
-.hb-editor-footer svg {
-    flex-shrink: 0;
-}
-
 .hb-tabs-list {
     display: flex;
     align-items: stretch;
@@ -3268,7 +3281,6 @@
     }
 }
 
-.hb-overview-target,
 .hb-project-summary {
     display: flex;
     align-items: center;

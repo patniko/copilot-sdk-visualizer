@@ -40,28 +40,30 @@ export function toolDefinitions(plan: HarnessPlan) {
 
 export function sessionData(plan: HarnessPlan) {
     const prompt =
-        plan.prompt.mode === "customize"
-            ? {
-                  mode: "customize",
-                  content: plan.prompt.content,
-                  sections: Object.fromEntries(
-                      plan.prompt.sections.map((section) => [
-                          section.name,
-                          {
-                              action: section.action,
-                              ...(["remove", "preserve"].includes(section.action)
-                                  ? {}
-                                  : { content: section.content }),
-                          },
-                      ]),
-                  ),
-              }
-            : { mode: plan.prompt.mode, content: plan.prompt.content };
+        plan.prompt.mode === "default"
+            ? undefined
+            : plan.prompt.mode === "customize"
+              ? {
+                    mode: "customize",
+                    content: plan.prompt.content,
+                    sections: Object.fromEntries(
+                        plan.prompt.sections.map((section) => [
+                            section.name,
+                            {
+                                action: section.action,
+                                ...(["remove", "preserve"].includes(section.action)
+                                    ? {}
+                                    : { content: section.content }),
+                            },
+                        ]),
+                    ),
+                }
+              : { mode: plan.prompt.mode, content: plan.prompt.content };
     return {
         ...(plan.model.id.trim() ? { model: plan.model.id.trim() } : {}),
         ...(plan.model.reasoningEffort === "default" ? {} : { reasoningEffort: plan.model.reasoningEffort }),
         ...(plan.model.contextTier === "default" ? {} : { contextTier: plan.model.contextTier }),
-        systemMessage: prompt,
+        ...(prompt ? { systemMessage: prompt } : {}),
         ...(plan.inventory === "explicit"
             ? {
                   availableTools: [

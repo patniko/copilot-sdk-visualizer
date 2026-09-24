@@ -3,7 +3,6 @@ import { lazy, Suspense, useState } from "react";
 import { ArrowRight, Check, ChevronRight, Columns3 } from "lucide-react";
 import { PRESETS, changedAxes } from "../domain/presets";
 import type { PresetId } from "../domain/plan";
-import { LANGUAGES, RUNTIME_OPTIONS } from "../domain/target";
 import { BUILTIN_NAMES } from "../content/builtin-tools";
 import { HarnessPrimer } from "./HarnessPrimer";
 import type { EditorProps, ViewId } from "./editor";
@@ -180,27 +179,6 @@ export function BaseProfileEditor({
                         hint="Profiles set this for you. Choosing Empty also makes the tool inventory explicit. Neither option is an operating-system sandbox."
                     />
                 </details>
-            </Panel>
-            <Panel
-                title="Next: turn this into a project"
-                description="Pick a runtime and language, then inspect the generated dependency and entrypoint files."
-            >
-                <div className="hb-overview-target">
-                    <div className="hb-chip-list">
-                        <Badge>
-                            {LANGUAGES.find((language) => language.id === plan.target.language)?.label ??
-                                plan.target.language}
-                        </Badge>
-                        <Badge>
-                            {RUNTIME_OPTIONS.find((runtime) => runtime.id === plan.target.runtime)?.title ??
-                                plan.target.runtime}
-                        </Badge>
-                    </div>
-                    <Button onClick={() => onNavigate("bootstrap")}>
-                        Choose runtime &amp; language
-                        <ArrowRight size={15} aria-hidden="true" />
-                    </Button>
-                </div>
             </Panel>
         </div>
     );

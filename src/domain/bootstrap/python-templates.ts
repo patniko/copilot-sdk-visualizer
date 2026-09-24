@@ -322,12 +322,13 @@ def load_configuration():
     if data["plan"] != plan:
         raise ValueError("harness-plan.json and python-bootstrap.json disagree. Regenerate after changing the plan.")
     session = data["session"]
-    optional = {"model", "reasoning_effort", "context_tier", "available_tools", "working_directory", "agent", "default_agent", "provider"}
+    optional = {"model", "reasoning_effort", "context_tier", "system_message", "available_tools", "working_directory", "agent", "default_agent", "provider"}
     required = set(SESSION_FIELDS) - optional
     for field, selected in {
         "model": bool(plan["model"]["id"].strip()),
         "reasoning_effort": plan["model"]["reasoningEffort"] != "default",
         "context_tier": plan["model"]["contextTier"] != "default",
+        "system_message": plan["prompt"]["mode"] != "default",
         "working_directory": bool(plan["context"]["workspace"].strip()),
         "agent": bool(plan["selectedAgent"]),
         "default_agent": bool(plan["rootExcludedTools"]),
@@ -347,12 +348,13 @@ def load_configuration():
     for field in ("available_tools", "excluded_tools"):
         if field in session and (not isinstance(session[field], list) or "*" in session[field]):
             raise ValueError(f"{field} must be a list of exact or source-qualified names, not bare '*'.")
-    exact_fields(session["system_message"], {"mode", "content", "sections"}, "system_message", {"mode", "content"})
-    message = session["system_message"]
-    if message["mode"] not in {"append", "replace", "customize"}:
-        raise ValueError("Unsupported prompt mode.")
-    if message["mode"] != "customize" and "sections" in message:
-        raise ValueError("Only customize mode accepts prompt sections.")
+    message = session.get("system_message", {})
+    if "system_message" in session:
+        exact_fields(message, {"mode", "content", "sections"}, "system_message", {"mode", "content"})
+        if message["mode"] not in {"append", "replace", "customize"}:
+            raise ValueError("Unsupported prompt mode.")
+        if message["mode"] != "customize" and "sections" in message:
+            raise ValueError("Only customize mode accepts prompt sections.")
     sections = {
         "preamble", "identity", "tone", "tool_efficiency", "environment_context",
         "code_change_rules", "guidelines", "safety", "tool_instructions",

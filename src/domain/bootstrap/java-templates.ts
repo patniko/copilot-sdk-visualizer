@@ -156,24 +156,26 @@ final class Configuration {
         if (session.has("reasoningEffort")) config.setReasoningEffort(text(session, "reasoningEffort"));
         if (session.has("contextTier")) config.setContextTier(text(session, "contextTier"));
 
-        JsonNode prompt = required(session, "systemMessage");
-        fields(prompt, Set.of("mode", "content", "sections"));
-        var systemMessage = new SystemMessageConfig()
-            .setMode(SystemMessageMode.valueOf(text(prompt, "mode").toUpperCase(Locale.ROOT)))
-            .setContent(text(prompt, "content"));
-        if (prompt.has("sections")) {
-            Map<String, SectionOverride> sections = new LinkedHashMap<>();
-            object(prompt, "sections").fields().forEachRemaining(entry -> {
-                var value = entry.getValue();
-                fields(value, Set.of("action", "content"));
-                var section = new SectionOverride().setAction(
-                    SectionOverrideAction.valueOf(text(value, "action").toUpperCase(Locale.ROOT)));
-                if (value.has("content")) section.setContent(text(value, "content"));
-                sections.put(entry.getKey(), section);
-            });
-            systemMessage.setSections(sections);
+        if (session.has("systemMessage")) {
+            JsonNode prompt = object(session, "systemMessage");
+            fields(prompt, Set.of("mode", "content", "sections"));
+            var systemMessage = new SystemMessageConfig()
+                .setMode(SystemMessageMode.valueOf(text(prompt, "mode").toUpperCase(Locale.ROOT)))
+                .setContent(text(prompt, "content"));
+            if (prompt.has("sections")) {
+                Map<String, SectionOverride> sections = new LinkedHashMap<>();
+                object(prompt, "sections").fields().forEachRemaining(entry -> {
+                    var value = entry.getValue();
+                    fields(value, Set.of("action", "content"));
+                    var section = new SectionOverride().setAction(
+                        SectionOverrideAction.valueOf(text(value, "action").toUpperCase(Locale.ROOT)));
+                    if (value.has("content")) section.setContent(text(value, "content"));
+                    sections.put(entry.getKey(), section);
+                });
+                systemMessage.setSections(sections);
+            }
+            config.setSystemMessage(systemMessage);
         }
-        config.setSystemMessage(systemMessage);
         if (session.has("availableTools")) config.setAvailableTools(strings(session, "availableTools"));
         config.setExcludedTools(strings(session, "excludedTools"));
         if (session.has("workingDirectory")) config.setWorkingDirectory(text(session, "workingDirectory"));

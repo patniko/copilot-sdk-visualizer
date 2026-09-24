@@ -253,8 +253,13 @@ export const valueHelp = {
     promptMode: setting(
         "System message mode",
         "systemMessage.mode",
-        "Choose whether to extend, replace, or selectively customize the foundation prompt.",
+        "Choose whether to keep, extend, replace, or selectively customize the foundation prompt.",
         [
+            {
+                title: "Default",
+                value: "default",
+                text: "Leave systemMessage unset so the runtime uses its built-in prompt unchanged. You can switch later.",
+            },
             { title: "Append", value: "append", text: "Keep the foundation and add your instructions." },
             {
                 title: "Replace",

@@ -105,7 +105,9 @@ export function generateCopilotCliInstructions(input: HarnessPlan): string {
         `- Runtime placement: ${runtime}. ${runtimeDetail}`,
         `- Client baseline: ${plan.clientMode}.`,
         `- Tool inventory: ${inventoryDetail}`,
-        `- Prompt mode: ${plan.prompt.mode}. Harness instructions: ${quoted(plan.prompt.content)}`,
+        plan.prompt.mode === "default"
+            ? "- Prompt mode: default. Do not set systemMessage; keep the runtime's built-in prompt unchanged."
+            : `- Prompt mode: ${plan.prompt.mode}. Harness instructions: ${quoted(plan.prompt.content)}`,
         `- Model and identity: ${modelDetail}`,
         `- Reasoning effort: ${plan.model.reasoningEffort}; context tier: ${plan.model.contextTier}.`,
         `- Working directory: ${plan.context.workspace.trim() ? quoted(plan.context.workspace.trim()) : "none configured"}.`,
@@ -241,23 +243,25 @@ export function generateSdkCode(input: HarnessPlan): string {
               : []),
     ];
     const prompt =
-        plan.prompt.mode === "customize"
-            ? {
-                  mode: "customize",
-                  sections: Object.fromEntries(
-                      plan.prompt.sections.map((section) => [
-                          section.name,
-                          {
-                              action: section.action,
-                              ...(["remove", "preserve"].includes(section.action)
-                                  ? {}
-                                  : { content: section.content }),
-                          },
-                      ]),
-                  ),
-                  content: plan.prompt.content,
-              }
-            : { mode: plan.prompt.mode, content: plan.prompt.content };
+        plan.prompt.mode === "default"
+            ? undefined
+            : plan.prompt.mode === "customize"
+              ? {
+                    mode: "customize",
+                    sections: Object.fromEntries(
+                        plan.prompt.sections.map((section) => [
+                            section.name,
+                            {
+                                action: section.action,
+                                ...(["remove", "preserve"].includes(section.action)
+                                    ? {}
+                                    : { content: section.content }),
+                            },
+                        ]),
+                    ),
+                    content: plan.prompt.content,
+                }
+              : { mode: plan.prompt.mode, content: plan.prompt.content };
     const available = [
         ...BUILTIN_NAMES.flatMap((name) =>
             plan.tools[name].action === "remove"
@@ -290,7 +294,7 @@ export function generateSdkCode(input: HarnessPlan): string {
         ...(plan.model.contextTier === "default"
             ? []
             : [`            contextTier: ${json(plan.model.contextTier)},`]),
-        `            systemMessage: ${json(prompt)},`,
+        ...(prompt ? [`            systemMessage: ${json(prompt)},`] : []),
         "            tools,",
         ...(plan.inventory === "explicit" ? [`            availableTools: ${json(available)},`] : []),
         `            excludedTools: ${json(BUILTIN_NAMES.filter((name) => plan.tools[name].action === "remove"))},`,

@@ -273,7 +273,7 @@ struct SessionData {
     model: Option<String>,
     reasoning_effort: Option<String>,
     context_tier: Option<String>,
-    system_message: PromptData,
+    system_message: Option<PromptData>,
     available_tools: Option<Vec<String>>,
     excluded_tools: Vec<String>,
     working_directory: Option<PathBuf>,
@@ -457,20 +457,22 @@ impl Configuration {
         });
         config.reasoning_effort = data.reasoning_effort.clone();
         config.context_tier = data.context_tier.clone();
-        let mut prompt = SystemMessageConfig::new()
-            .with_mode(data.system_message.mode.clone())
-            .with_content(data.system_message.content.clone());
-        if let Some(sections) = &data.system_message.sections {
-            let mut overrides = HashMap::new();
-            for (name, section) in sections {
-                let mut value = SectionOverride::default();
-                value.action = Some(section.action.clone());
-                value.content = section.content.clone();
-                overrides.insert(name.clone(), value);
+        if let Some(message) = &data.system_message {
+            let mut prompt = SystemMessageConfig::new()
+                .with_mode(message.mode.clone())
+                .with_content(message.content.clone());
+            if let Some(sections) = &message.sections {
+                let mut overrides = HashMap::new();
+                for (name, section) in sections {
+                    let mut value = SectionOverride::default();
+                    value.action = Some(section.action.clone());
+                    value.content = section.content.clone();
+                    overrides.insert(name.clone(), value);
+                }
+                prompt = prompt.with_sections(overrides);
             }
-            prompt = prompt.with_sections(overrides);
+            config.system_message = Some(prompt);
         }
-        config.system_message = Some(prompt);
         config.available_tools = data.available_tools.clone();
         config.excluded_tools = Some(data.excluded_tools.clone());
         config.working_directory = data.working_directory.clone();

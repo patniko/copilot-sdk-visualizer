@@ -77,7 +77,10 @@ it("explores every capability and the configurator without modifying the draft",
         expect(await detail.getByText("Related SDK surfaces · not a config recipe").count()).toBe(0);
         expect(await detail.getByText("Connect the ideas", { exact: true }).count()).toBe(0);
         expect(await detail.getByRole("button").count()).toBe(0);
-        await page.getByRole("button", { name: "Configure your harness", exact: true }).click();
+        await page
+            .getByRole("navigation", { name: "Harness workflow" })
+            .getByRole("button", { name: /^Base Profile\b/ })
+            .click();
         await page.getByRole("heading", { name: "Compose the behavior." }).waitFor();
         expect(await saved(page)).toBe(original);
         await page.goBack();

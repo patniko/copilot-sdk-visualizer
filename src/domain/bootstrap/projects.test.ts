@@ -217,6 +217,30 @@ describe("integrated language project contracts", () => {
         },
     );
 
+    it.each(["typescript", "python", "go", "csharp", "java", "rust"] as const)(
+        "omits the prompt configuration from the %s project in default prompt mode",
+        (language) => {
+            const plan = createPreset("copilot");
+            plan.prompt.mode = "default";
+            plan.target.language = language;
+            const result = buildBootstrapProject(plan);
+            expect(result.ok).toBe(true);
+            if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+            for (const file of result.project.files) {
+                if (file.path === "harness-plan.json") continue;
+                if (file.path === "python-bootstrap.json") {
+                    const data = JSON.parse(file.content) as { session: Record<string, unknown> };
+                    expect(data.session).not.toHaveProperty("system_message");
+                    continue;
+                }
+                expect(file.content, file.path).not.toContain(plan.prompt.content);
+                if (file.path.endsWith(".json")) {
+                    expect(file.content, file.path).not.toMatch(/"system_?[mM]essage"/);
+                }
+            }
+        },
+    );
+
     it("preserves an inactive managed path without passing it to another transport", () => {
         const plan = createPreset("empty");
         plan.target.language = "go";

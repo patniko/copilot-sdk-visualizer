@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { BookOpen, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { BookOpen, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { SECTION_NAMES } from "../domain/plan";
 import type { BuiltinPromptReference } from "../content/prompts";
 import { BuiltinPromptPanel } from "./BuiltinPromptPanel";
@@ -11,6 +12,7 @@ import { valueHelp } from "../content/setting-help";
 
 export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
     const rows = useEditorRowIds(plan.prompt.sections.length);
+    const [extraOpen, setExtraOpen] = useState(() => Boolean(issueFor(issues, "prompt.content")));
     const nextSection = SECTION_NAMES.find(
         (name) => !plan.prompt.sections.some((section) => section.name === name),
     );
@@ -46,6 +48,11 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     value={plan.prompt.mode}
                     options={[
                         {
+                            value: "default",
+                            label: "Default",
+                            description: "Use the built-in prompt as-is",
+                        },
+                        {
                             value: "append",
                             label: "Append",
                             description: "Keep the foundation and add guidance",
@@ -68,6 +75,12 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     }
                 />
             </Panel>
+            {plan.prompt.mode === "default" && (
+                <Notice title="Nothing to configure" tone="accent">
+                    The runtime uses its built-in system prompt unchanged. Switch to Append, Replace, or
+                    Customize sections whenever you need to change it.
+                </Notice>
+            )}
             {plan.prompt.mode === "append" && (
                 <Panel
                     title="Add guidance to the foundation"
@@ -122,7 +135,9 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                             <small>
                                 {plan.prompt.mode === "replace"
                                     ? "Compare what your complete prompt replaces"
-                                    : "See the foundation your instructions extend"}
+                                    : plan.prompt.mode === "default"
+                                      ? "See the prompt the runtime uses"
+                                      : "See the foundation your instructions extend"}
                             </small>
                         </span>
                     </summary>
@@ -274,12 +289,24 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                             })}
                         </div>
                     </Panel>
-                    <Panel
-                        title="Optional global instructions"
-                        description="Use this only for guidance that applies across the customized prompt, not for replacing a named section."
+                    <details
+                        className="hb-panel hb-panel-collapsible"
+                        open={extraOpen}
+                        onToggle={(event) => setExtraOpen(event.currentTarget.open)}
                     >
+                        <summary className="hb-panel-heading">
+                            <ChevronRight size={16} aria-hidden="true" />
+                            <div>
+                                <h3>Extra instructions (optional)</h3>
+                                <p>
+                                    Free-form guidance added alongside your section edits. Use it for rules
+                                    that don't belong to a single section.
+                                </p>
+                            </div>
+                            {plan.prompt.content.trim() && <Badge accent>In use</Badge>}
+                        </summary>
                         <TextAreaField
-                            label="Global customize instructions"
+                            label="Extra instructions"
                             value={plan.prompt.content}
                             onValueChange={(value) =>
                                 edit((draft) => {
@@ -289,9 +316,8 @@ export function PromptEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                             rows={5}
                             maxLength={12000}
                             error={issueFor(issues, "prompt.content")}
-                            hint="Leave this blank when the named section changes fully describe your customization."
                         />
-                    </Panel>
+                    </details>
                 </>
             )}
             <Notice title="Instructions are not permissions" tone="accent">

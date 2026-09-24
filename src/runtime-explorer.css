@@ -17,12 +17,6 @@
     padding: 4px 0 20px;
     border-bottom: 1px solid var(--cp-border);
 }
-.rt-hero .hb-kicker {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-}
 .rt-hero h2 {
     font-size: clamp(28px, 2.5vw, 40px);
     font-weight: 650;
@@ -43,9 +37,12 @@
     letter-spacing: 0.07em;
     text-transform: uppercase;
 }
-.rt-hero > .hb-button {
+.rt-hero > .rt-mode-switch {
     margin-bottom: 2px;
-    font-size: 11px;
+    white-space: nowrap;
+}
+.rt-mode-switch {
+    margin-bottom: 2px;
     white-space: nowrap;
 }
 .rt-section-heading {
@@ -109,9 +106,9 @@
     position: relative;
     isolation: isolate;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 156px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 204px minmax(0, 1fr);
     grid-template-rows: repeat(5, 80px);
-    gap: 16px 32px;
+    gap: 16px 40px;
     margin: 28px 20px 20px;
 }
 .rt-connections {
@@ -193,8 +190,8 @@
     align-self: center;
     flex-direction: column;
     justify-content: center;
-    gap: 16px;
-    padding: 28px 12px;
+    gap: 14px;
+    padding: 24px 20px 20px;
     border-radius: 16px;
     background: var(--cp-bg-elevated);
     text-align: center;
@@ -216,13 +213,18 @@
     letter-spacing: 0.08em;
     font-size: 9px;
 }
+.rt-node-core small {
+    text-wrap: balance;
+}
 .rt-core-loop {
+    align-self: stretch;
     padding-top: 12px;
     border-top: 1px solid var(--cp-border);
     font-family: Consolas, "Courier New", Courier, monospace;
     font-size: 9px;
+    line-height: 1.6;
     color: var(--cp-text-muted);
-    white-space: nowrap;
+    text-wrap: balance;
 }
 .rt-map-caption {
     display: flex;
@@ -394,53 +396,6 @@
     font-size: 11px;
     color: var(--cp-text-soft);
 }
-.rt-takeaway {
-    padding-top: 8px;
-}
-.rt-ownership-cards {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    border: 1px solid var(--cp-border);
-    border-radius: 16px;
-    background: var(--cp-bg-elevated);
-}
-.rt-ownership-cards article {
-    padding: 24px;
-}
-.rt-ownership-cards article + article {
-    border-left: 1px solid var(--cp-border);
-}
-.rt-ownership-cards svg {
-    color: var(--cp-accent);
-}
-.rt-ownership-cards h4 {
-    margin: 12px 0 8px;
-    font-size: 15px;
-    font-weight: 650;
-}
-.rt-ownership-cards p {
-    margin-bottom: 16px;
-    color: var(--cp-text-muted);
-    font-size: 12px;
-    line-height: 1.7;
-}
-.rt-ownership-cards strong {
-    font-size: 11px;
-}
-.rt-bottom-line {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 24px 0 0;
-    font-size: 12px;
-    line-height: 1.8;
-    color: var(--cp-text-muted);
-}
-.rt-bottom-line strong {
-    color: var(--cp-text);
-}
 @container (max-width: 1120px) {
     .rt-atlas-layout {
         grid-template-columns: minmax(0, 1fr) 280px;
@@ -450,8 +405,8 @@
         padding: 20px;
     }
     .rt-map {
-        grid-template-columns: minmax(0, 1fr) 132px minmax(0, 1fr);
-        gap: 16px 20px;
+        grid-template-columns: minmax(0, 1fr) 176px minmax(0, 1fr);
+        gap: 16px 28px;
         margin-inline: 16px;
     }
     .rt-node:not(.rt-node-core) .rt-node-icon {
@@ -477,7 +432,7 @@
         grid-column: 1 / -1;
     }
     .rt-map {
-        grid-template-columns: minmax(0, 1fr) 156px minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) 204px minmax(0, 1fr);
         gap: 16px 40px;
     }
     .rt-node:not(.rt-node-core) .rt-node-icon {
@@ -489,7 +444,7 @@
 }
 @container (max-width: 600px) {
     .rt-map {
-        grid-template-columns: minmax(0, 1fr) 124px minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) 136px minmax(0, 1fr);
         gap: 12px;
         grid-template-rows: repeat(5, 88px);
         margin: 24px 12px 20px;
@@ -501,17 +456,10 @@
         display: none;
     }
     .rt-node-core {
-        padding: 20px 8px;
+        padding: 20px 10px 16px;
     }
     .rt-core-loop {
         font-size: 8px;
-    }
-    .rt-ownership-cards {
-        grid-template-columns: 1fr;
-    }
-    .rt-ownership-cards article + article {
-        border-left: 0;
-        border-top: 1px solid var(--cp-border);
     }
 }
 @container (max-width: 400px) {

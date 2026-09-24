@@ -48,7 +48,7 @@ export function createPreset(preset: PresetId): HarnessPlan {
         clientMode: coding ? "copilot-cli" : "empty",
         inventory: coding ? "coding-defaults" : "explicit",
         prompt: {
-            mode: coding ? "append" : "replace",
+            mode: coding ? "default" : "replace",
             content: coding
                 ? "Follow the team's engineering conventions. Explain meaningful changes and verify the work."
                 : minimal

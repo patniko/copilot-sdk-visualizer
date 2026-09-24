@@ -11,7 +11,6 @@ import {
     FolderOpen,
     LayoutDashboard,
     Layers3,
-    LockKeyhole,
     Moon,
     Network,
     PackageOpen,
@@ -234,7 +233,7 @@ export default function App() {
                     </span>
                     <div>
                         <h1>Harness Builder</h1>
-                        <p>GitHub Copilot runtime</p>
+                        <p>GitHub Copilot Runtime/SDK</p>
                     </div>
                 </div>
                 {view !== "runtime" && (
@@ -351,7 +350,7 @@ export default function App() {
             >
                 <div className="hb-sidebar">
                     <div className="hb-sidebar-header">
-                        <p className="hb-nav-label">Compose your harness</p>
+                        <p className="hb-nav-label">Configure</p>
                         <button
                             className="hb-sidebar-toggle"
                             type="button"
@@ -462,7 +461,7 @@ export default function App() {
                         }
                     >
                         {view === "runtime" ? (
-                            <RuntimeExplorer onNavigate={navigate} />
+                            <RuntimeExplorer />
                         ) : view === "reference" ? (
                             <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
                         ) : (
@@ -498,12 +497,6 @@ export default function App() {
                             </fieldset>
                         )}
                     </Suspense>
-                    {view !== "runtime" && (
-                        <footer className="hb-editor-footer">
-                            <LockKeyhole size={13} aria-hidden="true" />
-                            Browser-local planning. Exported paths and bindings refer to your future host.
-                        </footer>
-                    )}
                 </main>
                 {view !== "runtime" && !planCollapsed && (
                     <PlanInspector

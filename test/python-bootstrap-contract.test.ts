@@ -107,6 +107,30 @@ assert data["session"]["provider"]["base_url"] == ""
         },
     );
 
+    it("accepts a session without system_message in default prompt mode", async () => {
+        const plan = createPreset("copilot");
+        plan.prompt.mode = "default";
+        plan.target.language = "python";
+        const result = buildBootstrapProject(plan);
+        if (!result.ok) throw new Error(JSON.stringify(result.blockers));
+        const root = path.resolve(".test-artifacts/python-bootstrap/default-prompt");
+        for (const file of result.project.files) {
+            const target = path.join(root, file.path);
+            await mkdir(path.dirname(target), { recursive: true });
+            await writeFile(target, file.content);
+        }
+        const loaded = spawnSync(
+            "python3",
+            [
+                "-c",
+                "import agent; data=agent.load_configuration(); print('system_message' in data['session'])",
+            ],
+            { cwd: root, encoding: "utf8" },
+        );
+        expect(loaded.status, loaded.stderr).toBe(0);
+        expect(loaded.stdout.trim()).toBe("False");
+    });
+
     it.each(["managed", "external", "inprocess"] as const)(
         "keeps S2S authentication at the %s runtime boundary",
         async (runtime) => {
