@@ -29,7 +29,8 @@ it("explains every context switch without toggling it, and restores keyboard foc
                 page.locator("#editor-heading").evaluate((element) => document.activeElement === element),
             )
             .toBe(true);
-        for (const key of CONTEXT_TOGGLE_KEYS) {
+        // File-based hooks lives on Policy & state; covered by educational-help-browser.test.ts.
+        for (const key of CONTEXT_TOGGLE_KEYS.filter((key) => key !== "fileHooks")) {
             const help = contextToggleHelp[key];
             const button = page.getByRole("button", { name: `Explain ${help.title}`, exact: true });
             const before = await page.evaluate((storageKey) => localStorage.getItem(storageKey), STORAGE_KEY);

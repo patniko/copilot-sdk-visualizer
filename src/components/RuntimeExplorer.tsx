@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-    ArrowDown,
-    ArrowLeft,
-    ArrowRight,
     BookOpen,
     Check,
-    CircleHelp,
+    Cloud,
+    Code2,
     Cpu,
     Database,
     Fingerprint,
     GitBranch,
+    HardDrive,
     Layers3,
     Network,
     PackageOpen,
@@ -22,11 +21,19 @@ import {
     SlidersHorizontal,
     Sparkles,
     Wrench,
+    X,
 } from "lucide-react";
 import { capabilitySides, runtimeCapability, turnWalkthrough } from "../content/runtime-map";
 import type { RuntimeCapabilityId } from "../content/runtime-map";
 import { Button } from "./ui";
 import "../runtime-explorer.css";
+
+const outsideSystems: { label: string; icon: LucideIcon }[] = [
+    { label: "Model services", icon: Cloud },
+    { label: "MCP servers", icon: Plug },
+    { label: "Your APIs", icon: Code2 },
+    { label: "Host storage", icon: HardDrive },
+];
 
 const icons: Record<RuntimeCapabilityId, LucideIcon> = {
     loop: Cpu,
@@ -52,9 +59,30 @@ export function RuntimeExplorer() {
         currentStep?.active ?? [selected, "loop", ...capability.related],
     );
 
+    const tracing = step !== null;
+    const traceButton = useRef<HTMLButtonElement | null>(null);
+    const exitButton = useRef<HTMLButtonElement | null>(null);
+
     useEffect(() => {
         window.requestAnimationFrame(() => document.getElementById("editor-heading")?.focus());
     }, []);
+
+    useEffect(() => {
+        if (!tracing) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        exitButton.current?.focus();
+        const trigger = traceButton.current;
+        function onKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") setStep(null);
+        }
+        document.addEventListener("keydown", onKeyDown);
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener("keydown", onKeyDown);
+            trigger?.focus();
+        };
+    }, [tracing]);
 
     function select(id: RuntimeCapabilityId) {
         setSelected(id);
@@ -119,6 +147,7 @@ export function RuntimeExplorer() {
                         <Network size={14} aria-hidden="true" /> Explore
                     </Button>
                     <Button
+                        ref={traceButton}
                         size="small"
                         variant={step !== null ? "primary" : "ghost"}
                         aria-pressed={step !== null}
@@ -129,11 +158,25 @@ export function RuntimeExplorer() {
                 </div>
             </section>
 
-            <section className="rt-atlas" aria-label="Runtime capability map">
+            <section
+                className={`rt-atlas${tracing ? " rt-atlas-fullscreen" : ""}`}
+                aria-label={tracing ? "Trace a turn" : "Runtime capability map"}
+                role={tracing ? "dialog" : undefined}
+                aria-modal={tracing ? true : undefined}
+            >
+                {tracing && (
+                    <div className="rt-fullscreen-bar">
+                        <span>
+                            <Play size={14} aria-hidden="true" /> Trace a turn
+                        </span>
+                        <Button ref={exitButton} size="small" onClick={() => setStep(null)}>
+                            <X size={14} aria-hidden="true" /> Exit
+                        </Button>
+                    </div>
+                )}
                 {currentStep && step !== null && (
                     <section className="rt-walkthrough" aria-label="Illustrative turn walkthrough">
                         <div className="rt-walkthrough-top">
-                            <span className="rt-overline">Illustrative path · no agent is running</span>
                             <Button size="small" variant="ghost" onClick={() => trace(0)}>
                                 <RotateCcw size={13} aria-hidden="true" /> Restart
                             </Button>
@@ -160,23 +203,6 @@ export function RuntimeExplorer() {
                         >
                             <strong>{currentStep.owner}</strong>
                             <p>{currentStep.description}</p>
-                        </div>
-                        <div className="rt-step-actions">
-                            <Button size="small" disabled={step === 0} onClick={() => trace(step - 1)}>
-                                <ArrowLeft size={13} aria-hidden="true" /> Previous step
-                            </Button>
-                            <span>
-                                {step + 1} / {turnWalkthrough.length}
-                            </span>
-                            {step === turnWalkthrough.length - 1 ? (
-                                <Button size="small" onClick={() => select("loop")}>
-                                    Back to exploration <ArrowRight size={13} aria-hidden="true" />
-                                </Button>
-                            ) : (
-                                <Button size="small" onClick={() => trace(step + 1)}>
-                                    Next step <ArrowRight size={13} aria-hidden="true" />
-                                </Button>
-                            )}
                         </div>
                     </section>
                 )}
@@ -216,19 +242,19 @@ export function RuntimeExplorer() {
                             {capabilitySides.left.map((id, index) => node(id, index, "left"))}
                             {capabilitySides.right.map((id, index) => node(id, index, "right"))}
                         </div>
-                        <p className="rt-map-caption">
-                            <CircleHelp size={13} aria-hidden="true" />
-                            Connections show participation in the shared engine, not call order or automatic
-                            enablement. Highlighted nodes are related capabilities; the double outline marks
-                            your selection.
-                        </p>
                         <div className="rt-outside">
-                            <ArrowDown size={16} aria-hidden="true" />
-                            <span className="rt-overline">Outside the runtime</span>
-                            <p>Model services · MCP servers · your APIs · host storage</p>
-                            <small>
-                                The runtime integrates them. It does not supply or secure them for you.
-                            </small>
+                            <div className="rt-outside-head">
+                                <span className="rt-overline">Outside the runtime</span>
+                                <small>Integrated, not supplied or secured by the runtime.</small>
+                            </div>
+                            <ul className="rt-outside-list">
+                                {outsideSystems.map(({ label, icon: Icon }) => (
+                                    <li key={label}>
+                                        <Icon size={14} aria-hidden="true" />
+                                        {label}
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
 

@@ -1,10 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { Activity, Database, ShieldCheck } from "lucide-react";
+import { lazy, Suspense, useState } from "react";
+import { Activity, ChevronRight, Database, ShieldCheck, Webhook } from "lucide-react";
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
 import { Badge, ChoiceField, Notice, Panel, TextAreaField, TextField, ToggleField } from "./ui";
 import { SettingHelp } from "./SettingHelp";
+import { contextToggleHelp } from "../content/context-help";
 import { toggleHelp, valueHelp } from "../content/setting-help";
+
+const FileHookEventList = lazy(() =>
+    import("./FileHookEventList").then((module) => ({ default: module.FileHookEventList })),
+);
+
+function FileHookEvents() {
+    const [open, setOpen] = useState(false);
+    return (
+        <details
+            className="hb-panel-collapsible hb-hook-events"
+            open={open}
+            onToggle={(event) => setOpen(event.currentTarget.open)}
+        >
+            <summary className="hb-panel-heading">
+                <ChevronRight size={16} aria-hidden="true" />
+                <div>
+                    <h4>Lifecycle events</h4>
+                    <p>Every event a hook file can attach commands to.</p>
+                </div>
+            </summary>
+            {open && (
+                <Suspense fallback={<p className="hb-field-hint">Loading events…</p>}>
+                    <FileHookEventList />
+                </Suspense>
+            )}
+        </details>
+    );
+}
 
 export function PolicyEditor({ plan, edit, issues }: EditorProps) {
     return (
@@ -75,10 +105,31 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                         }
                     />
                 </div>
-                <p className="hb-field-hint">
-                    Hooks do not replace the inner execution algorithm. Keep effect authorization in the
-                    handler and downstream service, too.
-                </p>
+            </Panel>
+            <Panel
+                title="Lifecycle hooks"
+                description="Let trusted hook files run commands at runtime lifecycle events."
+                action={<Webhook size={19} aria-hidden="true" />}
+            >
+                <div className="hb-toggle-list">
+                    <ToggleField
+                        label="File-based hooks"
+                        description="Load file-defined lifecycle hooks, including commands in .github/hooks/."
+                        help={
+                            <SettingHelp
+                                help={contextToggleHelp.fileHooks}
+                                enabled={plan.context.fileHooks}
+                            />
+                        }
+                        checked={plan.context.fileHooks}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.context.fileHooks = checked;
+                            })
+                        }
+                    />
+                </div>
+                <FileHookEvents />
             </Panel>
             <Panel
                 title="Session state and lifetime"

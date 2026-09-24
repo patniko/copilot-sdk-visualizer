@@ -53,7 +53,7 @@ export const contextToggleHelp: Record<ContextToggleKey, ContextToggleHelp> = {
         example:
             "A trusted repository can provide a pre-tool policy or validation hook that runs at its configured event.",
         boundary:
-            "Review hook files as executable project configuration. This is not the Pre-tool policy hook or Post-tool result hook switch in Policy & state; those wire functions implemented by your host.",
+            "Review hook files as executable project configuration. This is not the Pre-tool policy hook or Post-tool result hook switch under Host policy; those wire functions implemented by your host.",
         sources: [
             { label: "File hooks versus SDK callbacks" },
             { label: "Hook commands execute as subprocesses" },

@@ -4,6 +4,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import {
     ArrowUpRight,
     BookOpen,
+    ChevronRight,
     Code2,
     Download,
     FileText,
@@ -24,7 +25,7 @@ import type {
 } from "../domain/bootstrap/types";
 import { BootstrapFileTree } from "./BootstrapFileTree";
 import { CopyTextButton } from "./BootstrapPrimitives";
-import { Badge, Button, Notice, Panel } from "./ui";
+import { Badge, Button, Notice } from "./ui";
 
 const requirementIcons = { environment: KeyRound, "host-code": Code2, runtime: Server, review: ShieldCheck };
 const requirementLabels = {
@@ -53,6 +54,9 @@ export function BootstrapProjectPanel({ project }: { project: BootstrapProject }
     const fileHeading = useRef<HTMLHeadingElement | null>(null);
     const requirementsPane = useRef<HTMLDivElement | null>(null);
     const filePreviewId = useId();
+    const headingId = useId();
+    const bodyId = useId();
+    const [open, setOpen] = useState(false);
     const file = project.files.find((entry) => entry.path === selectedPath) ?? firstFile(project.files);
     const feedback = downloadFeedback?.project === project ? downloadFeedback : null;
     const notes = publicProjectNotes(project.notes);
@@ -88,30 +92,28 @@ export function BootstrapProjectPanel({ project }: { project: BootstrapProject }
     }
 
     return (
-        <Panel
-            title={`${project.languageLabel} bootstrap project`}
-            description="A scaffold with real dependency files, entrypoint, and host integration work. Start with the README."
-            action={
+        <section className="hb-panel hb-project-panel" aria-labelledby={headingId}>
+            <div className="hb-panel-heading hb-disclosure-heading">
+                <button
+                    type="button"
+                    className="hb-disclosure-toggle"
+                    aria-expanded={open}
+                    aria-controls={bodyId}
+                    onClick={() => setOpen((value) => !value)}
+                >
+                    <ChevronRight size={16} aria-hidden="true" />
+                    <PackageOpen size={18} aria-hidden="true" className="hb-disclosure-icon" />
+                    <div>
+                        <h3 id={headingId}>{project.languageLabel} project</h3>
+                        <p>
+                            {project.files.length} files · {project.requirements.length} host requirements
+                        </p>
+                    </div>
+                </button>
                 <Button variant="primary" disabled={!file} onClick={download}>
                     <Download size={15} aria-hidden="true" />
                     Download ZIP
                 </Button>
-            }
-        >
-            {file && (
-                <Notice title="Scaffold files, not a finished integration" tone="accent">
-                    Host integrations can contain explicit failing TODOs. Supply environment values and
-                    implement the required handlers before running a workload; do not replace them with
-                    success-shaped no-ops.
-                </Notice>
-            )}
-            <div className="hb-project-summary">
-                <span>
-                    <PackageOpen size={16} aria-hidden="true" />
-                    <code>{project.name}</code>
-                </span>
-                <Badge>{project.files.length} files</Badge>
-                <Badge>{project.requirements.length} host requirements</Badge>
             </div>
             {feedback && (
                 <div
@@ -121,112 +123,135 @@ export function BootstrapProjectPanel({ project }: { project: BootstrapProject }
                     {feedback.message}
                 </div>
             )}
-            {!file ? (
-                <Notice title="The adapter returned no project files" tone="error">
-                    A complete bootstrap cannot be exported until the language adapter supplies its files.
-                </Notice>
-            ) : (
-                <Tabs.Root
-                    value={tab}
-                    onValueChange={(value) => {
-                        if (value === "files" || value === "commands" || value === "requirements")
-                            setTab(value);
-                    }}
-                >
-                    <Tabs.List className="hb-tabs-list hb-project-tabs" aria-label="Bootstrap project views">
-                        <Tabs.Trigger className="hb-tab" value="files">
-                            <FileText size={15} aria-hidden="true" />
-                            Project files
-                        </Tabs.Trigger>
-                        <Tabs.Trigger className="hb-tab" value="commands">
-                            <Terminal size={15} aria-hidden="true" />
-                            Install &amp; run
-                        </Tabs.Trigger>
-                        <Tabs.Trigger className="hb-tab" value="requirements">
-                            <ListChecks size={15} aria-hidden="true" />
-                            Host integration
-                        </Tabs.Trigger>
-                    </Tabs.List>
-                    <Tabs.Content className="hb-tab-content" value="files">
-                        <div className="hb-file-workbench">
-                            <BootstrapFileTree
-                                files={project.files}
-                                selected={file.path}
-                                onSelect={selectFile}
-                            />
-                            <section className="hb-project-file" aria-label="Selected bootstrap file">
-                                <div className="hb-project-file-toolbar">
-                                    <div>
-                                        <h4 ref={fileHeading} tabIndex={-1}>
-                                            {file.path}
-                                        </h4>
-                                        <Badge>{file.language}</Badge>
+            <div id={bodyId} className="hb-disclosure-body" hidden={!open}>
+                {file && (
+                    <Notice title="Scaffold files, not a finished integration" tone="accent">
+                        Host integrations can contain explicit failing TODOs. Supply environment values and
+                        implement the required handlers before running a workload; do not replace them with
+                        success-shaped no-ops.
+                    </Notice>
+                )}
+                <div className="hb-project-summary">
+                    <span>
+                        <PackageOpen size={16} aria-hidden="true" />
+                        <code>{project.name}</code>
+                    </span>
+                    <Badge>{project.files.length} files</Badge>
+                    <Badge>{project.requirements.length} host requirements</Badge>
+                </div>
+                {!file ? (
+                    <Notice title="The adapter returned no project files" tone="error">
+                        A complete bootstrap cannot be exported until the language adapter supplies its files.
+                    </Notice>
+                ) : (
+                    <Tabs.Root
+                        value={tab}
+                        onValueChange={(value) => {
+                            if (value === "files" || value === "commands" || value === "requirements")
+                                setTab(value);
+                        }}
+                    >
+                        <Tabs.List
+                            className="hb-tabs-list hb-project-tabs"
+                            aria-label="Bootstrap project views"
+                        >
+                            <Tabs.Trigger className="hb-tab" value="files">
+                                <FileText size={15} aria-hidden="true" />
+                                Project files
+                            </Tabs.Trigger>
+                            <Tabs.Trigger className="hb-tab" value="commands">
+                                <Terminal size={15} aria-hidden="true" />
+                                Install &amp; run
+                            </Tabs.Trigger>
+                            <Tabs.Trigger className="hb-tab" value="requirements">
+                                <ListChecks size={15} aria-hidden="true" />
+                                Host integration
+                            </Tabs.Trigger>
+                        </Tabs.List>
+                        <Tabs.Content className="hb-tab-content" value="files">
+                            <div className="hb-file-workbench">
+                                <BootstrapFileTree
+                                    files={project.files}
+                                    selected={file.path}
+                                    onSelect={selectFile}
+                                />
+                                <section className="hb-project-file" aria-label="Selected bootstrap file">
+                                    <div className="hb-project-file-toolbar">
+                                        <div>
+                                            <h4 ref={fileHeading} tabIndex={-1}>
+                                                {file.path}
+                                            </h4>
+                                            <Badge>{file.language}</Badge>
+                                        </div>
+                                        <CopyTextButton text={file.content} label={file.path} />
                                     </div>
-                                    <CopyTextButton text={file.content} label={file.path} />
-                                </div>
-                                <label htmlFor={filePreviewId} className="hb-sr-only">
-                                    Contents of {file.path}
-                                </label>
-                                <textarea
-                                    id={filePreviewId}
-                                    className={`hb-project-file-preview${file.language === "markdown" ? " hb-project-readme" : ""}`}
-                                    value={file.content}
-                                    readOnly
-                                    spellCheck={false}
-                                    wrap={file.language === "markdown" ? "soft" : "off"}
-                                />
-                            </section>
-                        </div>
-                        <p className="hb-field-hint">
-                            These are the exact files included in the ZIP. The preview never evaluates or
-                            executes their contents.
-                        </p>
-                    </Tabs.Content>
-                    <Tabs.Content className="hb-tab-content" value="commands">
-                        <CommandSteps commands={project.commands} onHostIntegration={showRequirements} />
-                    </Tabs.Content>
-                    <Tabs.Content ref={requirementsPane} className="hb-tab-content" value="requirements">
-                        <Notice title="Required integration checklist">
-                            These are implementation obligations, not completed checks. Follow each
-                            requirement to the generated file it describes. Environment entries are names
-                            only; the browser never requests their secret values.
-                        </Notice>
-                        <ul className="hb-requirement-list">
-                            {project.requirements.map((requirement) => (
-                                <RequirementRow
-                                    key={requirement.id}
-                                    requirement={requirement}
-                                    hasFile={project.files.some((entry) => entry.path === requirement.file)}
-                                    onSelectFile={selectFile}
-                                />
+                                    <label htmlFor={filePreviewId} className="hb-sr-only">
+                                        Contents of {file.path}
+                                    </label>
+                                    <textarea
+                                        id={filePreviewId}
+                                        className={`hb-project-file-preview${file.language === "markdown" ? " hb-project-readme" : ""}`}
+                                        value={file.content}
+                                        readOnly
+                                        spellCheck={false}
+                                        wrap={file.language === "markdown" ? "soft" : "off"}
+                                    />
+                                </section>
+                            </div>
+                            <p className="hb-field-hint">
+                                These are the exact files included in the ZIP. The preview never evaluates or
+                                executes their contents.
+                            </p>
+                        </Tabs.Content>
+                        <Tabs.Content className="hb-tab-content" value="commands">
+                            <CommandSteps commands={project.commands} onHostIntegration={showRequirements} />
+                        </Tabs.Content>
+                        <Tabs.Content ref={requirementsPane} className="hb-tab-content" value="requirements">
+                            <Notice title="Required integration checklist">
+                                These are implementation obligations, not completed checks. Follow each
+                                requirement to the generated file it describes. Environment entries are names
+                                only; the browser never requests their secret values.
+                            </Notice>
+                            <ul className="hb-requirement-list">
+                                {project.requirements.map((requirement) => (
+                                    <RequirementRow
+                                        key={requirement.id}
+                                        requirement={requirement}
+                                        hasFile={project.files.some(
+                                            (entry) => entry.path === requirement.file,
+                                        )}
+                                        onSelectFile={selectFile}
+                                    />
+                                ))}
+                            </ul>
+                            {project.requirements.length === 0 && (
+                                <p className="hb-muted-copy">
+                                    No additional requirements were returned by this adapter. Review the
+                                    README and preflight; this is not a claim of production readiness.
+                                </p>
+                            )}
+                        </Tabs.Content>
+                    </Tabs.Root>
+                )}
+                <details className="hb-project-notes">
+                    <summary>
+                        <BookOpen size={16} aria-hidden="true" />
+                        Version &amp; native packaging notes
+                    </summary>
+                    <div className="hb-editor-stack">
+                        <ul className="hb-project-note-list">
+                            {notes.map((note, index) => (
+                                <li key={index}>{note}</li>
                             ))}
                         </ul>
-                        {project.requirements.length === 0 && (
-                            <p className="hb-muted-copy">
-                                No additional requirements were returned by this adapter. Review the README
-                                and preflight; this is not a claim of production readiness.
-                            </p>
-                        )}
-                    </Tabs.Content>
-                </Tabs.Root>
-            )}
-            <details className="hb-project-notes">
-                <summary>
-                    <BookOpen size={16} aria-hidden="true" />
-                    Version &amp; native packaging notes
-                </summary>
-                <div className="hb-editor-stack">
-                    <ul className="hb-project-note-list">
-                        {notes.map((note, index) => (
-                            <li key={index}>{note}</li>
-                        ))}
-                    </ul>
-                    <p className="hb-field-hint">
-                        Use the adapter&apos;s dependency and native-package notes for version compatibility.
-                    </p>
-                </div>
-            </details>
-        </Panel>
+                        <p className="hb-field-hint">
+                            Use the adapter&apos;s dependency and native-package notes for version
+                            compatibility.
+                        </p>
+                    </div>
+                </details>
+            </div>
+        </section>
     );
 }
 

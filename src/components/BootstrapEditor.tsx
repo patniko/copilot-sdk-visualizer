@@ -56,20 +56,26 @@ export function BootstrapEditor({
 
     return (
         <div className="hb-editor-stack hb-bootstrap-editor">
-            <ol className="hb-bootstrap-steps" aria-label="From configuration to a running host">
-                <li>
-                    <span>1</span>Choose target
-                </li>
-                <li>
-                    <span>2</span>Install dependencies
-                </li>
-                <li>
-                    <span>3</span>Integrate host
-                </li>
-                <li>
-                    <span>4</span>Preflight &amp; run
-                </li>
-            </ol>
+            <Panel
+                title="Choose the SDK language"
+                description="Language and runtime deployment are independent of your behavior profile. Unsupported combinations are reported below, never silently rewritten."
+                action={<Badge>{LANGUAGES.length} SDKs</Badge>}
+            >
+                <div className="hb-language-picker">
+                    <ChoiceField
+                        label="Bootstrap language"
+                        help={<SettingHelp help={valueHelp.language} value={plan.target.language} />}
+                        value={plan.target.language}
+                        options={LANGUAGES.map((language) => ({ value: language.id, label: language.label }))}
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.target.language = value;
+                            })
+                        }
+                        error={issueFor(issues, "target.language")}
+                    />
+                </div>
+            </Panel>
             <Panel
                 title="Where should the runtime live?"
                 action={<SettingHelp help={valueHelp.runtime} value={plan.target.runtime} />}
@@ -187,21 +193,6 @@ export function BootstrapEditor({
                         )}
                     </div>
                 ) : null}
-                <Button
-                    variant="ghost"
-                    size="small"
-                    onClick={() =>
-                        onEvidence({
-                            kind: "topic",
-                            title: "Runtime placement and host ownership",
-                            detail: "Managed clients own a child-process lifecycle over stdio. An existing runtime has a host-owned lifecycle and a client connection over TCP. Experimental native hosting loads a matching library into the application process, shares process state, and requires language-specific packaging. A subprocess is not a sandbox; client disconnect is not shared-service shutdown.",
-                            sources: ["sdk-transports", "runtime-core"],
-                        })
-                    }
-                >
-                    <BookOpen size={15} aria-hidden="true" />
-                    Inspect the connection boundary
-                </Button>
                 <div className="hb-setup-docs" role="note">
                     <p className="hb-small-label">Matching SDK setup guides</p>
                     <ul className="hb-setup-docs-links">
@@ -216,26 +207,6 @@ export function BootstrapEditor({
                             </li>
                         ))}
                     </ul>
-                </div>
-            </Panel>
-            <Panel
-                title="Choose the SDK language"
-                description="Language and runtime deployment are independent of your behavior profile. Unsupported combinations are reported below, never silently rewritten."
-                action={<Badge>{LANGUAGES.length} SDKs</Badge>}
-            >
-                <div className="hb-language-picker">
-                    <ChoiceField
-                        label="Bootstrap language"
-                        help={<SettingHelp help={valueHelp.language} value={plan.target.language} />}
-                        value={plan.target.language}
-                        options={LANGUAGES.map((language) => ({ value: language.id, label: language.label }))}
-                        onValueChange={(value) =>
-                            edit((draft) => {
-                                draft.target.language = value;
-                            })
-                        }
-                        error={issueFor(issues, "target.language")}
-                    />
                 </div>
             </Panel>
             {generation.state === "recovery" && (

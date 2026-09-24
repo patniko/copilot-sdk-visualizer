@@ -1,7 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { LibraryBig, Plus } from "lucide-react";
-import { reference } from "../content/reference";
-import type { Evidence } from "./editor";
+import { Plus } from "lucide-react";
 import { Badge, Button, Panel, ToggleField } from "./ui";
 
 const sampleSkills = [
@@ -21,14 +19,7 @@ const sampleSkills = [
     },
 ];
 
-const limits = [
-    "The runtime lists the catalog first and fetches each full SKILL.md only when a skill is used.",
-    "Up to 1,024 skills and 1 MiB of catalog metadata; each SKILL.md is text-only, up to 1 MiB, with no related files or assets.",
-    "The provider is bound per session and never persisted. Cloud, relay, and handoff sessions will not support it.",
-];
-
-export function SkillProviderPreview({ onEvidence }: { onEvidence: (evidence: Evidence) => void }) {
-    const gap = reference.gaps.find((entry) => entry.id === "gap-skills");
+export function SkillProviderPreview() {
     return (
         <Panel
             title="Skill provider"
@@ -36,10 +27,6 @@ export function SkillProviderPreview({ onEvidence }: { onEvidence: (evidence: Ev
             action={<Badge accent>Coming soon</Badge>}
             className="hb-coming-soon"
         >
-            <p className="hb-coming-soon-note">
-                The runtime already supports this, but the SDKs don&apos;t expose it yet. These controls
-                preview the options and are not saved or exported.
-            </p>
             <fieldset className="hb-coming-soon-fields" disabled aria-describedby="skill-provider-status">
                 <legend className="hb-sr-only">Skill provider preview (not available yet)</legend>
                 <span id="skill-provider-status" className="hb-sr-only">
@@ -99,27 +86,9 @@ export function SkillProviderPreview({ onEvidence }: { onEvidence: (evidence: Ev
                     </Button>
                 </div>
             </fieldset>
-            <ul className="hb-coming-soon-limits">
-                {limits.map((limit) => (
-                    <li key={limit}>{limit}</li>
-                ))}
-            </ul>
-            <p className="hb-field-hint">
-                Today, have your host write reviewed SKILL.md folders to disk and list them in Skill
-                directories above.
-                {gap && (
-                    <>
-                        {" "}
-                        <Button
-                            variant="ghost"
-                            size="small"
-                            onClick={() => onEvidence({ kind: "gap", value: gap })}
-                        >
-                            <LibraryBig size={14} aria-hidden="true" />
-                            Why it isn&apos;t available yet
-                        </Button>
-                    </>
-                )}
+            <p className="hb-coming-soon-limits">
+                Up to 1,024 skills and 1 MiB of catalog metadata; each SKILL.md is text-only, up to 1 MiB,
+                with no related files or assets.
             </p>
         </Panel>
     );

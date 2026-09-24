@@ -467,6 +467,148 @@
     color: var(--cp-accent);
 }
 
+.hb-disclosure-heading {
+    align-items: center;
+}
+
+.hb-disclosure-toggle {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.hb-disclosure-toggle > svg {
+    flex-shrink: 0;
+    margin-top: 4px;
+    color: var(--cp-text-soft);
+    transition: transform 120ms ease-out;
+}
+
+.hb-disclosure-toggle[aria-expanded="true"] > svg {
+    transform: rotate(90deg);
+}
+
+.hb-disclosure-toggle > .hb-disclosure-icon {
+    color: var(--cp-accent);
+    transition: none;
+}
+
+.hb-disclosure-toggle[aria-expanded="true"] > .hb-disclosure-icon {
+    transform: none;
+}
+
+.hb-disclosure-toggle:hover h3 {
+    color: var(--cp-accent);
+}
+
+.hb-disclosure-toggle:focus-visible {
+    outline: 2px solid var(--cp-accent);
+    outline-offset: 4px;
+    border-radius: 6px;
+}
+
+.hb-disclosure-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+.hb-disclosure-body[hidden] {
+    display: none;
+}
+
+.hb-hook-events {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--cp-border);
+}
+
+.hb-hook-events > summary h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.hb-hook-events > summary p {
+    margin-top: 2px;
+}
+
+.hb-hook-events > summary:hover h4 {
+    color: var(--cp-accent);
+}
+
+.hb-hook-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px 24px;
+    margin-top: 18px;
+}
+
+.hb-hook-group h4 {
+    margin-bottom: 8px;
+    color: var(--cp-text-soft);
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hb-hook-group ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hb-hook-group li {
+    padding: 10px 12px;
+    border: 1px solid var(--cp-border);
+    border-radius: 8px;
+}
+
+.hb-hook-event-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.hb-hook-event-head code {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.hb-hook-group li p {
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.hb-hook-event-detail {
+    color: var(--cp-text-soft);
+}
+
+.hb-hook-reference {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    color: var(--cp-accent);
+    font-size: 13px;
+}
+
 .hb-panel h3,
 .hb-evidence-section h3 {
     font-size: 15px;
@@ -1292,13 +1434,6 @@
     border-style: dashed;
 }
 
-.hb-coming-soon-note {
-    margin-bottom: 16px;
-    color: var(--cp-text-muted);
-    font-size: 12px;
-    line-height: 1.7;
-}
-
 .hb-coming-soon-fields {
     min-width: 0;
     margin: 0;
@@ -1382,14 +1517,10 @@
 }
 
 .hb-coming-soon-limits {
-    display: grid;
-    gap: 6px;
-    margin: 18px 0 12px;
-    padding-left: 18px;
+    margin-top: 16px;
     color: var(--cp-text-muted);
     font-size: 12px;
     line-height: 1.65;
-    list-style: disc;
 }
 
 .hb-toggle-list {
@@ -3293,36 +3424,6 @@
     container-type: inline-size;
 }
 
-.hb-bootstrap-steps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 20px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.hb-bootstrap-steps li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--cp-text-muted);
-    font-size: 11px;
-}
-
-.hb-bootstrap-steps li > span {
-    display: grid;
-    width: 24px;
-    height: 24px;
-    place-items: center;
-    border: 1px solid var(--cp-border);
-    border-radius: 7px;
-    background: var(--cp-surface);
-    color: var(--cp-accent);
-    font-size: 10px;
-    font-weight: 650;
-}
-
 .hb-runtime-options {
     min-width: 0;
     margin: 0;
@@ -4345,12 +4446,6 @@
 
     .hb-plan-export-action {
         grid-column: 3;
-    }
-
-    .hb-bootstrap-steps {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
     }
 
     .hb-runtime-option-grid,

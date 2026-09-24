@@ -108,32 +108,21 @@ it("steps through an explicitly illustrative turn and supports keyboard selectio
         await openRuntime(page);
         await page.getByRole("button", { name: "Trace a turn", exact: true }).click();
         const walkthrough = page.getByRole("region", { name: "Illustrative turn walkthrough" });
-        expect(
-            await page.getByText("Illustrative path · no agent is running", { exact: true }).isVisible(),
-        ).toBe(true);
-        expect(await page.getByRole("button", { name: "Previous step" }).isDisabled()).toBe(true);
+        const stepButtons = page.locator(".rt-steps button");
         for (const [index, step] of turnWalkthrough.entries()) {
+            await stepButtons.nth(index).click();
             expect(await page.locator("#runtime-turn-detail").innerText()).toContain(step.description);
             const active = await page
                 .locator('.rt-node[data-active="true"]')
                 .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-capability")).sort());
             expect(active).toEqual([...step.active].sort());
             expect(await page.locator('.rt-steps [aria-current="step"]').textContent()).toContain(step.title);
-            if (index < turnWalkthrough.length - 1) {
-                await page.getByRole("button", { name: "Next step" }).click();
-            }
         }
-        await page.getByRole("button", { name: "Previous step" }).click();
-        expect(await page.locator("#runtime-turn-detail").innerText()).toContain(
-            turnWalkthrough[4]?.description,
-        );
         await page.getByRole("button", { name: "Restart", exact: true }).click();
-        expect(await page.getByRole("button", { name: "Previous step" }).isDisabled()).toBe(true);
-        await page
-            .locator(".rt-steps")
-            .getByRole("button", { name: /Continue/ })
-            .click();
-        await page.getByRole("button", { name: "Back to exploration" }).click();
+        expect(await page.locator('.rt-steps [aria-current="step"]').textContent()).toContain(
+            turnWalkthrough[0]?.title,
+        );
+        await page.getByRole("button", { name: "Exit", exact: true }).click();
         expect(await walkthrough.count()).toBe(0);
         const skill = page.getByRole("button", { name: "Explore Skills", exact: true });
         await skill.focus();
@@ -182,6 +171,7 @@ it("fits desktop and mobile in both themes, and remains readable with a corrupt 
                 expect(
                     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
                 ).toBe(true);
+                await page.getByRole("button", { name: "Exit", exact: true }).click();
                 await page.getByRole("button", { name: "Explore", exact: true }).click();
                 await page.screenshot({
                     path: path.resolve(`.test-artifacts/browser/runtime-${width}-${theme}.png`),

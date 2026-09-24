@@ -64,22 +64,6 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                         }
                     />
                     <ToggleField
-                        label="File-based hooks"
-                        description="Load file-defined lifecycle hooks, including commands in .github/hooks/."
-                        help={
-                            <SettingHelp
-                                help={contextToggleHelp.fileHooks}
-                                enabled={plan.context.fileHooks}
-                            />
-                        }
-                        checked={plan.context.fileHooks}
-                        onCheckedChange={(checked) =>
-                            edit((draft) => {
-                                draft.context.fileHooks = checked;
-                            })
-                        }
-                    />
-                    <ToggleField
                         label="Host Git operations"
                         description="Supply Git branch, status, and history context—not permission to commit or push."
                         help={<SettingHelp help={contextToggleHelp.hostGit} enabled={plan.context.hostGit} />}
@@ -170,7 +154,7 @@ export function ContextEditor({ plan, edit, issues, onEvidence }: EditorProps) {
                     </Button>
                 </Notice>
             </Panel>
-            <SkillProviderPreview onEvidence={onEvidence} />
+            <SkillProviderPreview />
         </div>
     );
 }

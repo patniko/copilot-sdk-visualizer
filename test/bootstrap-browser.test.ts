@@ -57,6 +57,11 @@ async function stored(page: Page) {
     return parsePlan(value);
 }
 
+async function expandProject(page: Page) {
+    const toggle = page.getByRole("button", { name: /\d+ files · \d+ host requirements/ });
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+}
+
 it("migrates existing drafts and makes a real runtime-specific bootstrap ZIP", async () => {
     const { target: _target, ...legacyFields } = createPreset("empty");
     const legacy = { ...legacyFields, name: "Existing host plan", schemaVersion: 1 };
@@ -85,6 +90,11 @@ it("migrates existing drafts and makes a real runtime-specific bootstrap ZIP", a
             ).toBe(true);
             await placements.getByText("Native in-process runtime", { exact: true }).click();
             await expect.poll(async () => (await stored(page)).target.runtime).toBe("inprocess");
+            const projectToggle = page.getByRole("button", { name: /\d+ files · \d+ host requirements/ });
+            expect(await projectToggle.getAttribute("aria-expanded")).toBe("false");
+            expect(await page.getByRole("tab", { name: "Install & run", exact: true }).count()).toBe(0);
+            await expandProject(page);
+            expect(await projectToggle.getAttribute("aria-expanded")).toBe("true");
             expect(await page.getByRole("textbox", { name: "Contents of README.md" }).inputValue()).toContain(
                 "Install the project dependencies",
             );
@@ -184,6 +194,7 @@ it("provides every language's files and explains Java's virtual-storage boundary
                 await expect
                     .poll(() => page.getByRole("button", { name: "Download ZIP", exact: true }).isVisible())
                     .toBe(true);
+                await expandProject(page);
                 expect(
                     await page
                         .getByRole("textbox", { name: "Contents of README.md", exact: true })
@@ -210,6 +221,7 @@ it("provides every language's files and explains Java's virtual-storage boundary
         await expect
             .poll(() => page.getByRole("button", { name: "Download ZIP", exact: true }).isVisible())
             .toBe(true);
+        await expandProject(page);
         expect(
             await page.getByRole("textbox", { name: "Contents of README.md", exact: true }).inputValue(),
         ).toContain("Maven");

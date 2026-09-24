@@ -27,7 +27,7 @@ describe("context toggle help", () => {
         expect(contextToggleHelp.discovery.disabled).toContain("pluginDirectories");
         expect(contextToggleHelp.skills.disabled).toContain("No skills");
         expect(contextToggleHelp.skills.boundary).toContain("tool inventory");
-        expect(contextToggleHelp.fileHooks.boundary).toContain("Policy & state");
+        expect(contextToggleHelp.fileHooks.boundary).toContain("Host policy");
         expect(contextToggleHelp.hostGit.boundary).toContain("commit/push");
         expect(contextToggleHelp.hostGit.boundary).toContain("shell");
     });

@@ -5,6 +5,7 @@ import type { Page } from "playwright";
 import { createPreset } from "../src/domain/presets";
 import { createAgent, createCustomTool, createMcpServer } from "../src/domain/plan";
 import { STORAGE_KEY } from "../src/domain/storage";
+import { contextToggleHelp } from "../src/content/context-help";
 import { toggleHelp } from "../src/content/setting-help";
 import { startBrowserHarness } from "./browser-harness";
 import type { BrowserHarness } from "./browser-harness";
@@ -98,6 +99,7 @@ it("gives every Policy & state switch consistent on/off and host-boundary help",
         const titles = [
             toggleHelp.preToolHook.title,
             toggleHelp.postToolHook.title,
+            contextToggleHelp.fileHooks.title,
             toggleHelp.infinite.title,
             toggleHelp.largeOutput.title,
             toggleHelp.streaming.title,
