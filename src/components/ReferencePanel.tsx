@@ -22,6 +22,7 @@ const viewLabels: Record<ViewId, string> = {
     models: "Models & identity",
     policy: "Policy & state",
     bootstrap: "Build & run",
+    deploy: "Host & deploy",
     reference: "Reference",
 };
 

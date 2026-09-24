@@ -18,6 +18,7 @@ import {
     PanelLeftOpen,
     PanelRightOpen,
     Redo2,
+    Rocket,
     ShieldCheck,
     SlidersHorizontal,
     Sun,
@@ -59,6 +60,9 @@ const ImportDialog = lazy(() =>
 const ReferencePanel = lazy(() =>
     import("./components/ReferencePanel").then((module) => ({ default: module.ReferencePanel })),
 );
+const HostingGuide = lazy(() =>
+    import("./components/HostingGuide").then((module) => ({ default: module.HostingGuide })),
+);
 const RuntimeExplorer = lazy(() =>
     import("./components/RuntimeExplorer").then((module) => ({ default: module.RuntimeExplorer })),
 );
@@ -79,6 +83,7 @@ const navigation = [
     },
     { id: "policy", label: "Policy & state", detail: "Permissions & lifecycle", icon: ShieldCheck },
     { id: "bootstrap", label: "Build & run", detail: "Language, files & host setup", icon: PackageOpen },
+    { id: "deploy", label: "Host & deploy", detail: "Where your agent runs", icon: Rocket },
     { id: "reference", label: "Learn / reference", detail: "Source-backed boundaries", icon: BookOpen },
 ] as const;
 
@@ -129,6 +134,11 @@ const viewHeadings: Record<ViewId, { title: string; description: string }> = {
         title: "Build the project. Wire the host.",
         description:
             "Configure behavior, choose runtime and language, install dependencies, integrate the host, then preflight and run locally.",
+    },
+    deploy: {
+        title: "Decide where your agent lives.",
+        description:
+            "Compare hosting options from a personal assistant to a production service, and see what a safe deployment adds around the runtime.",
     },
     reference: {
         title: "Understand the seams.",
@@ -462,6 +472,8 @@ export default function App() {
                     >
                         {view === "runtime" ? (
                             <RuntimeExplorer />
+                        ) : view === "deploy" ? (
+                            <HostingGuide plan={plan} />
                         ) : view === "reference" ? (
                             <ReferencePanel onEvidence={setEvidence} onNavigate={navigate} />
                         ) : (

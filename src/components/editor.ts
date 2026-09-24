@@ -15,6 +15,7 @@ export type ViewId =
     | "models"
     | "policy"
     | "bootstrap"
+    | "deploy"
     | "reference";
 
 export type Evidence =

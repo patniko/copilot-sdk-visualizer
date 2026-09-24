@@ -268,6 +268,28 @@ export const SDK_DOC_MAP: SdkDocGroup[] = [
         ],
     },
     {
+        view: "deploy",
+        title: "Hosting & production",
+        summary: "Local, containerized, cloud, and multi-user deployments.",
+        links: [
+            {
+                label: "Backend services",
+                url: doc("setup/backend-services.md"),
+                note: "Headless runtime, Docker, health checks.",
+            },
+            {
+                label: "Scaling & multi-tenancy",
+                url: doc("setup/scaling.md"),
+                note: "Isolation patterns, storage, production checklist.",
+            },
+            {
+                label: "Cloud sessions",
+                url: doc("features/cloud-sessions.md"),
+                note: "GitHub-hosted compute via Mission Control.",
+            },
+        ],
+    },
+    {
         view: "reference",
         title: "More capabilities",
         summary: "Events, remote/cloud sessions, and the full feature index.",

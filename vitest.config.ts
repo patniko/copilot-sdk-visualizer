@@ -15,6 +15,7 @@ export default defineConfig({
                         "test/context-help-browser.test.ts",
                         "test/educational-help-browser.test.ts",
                         "test/runtime-browser.test.ts",
+                        "test/hosting-browser.test.ts",
                     ],
                     testTimeout: 60_000,
                     hookTimeout: 60_000,
