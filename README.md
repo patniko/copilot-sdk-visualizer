@@ -6,6 +6,10 @@ A local-first web app for designing a harness on the GitHub Copilot runtime. It 
 
 The builder does not start agents, call model services, execute tools, or store credentials.
 
+**[Try the live Copilot Harness Builder](https://patniko.github.io/copilot-sdk-visualizer/)**
+
+[![Copilot Harness Builder overview](docs/images/copilot-harness-builder.png)](https://patniko.github.io/copilot-sdk-visualizer/)
+
 ## What you can do
 
 - Configure prompts, tools, MCP servers, context, agents, models, policies, sessions, and evaluation criteria.
