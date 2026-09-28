@@ -1,0 +1,58 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+import { describe, expect, it } from "vitest";
+import { reference } from "./reference";
+import { S2S_AUTH_DOCS, SDK_DOCS_HOME, SDK_DOC_MAP, SDK_GETTING_STARTED, sdkDocsForView } from "./sdk-docs";
+
+describe("reference source integrity", () => {
+    it("resolves every control, axis, and gap source id", () => {
+        for (const control of reference.controls) {
+            expect(reference.sources[control.source], `${control.name} → ${control.source}`).toBeDefined();
+        }
+        for (const axis of reference.axes) {
+            for (const source of axis.sources) expect(reference.sources[source], source).toBeDefined();
+        }
+        for (const gap of reference.gaps) {
+            for (const source of gap.sources) expect(reference.sources[source], source).toBeDefined();
+        }
+    });
+
+    it("gives every source with a url an absolute https link", () => {
+        for (const [id, source] of Object.entries(reference.sources)) {
+            if (source.url) expect(source.url, id).toMatch(/^https:\/\//);
+        }
+    });
+});
+
+describe("SDK docs map", () => {
+    it("discloses feature-flagged availability alongside the S2S setup guide", () => {
+        const guide = sdkDocsForView("models")?.links.find((link) => link.url === S2S_AUTH_DOCS);
+        expect(guide?.note).toContain("Coming soon");
+        expect(guide?.note).toContain("behind a feature flag");
+        expect(reference.sources["sdk-s2s-auth"]?.label).toContain("coming soon");
+    });
+
+    it("covers each builder view once with valid https links", () => {
+        const views = SDK_DOC_MAP.map((group) => group.view);
+        expect(new Set(views).size).toBe(views.length);
+        for (const group of SDK_DOC_MAP) {
+            expect(group.links.length).toBeGreaterThan(0);
+            for (const link of group.links) {
+                expect(link.url, link.label).toMatch(
+                    /^https:\/\/(?:github\.com\/github\/copilot-sdk\/blob\/|docs\.github\.com\/)/,
+                );
+                expect(link.note.length).toBeGreaterThan(0);
+            }
+        }
+    });
+
+    it("exposes home and getting-started entry points and a lookup helper", () => {
+        expect(SDK_DOCS_HOME).toMatch(/^https:\/\//);
+        expect(SDK_GETTING_STARTED).toMatch(/^https:\/\//);
+        expect(S2S_AUTH_DOCS).toBe(
+            "https://docs.github.com/en/copilot/how-tos/copilot-sdk/auth/server-to-server-tokens",
+        );
+        expect(sdkDocsForView("bootstrap")?.links.some((link) => /bundled-cli/.test(link.url))).toBe(true);
+        expect(sdkDocsForView("overview")?.view).toBe("overview");
+        expect(sdkDocsForView("base-profile")?.view).toBe("base-profile");
+    });
+});

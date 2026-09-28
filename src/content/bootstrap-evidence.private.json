@@ -1,0 +1,8 @@
+{
+    "$comment": "Private maintenance references for bootstrap adapters. This file is intentionally not imported by the application.",
+    "java": "Java API evidence at SDK JAVA_RUST_SDK_REVISION: java/README.md (JDK/dependencies); java/sdk/src/main/java/com/github/copilot/rpc/RuntimeConnection.java:42-93; CopilotSession.java:598-635,2522-2561; rpc/SessionConfig.java:43-123,1438-1626; rpc/ToolDefinition.java:65-95; ffi/NativeRuntimeLoader.java:324-343.",
+    "rust": "Rust API evidence at SDK JAVA_RUST_SDK_REVISION: rust/Cargo.toml:1-34; rust/src/lib.rs:145-185,1118-1157,1230-1270; types.rs:1940-2298,4719-4777; session.rs:590-637,788-802; session_fs.rs:64-120,391-551; github_token.rs:31-114; provider_token.rs:27-110.",
+    "python": "Python signatures: https://github.com/github/copilot-sdk/blob/SDK_COMMIT/python/copilot/client.py#L2258-L2344; host callbacks: python/copilot/session.py#L403-L576; storage: python/copilot/session_fs_provider.py#L52-L148.",
+    "go": "Language API anchors: copilot-sdk@SDK_REVISION/go/types.go:116,1053,1218,1320,1707,2224; go/github_token_provider.go:24; go/session.go:494; go/session_fs_provider.go:20.",
+    "csharp": "Language API anchors: copilot-sdk@SDK_REVISION/dotnet/src/Types.cs:116,580,2041,2341,2364,3268; CopilotTool.cs:43,143; GitHubTokenProvider.cs:21; Session.cs:375; SessionFsProvider.cs:129."
+}

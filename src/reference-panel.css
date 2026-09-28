@@ -1,0 +1,67 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. */
+.hb-docmap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.hb-docmap-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--cp-border);
+    border-radius: 12px;
+    background: var(--cp-surface);
+}
+
+.hb-docmap-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.hb-docmap-head h4 {
+    margin: 4px 0;
+    font-size: 15px;
+}
+
+.hb-docmap-links {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hb-docmap-links li {
+    padding-left: 12px;
+    border-left: 2px solid var(--cp-border);
+}
+
+.hb-docmap-links a {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 100%;
+    color: var(--cp-link);
+    font-size: 13px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.hb-docmap-links p {
+    margin: 2px 0 0;
+    color: var(--cp-text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+    .hb-docmap-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

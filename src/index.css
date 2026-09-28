@@ -1,0 +1,147 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    color-scheme: light;
+    --cp-bg: #ffffff;
+    --cp-bg-elevated: #f6f8fa;
+    --cp-surface: #ffffff;
+    --cp-surface-soft: #f6f8fa;
+    --cp-border: #d1d9e0;
+    --cp-border-strong: #8c959f;
+    --cp-text: #1f2328;
+    --cp-text-muted: #59636e;
+    --cp-text-soft: #6e7781;
+    --cp-accent: #8250df;
+    --cp-accent-hover: #6639ba;
+    --cp-accent-soft: rgba(130, 80, 223, 0.08);
+    --cp-accent-fg: #ffffff;
+    --cp-success: #1f883d;
+    --cp-danger: #cf222e;
+    --cp-warning: #9a6700;
+    --cp-link: #0969da;
+    --cp-shadow: 0 18px 48px rgba(31, 35, 40, 0.12);
+    --cp-overlay: rgba(255, 255, 255, 0.8);
+    --cp-panel: rgba(255, 255, 255, 0.86);
+    --cp-panel-strong: rgba(255, 255, 255, 0.96);
+    --cp-sheen: rgba(255, 255, 255, 0.55);
+    --cp-highlight: rgba(130, 80, 223, 0.12);
+}
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --cp-bg: #0d1117;
+    --cp-bg-elevated: #161b22;
+    --cp-surface: #161b22;
+    --cp-surface-soft: #1c2128;
+    --cp-border: #30363d;
+    --cp-border-strong: #6e7681;
+    --cp-text: #e6edf3;
+    --cp-text-muted: #9198a1;
+    --cp-text-soft: #7d8590;
+    --cp-accent: #a371f7;
+    --cp-accent-hover: #bc8cff;
+    --cp-accent-soft: rgba(163, 113, 247, 0.14);
+    --cp-accent-fg: #ffffff;
+    --cp-success: #3fb950;
+    --cp-danger: #f85149;
+    --cp-warning: #d29922;
+    --cp-link: #4493f8;
+    --cp-shadow: 0 18px 48px rgba(1, 4, 9, 0.4);
+    --cp-overlay: rgba(13, 17, 23, 0.88);
+    --cp-panel: rgba(22, 27, 34, 0.72);
+    --cp-panel-strong: rgba(22, 27, 34, 0.96);
+    --cp-sheen: rgba(255, 255, 255, 0.04);
+    --cp-highlight: rgba(163, 113, 247, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    background: var(--cp-bg);
+    color: var(--cp-text);
+    font-family:
+        "Segoe UI",
+        Aptos,
+        Calibri,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+button,
+select {
+    cursor: pointer;
+}
+code,
+pre {
+    font-family: Consolas, "Courier New", Courier, monospace;
+}
+:focus-visible {
+    outline: 3px solid var(--cp-accent);
+    outline-offset: 4px;
+}
+a {
+    color: var(--cp-link);
+    text-underline-offset: 3px;
+}
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+.muted {
+    color: var(--cp-text-muted);
+}
+.eyebrow {
+    color: var(--cp-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+.scaffold {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 32px;
+}
+.scaffold h1 {
+    font-size: 56px;
+    font-weight: 650;
+    letter-spacing: -0.045em;
+    margin: 20px 0 12px;
+}
+.scaffold > p {
+    margin-bottom: 24px;
+}
+.scaffold-profiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 32px 0;
+}
+.scaffold-profiles article {
+    background: var(--cp-surface);
+    border: 1px solid var(--cp-border);
+    border-radius: 16px;
+    padding: 24px;
+}
+.scaffold-profiles h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+@media (max-width: 650px) {
+    .scaffold-profiles {
+        grid-template-columns: 1fr;
+    }
+}
