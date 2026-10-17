@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { z } from "zod";
 import snapshot from "./reference.public.json";
+import { SDK_SOURCE_REVISION } from "../domain/bootstrap/revisions";
 
 const SourceSchema = z.object({ label: z.string(), scope: z.string(), url: z.string().optional() });
 const ControlSchema = z.object({
@@ -41,10 +42,143 @@ const ReferenceSchema = z.object({
 });
 
 const sdkBase = "https://github.com/github/copilot-sdk/blob/main";
+const sdkTypes = (start: number, end: number) =>
+    `https://github.com/github/copilot-sdk/blob/${SDK_SOURCE_REVISION}/nodejs/src/types.ts#L${start}-L${end}`;
+const typesScope = (start: number, end: number, detail: string) =>
+    `copilot-sdk · nodejs/src/types.ts:${start}–${end} · ${detail}`;
+const pinned = (label: string, start: number, end: number, detail: string) => ({
+    label,
+    scope: typesScope(start, end, detail),
+    url: sdkTypes(start, end),
+});
 export const reference = ReferenceSchema.parse({
     ...snapshot,
     sources: {
         ...snapshot.sources,
+        "sdk-discovery-roots": pinned(
+            "Explicit agent, hook, and instruction roots",
+            3002,
+            3080,
+            "discovery-only roots that work without enableConfigDiscovery; relative paths resolve once",
+        ),
+        "sdk-skill-provider": pinned(
+            "Session-scoped skill provider (experimental)",
+            2465,
+            2520,
+            "listSkills/readSkill from host storage; 30-second calls; not persisted across resume",
+        ),
+        "sdk-lifecycle-hooks": pinned(
+            "SDK callback hooks",
+            1917,
+            1990,
+            "session, prompt, MCP, error, agent, and sub-agent lifecycle callbacks",
+        ),
+        "sdk-subagent-hooks": pinned(
+            "Sub-agent start and stop hooks",
+            1862,
+            1915,
+            "start context injection; stop block-with-reason or response rewrite",
+        ),
+        "sdk-prompt-block": pinned(
+            "Blocking a submitted prompt",
+            1695,
+            1708,
+            "userPromptSubmitted decision: block emits a policy_blocked session.warning",
+        ),
+        "sdk-agent-hooks": pinned(
+            "Agent-scoped declarative hooks",
+            2059,
+            2075,
+            "CustomAgentConfig.hooks and displayName",
+        ),
+        "sdk-managed-settings": pinned(
+            "Managed settings and permission rules",
+            2418,
+            2462,
+            "deny/ask/allow, Domain limitTo boundary, bypass and Assisted-permission disables",
+        ),
+        "sdk-managed-session": pinned(
+            "Managed settings on a session",
+            3120,
+            3170,
+            "enableManagedSettings, enforceManagedModelDefaults, interactiveUser, host-injected managedSettings",
+        ),
+        "sdk-model-allowlist": pinned(
+            "Session model allowlist",
+            2528,
+            2531,
+            "allowedModels exact IDs; other SDK languages use session.model.setAllowedModels",
+        ),
+        "sdk-auto-tier": pinned(
+            "Auto routing tier and reasoning summary",
+            2320,
+            2333,
+            "autoTier preference for the auto model; persisted across cold resume",
+        ),
+        "sdk-provider-product": pinned(
+            "Provider product and wire overrides",
+            3411,
+            3530,
+            "modelProvider telemetry product, wireModel, and token limits",
+        ),
+        "sdk-image-generation": pinned(
+            "Image generation opt-in (experimental)",
+            864,
+            880,
+            "non-persisted opt-in; not available with BYOK providers",
+        ),
+        "sdk-tool-search-config": pinned(
+            "Tool search and deferral",
+            800,
+            900,
+            "per-tool defer and skipPermission; session toolSearch enabled/deferThreshold",
+        ),
+        "sdk-session-name": pinned(
+            "Naming a session at creation",
+            3284,
+            3303,
+            "name persists the session immediately; refreshCustomInstructions is create-only",
+        ),
+        "sdk-resume-recovery": pinned(
+            "Resume recovery and pending work",
+            3313,
+            3346,
+            "allowTranscriptRecovery and continuePendingWork",
+        ),
+        "sdk-diagnostics": pinned(
+            "Session MCP diagnostics",
+            2565,
+            2577,
+            "off by default; debug/trace entries can contain payloads and paths",
+        ),
+        "sdk-structured-output": pinned(
+            "Structured output per run",
+            3757,
+            3772,
+            "MessageOptions.responseSchema; typed sendAndWait in every SDK language",
+        ),
+        "sdk-host-handlers": pinned(
+            "Host request handlers",
+            2840,
+            2925,
+            "MCP OAuth, elicitation-based ask_user, exit-plan-mode, and auto-mode-switch callbacks",
+        ),
+        "sdk-instruction-options": pinned(
+            "Custom-instruction loading options",
+            2800,
+            2812,
+            "skipCustomInstructions defaults to true in empty mode",
+        ),
+        "sdk-client-log-level": pinned(
+            "Client runtime log level",
+            435,
+            445,
+            "logLevel for the managed or in-process runtime",
+        ),
+        "runtime-workflows": {
+            label: "Dynamic workflows (formerly factories)",
+            scope: "Maintained in the private research snapshot. run_dynamic_workflow and dynamic_workflows_manage replace run_factory and factories_manage; experimental and gated by session capability and quota policy.",
+        },
         "sdk-inprocess-guide": {
             label: "In-process hosting across the six SDKs",
             scope: "copilot-sdk · docs/setup/in-process-runtime.md · native loading, prerequisites, lifecycle, and shared-process limits",

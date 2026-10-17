@@ -10,6 +10,7 @@ import { startBrowserHarness } from "./browser-harness";
 import type { BrowserHarness } from "./browser-harness";
 import type { Page } from "playwright";
 import { LANGUAGES } from "../src/domain/target";
+import { ADVANCED_TOOL_NAMES, INTERNAL_TOOL_NAMES } from "../src/components/tool-catalog-ui";
 
 let harness: BrowserHarness | undefined;
 beforeAll(async () => {
@@ -75,6 +76,7 @@ it("migrates existing drafts and makes a real runtime-specific bootstrap ZIP", a
                 .getByRole("navigation", { name: "Harness workflow" })
                 .getByRole("button", { name: /^Build & run\b/ })
                 .click();
+            await page.locator(".hb-loading").waitFor({ state: "detached" });
             const placements = page.getByRole("group", { name: "Runtime placement", exact: true });
             await placements.waitFor();
             expect(
@@ -128,6 +130,7 @@ it("migrates existing drafts and makes a real runtime-specific bootstrap ZIP", a
                 .getByRole("navigation", { name: "Harness workflow" })
                 .getByRole("button", { name: /^Base Profile\b/ })
                 .click();
+            await page.locator(".hb-loading").waitFor({ state: "detached" });
             await page.getByRole("button", { name: "Apply Copilot", exact: true }).click();
             await page
                 .getByRole("dialog", { name: "Apply Copilot?" })
@@ -146,6 +149,7 @@ it("explains the complete runtime-input set instead of displaying unexplained ma
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Prompt\b/ })
             .click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         await page.locator(".hb-prompt-reference-disclosure > summary").click();
         await page.getByLabel("Built-in prompt section", { exact: true }).selectOption("safety");
         const reference = await page
@@ -174,6 +178,7 @@ it("provides every language's files and explains Java's virtual-storage boundary
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Build & run\b/ })
             .click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         for (const language of LANGUAGES) {
             await page
                 .getByRole("group", { name: "Bootstrap language", exact: true })
@@ -206,6 +211,7 @@ it("provides every language's files and explains Java's virtual-storage boundary
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Policy & state\b/ })
             .click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         await page
             .getByRole("group", { name: "Session storage", exact: true })
             .getByText("Local state directory", { exact: true })
@@ -214,6 +220,7 @@ it("provides every language's files and explains Java's virtual-storage boundary
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Build & run\b/ })
             .click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         await page
             .getByRole("group", { name: "Bootstrap language", exact: true })
             .getByText("Java", { exact: true })
@@ -237,6 +244,7 @@ it("focuses tool planning on user-facing capabilities while preserving hidden se
                 .getByRole("navigation", { name: "Harness workflow" })
                 .getByRole("button", { name: /^Tools\b/ })
                 .click();
+            await page.locator(".hb-loading").waitFor({ state: "detached" });
             const original = await stored(page);
             expect(
                 await page.getByRole("list", { name: "Visible built-in tools" }).getByRole("button").count(),
@@ -254,7 +262,7 @@ it("focuses tool planning on user-facing capabilities while preserving hidden se
                 .click();
             expect(
                 await page.getByRole("list", { name: "Visible built-in tools" }).getByRole("button").count(),
-            ).toBe(8);
+            ).toBe(ADVANCED_TOOL_NAMES.length);
             await page.getByRole("button", { name: /tool_search_tool/ }).click();
             const specialized = page.getByRole("group", { name: "tool_search_tool action", exact: true });
             expect(await specialized.getByRole("radio", { name: "Override", exact: true }).isEnabled()).toBe(
@@ -266,7 +274,9 @@ it("focuses tool planning on user-facing capabilities while preserving hidden se
                 .getByRole("tablist", { name: "Tool configuration areas", exact: true })
                 .getByRole("tab", { name: "Reference", exact: true })
                 .click();
-            expect(await page.getByText("33", { exact: true }).isVisible()).toBe(true);
+            expect(
+                await page.getByText(String(INTERNAL_TOOL_NAMES.length), { exact: true }).isVisible(),
+            ).toBe(true);
             expect(await page.getByText("Internal descriptors hidden", { exact: true }).isVisible()).toBe(
                 true,
             );

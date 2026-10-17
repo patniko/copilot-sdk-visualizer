@@ -42,6 +42,18 @@ export function Badge({
     return <span className={clsx("hb-badge", accent && "hb-badge-accent", className)}>{children}</span>;
 }
 
+/** Marks an SDK option that the SDK itself documents as experimental and subject to change. */
+export function ExperimentalBadge() {
+    return (
+        <span
+            className="hb-badge hb-badge-experimental"
+            title="Experimental SDK option: it may change or be removed in a future SDK or runtime release."
+        >
+            Experimental
+        </span>
+    );
+}
+
 export function Panel({
     title,
     description,
@@ -323,18 +335,109 @@ export function ChoiceField<T extends string>({
     );
 }
 
+export function CheckboxListField<T extends string>({
+    label,
+    values,
+    options,
+    onValuesChange,
+    hint,
+    help,
+    error,
+}: Omit<FieldDetails, "monospace"> & {
+    values: readonly T[];
+    options: readonly Option<T>[];
+    onValuesChange: (values: T[]) => void;
+}) {
+    const id = useId();
+    return (
+        <fieldset
+            className="hb-choice-field hb-check-list-field"
+            aria-describedby={describedBy(id, hint, error)}
+        >
+            <legend>{label}</legend>
+            {help && <div className="hb-choice-help">{help}</div>}
+            <div className="hb-check-list">
+                {options.map((option) => (
+                    <label key={option.value} className="hb-check-option">
+                        <input
+                            type="checkbox"
+                            checked={values.includes(option.value)}
+                            disabled={option.disabled}
+                            onChange={(event) => {
+                                const checked = event.currentTarget.checked;
+                                // Keep the canonical option order regardless of click order.
+                                onValuesChange(
+                                    options
+                                        .map((entry) => entry.value)
+                                        .filter((value) =>
+                                            value === option.value ? checked : values.includes(value),
+                                        ),
+                                );
+                            }}
+                        />
+                        <span className="hb-check-option-body">
+                            <code>{option.label}</code>
+                            {option.badge && <Badge>{option.badge}</Badge>}
+                            {option.description && (
+                                <span className="hb-choice-description">{option.description}</span>
+                            )}
+                        </span>
+                    </label>
+                ))}
+            </div>
+            <FieldHelp id={id} hint={hint} error={error} />
+        </fieldset>
+    );
+}
+
+/** A whole-number input where 0 (or blank) leaves the SDK option unset. */
+export function CountField({
+    value,
+    onValueChange,
+    max,
+    ...props
+}: Omit<ComponentProps<typeof TextField>, "value" | "onValueChange" | "type" | "min" | "max" | "step"> & {
+    value: number;
+    max: number;
+    onValueChange: (value: number) => void;
+}) {
+    return (
+        <TextField
+            {...props}
+            type="number"
+            min={0}
+            max={max}
+            step={1}
+            value={value ? String(value) : ""}
+            placeholder={props.placeholder ?? "Unset"}
+            onValueChange={(text) => {
+                const parsed = Number(text);
+                onValueChange(
+                    text.trim() && Number.isFinite(parsed)
+                        ? Math.min(max, Math.max(0, Math.trunc(parsed)))
+                        : 0,
+                );
+            }}
+        />
+    );
+}
+
 export function ToggleField({
     label,
     description,
     checked,
     onCheckedChange,
     help,
+    badge,
+    error,
 }: {
     label: string;
     description: string;
     checked: boolean;
     onCheckedChange: (checked: boolean) => void;
     help: ReactNode;
+    badge?: ReactNode;
+    error?: string;
 }) {
     const id = useId();
     return (
@@ -344,11 +447,17 @@ export function ToggleField({
                     <label htmlFor={id}>
                         <strong>{label}</strong>
                     </label>
+                    {badge}
                     {help}
                 </div>
                 <label className="hb-toggle-description" htmlFor={id} id={`${id}-hint`}>
                     {description}
                 </label>
+                {error && (
+                    <p className="hb-field-error" id={`${id}-error`}>
+                        {error}
+                    </p>
+                )}
             </div>
             <label className="hb-toggle-control" htmlFor={id}>
                 <input
@@ -358,7 +467,8 @@ export function ToggleField({
                     role="switch"
                     checked={checked}
                     aria-label={label}
-                    aria-describedby={`${id}-hint`}
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? `${id}-hint ${id}-error` : `${id}-hint`}
                     onChange={(event) => onCheckedChange(event.currentTarget.checked)}
                 />
                 <span className="hb-switch" aria-hidden="true" />

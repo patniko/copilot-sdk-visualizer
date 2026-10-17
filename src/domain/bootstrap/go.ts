@@ -1,14 +1,196 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import type { HarnessPlan } from "../plan";
+import type { HarnessPlan, HostHandler, LifecycleHook } from "../plan";
 import { runtimeEndpoint } from "../target";
 import { commonRequirements, sessionData } from "./common";
-import { goCsharpToolData } from "./go-csharp-data";
+import {
+    clientLogLevel,
+    customToolsSkipPermission,
+    goCsharpHostExtras,
+    goCsharpToolData,
+    goCsharpV3Notes,
+    replaceOnce,
+    responseSchemaText,
+    v3Requirements,
+} from "./go-csharp-data";
 import { SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 
 const sdkRevision = SDK_SOURCE_REVISION;
 const json = (value: unknown) => JSON.stringify(value, null, 2) + "\n";
 const shellQuote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
+
+/** copilot.SessionHooks fields and handler types (go/types.go SessionHooks). */
+const goHooks: Record<LifecycleHook, { slot: string; field: string; type: string }> = {
+    preMcpToolCall: { slot: "PreMCPToolCallHook", field: "OnPreMCPToolCall", type: "PreMCPToolCallHandler" },
+    userPromptSubmitted: {
+        slot: "UserPromptSubmittedHook",
+        field: "OnUserPromptSubmitted",
+        type: "UserPromptSubmittedHandler",
+    },
+    userPromptTransformed: {
+        slot: "UserPromptTransformedHook",
+        field: "OnUserPromptTransformed",
+        type: "UserPromptTransformedHandler",
+    },
+    sessionStart: { slot: "SessionStartHook", field: "OnSessionStart", type: "SessionStartHandler" },
+    sessionEnd: { slot: "SessionEndHook", field: "OnSessionEnd", type: "SessionEndHandler" },
+    errorOccurred: { slot: "ErrorOccurredHook", field: "OnErrorOccurred", type: "ErrorOccurredHandler" },
+    agentStop: { slot: "AgentStopHook", field: "OnAgentStop", type: "AgentStopHandler" },
+    subagentStart: { slot: "SubagentStartHook", field: "OnSubagentStart", type: "SubagentStartHandler" },
+    subagentStop: { slot: "SubagentStopHook", field: "OnSubagentStop", type: "SubagentStopHandler" },
+};
+
+/** copilot.SessionConfig request-handler fields and types. */
+const goHandlers: Record<HostHandler, { slot: string; field: string; type: string }> = {
+    elicitation: {
+        slot: "ElicitationRequestHandler",
+        field: "OnElicitationRequest",
+        type: "ElicitationHandler",
+    },
+    exitPlanMode: {
+        slot: "ExitPlanModeRequestHandler",
+        field: "OnExitPlanModeRequest",
+        type: "ExitPlanModeRequestHandler",
+    },
+    autoModeSwitch: {
+        slot: "AutoModeSwitchRequestHandler",
+        field: "OnAutoModeSwitchRequest",
+        type: "AutoModeSwitchRequestHandler",
+    },
+    mcpAuth: { slot: "MCPAuthRequestHandler", field: "OnMCPAuthRequest", type: "MCPAuthHandler" },
+};
+
+/** Applies plan schema v3 options. Each edit happens only when its option is selected. */
+function applyGoMainOptions(source: string, plan: HarnessPlan): string {
+    let result = source;
+    const schema = responseSchemaText(plan);
+    const extras = goCsharpHostExtras(plan);
+    if (Object.keys(extras).length)
+        result = replaceOnce(
+            result,
+            "\tUserInput, Observer, PreToolHook, PostToolHook        bool\n}\n",
+            "\tUserInput, Observer, PreToolHook, PostToolHook        bool\n\n\tLogLevel      string\n\tAllowedModels []string\n}\n",
+        );
+    if (clientLogLevel(plan))
+        result = replaceOnce(
+            result,
+            "\t\toptions.SessionIdleTimeoutSeconds = int(settings.IdleTimeoutSeconds)\n",
+            "\t\toptions.SessionIdleTimeoutSeconds = int(settings.IdleTimeoutSeconds)\n\t\toptions.LogLevel = settings.LogLevel\n",
+        );
+    if (schema) {
+        result = replaceOnce(
+            result,
+            "//go:embed config/session.json config/host.json config/tools.json\n",
+            "//go:embed config/session.json config/host.json config/tools.json config/response-schema.json\n",
+        );
+        result = replaceOnce(
+            result,
+            "func clientOptions(",
+            `func loadResponseSchema() (map[string]any, error) {
+	var schema map[string]any
+	if err := readConfig("config/response-schema.json", &schema); err != nil {
+		return nil, err
+	}
+	if schema["type"] != "object" {
+		return nil, errors.New("config/response-schema.json must be an object JSON schema")
+	}
+	return schema, nil
+}
+
+func clientOptions(`,
+        );
+        result = replaceOnce(
+            result,
+            "\tconfig, err := loadSession()\n\tif err != nil {\n\t\treturn err\n\t}\n",
+            "\tconfig, err := loadSession()\n\tif err != nil {\n\t\treturn err\n\t}\n\tresponseSchema, err := loadResponseSchema()\n\tif err != nil {\n\t\treturn err\n\t}\n",
+        );
+        result = replaceOnce(
+            result,
+            "copilot.MessageOptions{Prompt: prompt})",
+            "copilot.MessageOptions{\n\t\tPrompt: prompt, ResponseSchema: responseSchema,\n\t})",
+        );
+    }
+    if (plan.model.allowedModels.length)
+        result = replaceOnce(
+            result,
+            "\tdefer func() { result = errors.Join(result, session.Disconnect()) }()\n",
+            `\tdefer func() { result = errors.Join(result, session.Disconnect()) }()
+	if len(settings.AllowedModels) > 0 {
+		if _, err := session.RPC.Model.SetAllowedModels(ctx, &rpc.ModelSetAllowedModelsRequest{
+			AllowedModels: settings.AllowedModels,
+		}); err != nil {
+			return fmt.Errorf("apply allowed models: %w", err)
+		}
+	}
+`,
+        );
+    return result;
+}
+
+function applyGoHostOptions(source: string, plan: HarnessPlan): string {
+    let result = source;
+    const hooks = plan.policy.hooks.map((hook) => ({ name: hook, ...goHooks[hook] }));
+    const handlers = plan.policy.handlers.map((handler) => ({ name: handler, ...goHandlers[handler] }));
+    const slots = [
+        ...hooks.map((hook) => `var ${hook.slot} copilot.${hook.type}\n`),
+        ...handlers.map((handler) => `var ${handler.slot} copilot.${handler.type}\n`),
+        ...(plan.context.skillProvider ? ["var SkillProvider copilot.SkillProvider\n"] : []),
+    ];
+    if (!slots.length && !customToolsSkipPermission(plan)) return result;
+    const slotNames = [
+        ...hooks.map((hook) => hook.slot),
+        ...handlers.map((handler) => handler.slot),
+        ...(plan.context.skillProvider ? ["SkillProvider"] : []),
+    ];
+    if (slots.length) {
+        result = replaceOnce(
+            result,
+            "var PostToolHook copilot.PostToolUseHandler\n",
+            "var PostToolHook copilot.PostToolUseHandler\n" + slots.join(""),
+        );
+        result = replaceOnce(
+            result,
+            '\tif settings.Storage == "virtual" && SessionFilesystemFactory == nil {\n',
+            slotNames
+                .map(
+                    (slot) =>
+                        `\tif ${slot} == nil {\n\t\tadd(errors.New("implement and register ${slot} in host.go"))\n\t}\n`,
+                )
+                .join("") + '\tif settings.Storage == "virtual" && SessionFilesystemFactory == nil {\n',
+        );
+        const missing = (slot: string, label: string) =>
+            `\tif ${slot} == nil {\n\t\treturn errors.New("selected ${label} is not implemented")\n\t}\n`;
+        const binding = [
+            ...(hooks.length
+                ? ["\tif config.Hooks == nil {\n\t\tconfig.Hooks = &copilot.SessionHooks{}\n\t}\n"]
+                : []),
+            ...hooks.map(
+                (hook) =>
+                    missing(hook.slot, `${hook.name} hook`) + `\tconfig.Hooks.${hook.field} = ${hook.slot}\n`,
+            ),
+            ...handlers.map(
+                (handler) =>
+                    missing(handler.slot, `${handler.name} request handler`) +
+                    `\tconfig.${handler.field} = ${handler.slot}\n`,
+            ),
+            ...(plan.context.skillProvider
+                ? [missing("SkillProvider", "skill provider") + "\tconfig.SkillProvider = SkillProvider\n"]
+                : []),
+        ];
+        result = replaceOnce(
+            result,
+            '\tif settings.Storage == "virtual" {\n\t\tconfig.CreateSessionFSProvider',
+            binding.join("") + '\tif settings.Storage == "virtual" {\n\t\tconfig.CreateSessionFSProvider',
+        );
+    }
+    if (customToolsSkipPermission(plan))
+        result = replaceOnce(
+            result,
+            '\t\tif tool.SkipPermission {\n\t\t\tadd(fmt.Errorf("tool %s must not skip the host permission policy", tool.Name))\n\t\t}\n',
+            "",
+        );
+    return result;
+}
 
 function renderGoSource(source: string, plan: HarnessPlan): string {
     const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
@@ -129,6 +311,13 @@ export const goAdapter: LanguageAdapter = {
                 file: "host.go",
                 kind: "runtime",
             });
+        requirements.push(
+            ...v3Requirements(plan, "host.go", requirements, {
+                hook: (hook) => goHooks[hook].slot,
+                handler: (handler) => goHandlers[handler].slot,
+                skillProvider: "copilot.SkillProvider as SkillProvider",
+            }),
+        );
         return {
             files: [
                 {
@@ -137,8 +326,16 @@ export const goAdapter: LanguageAdapter = {
                     content:
                         "// Copyright (c) Microsoft Corporation. All rights reserved.\nmodule example.com/copilot-harness\n\ngo 1.24.0\n",
                 },
-                { path: "main.go", language: "go", content: renderGoSource(mainSource, plan) },
-                { path: "host.go", language: "go", content: renderGoSource(hostSource, plan) },
+                {
+                    path: "main.go",
+                    language: "go",
+                    content: renderGoSource(applyGoMainOptions(mainSource, plan), plan),
+                },
+                {
+                    path: "host.go",
+                    language: "go",
+                    content: renderGoSource(applyGoHostOptions(hostSource, plan), plan),
+                },
                 {
                     path: "native_enabled.go",
                     language: "go",
@@ -153,6 +350,15 @@ export const goAdapter: LanguageAdapter = {
                 },
                 { path: "config/session.json", language: "json", content: json(sessionData(plan)) },
                 { path: "config/tools.json", language: "json", content: goCsharpToolData(plan) },
+                ...(responseSchemaText(plan)
+                    ? [
+                          {
+                              path: "config/response-schema.json",
+                              language: "json" as const,
+                              content: responseSchemaText(plan) ?? "",
+                          },
+                      ]
+                    : []),
                 {
                     path: "config/host.json",
                     language: "json",
@@ -172,6 +378,7 @@ export const goAdapter: LanguageAdapter = {
                         observer: plan.events.observer,
                         preToolHook: plan.policy.preToolHook,
                         postToolHook: plan.policy.postToolHook,
+                        ...goCsharpHostExtras(plan),
                     }),
                 },
             ],
@@ -219,6 +426,7 @@ export const goAdapter: LanguageAdapter = {
                 "Session working directories, skills, plugins, discovered configuration, file hooks, and Git context refer to the runtime host's filesystem. A subprocess, an SDK mode, permission callbacks, and session storage are not an OS or tenant sandbox.",
                 "Virtual storage requires copilot.SessionFSProvider: ReadFile, WriteFile, AppendFile, Exists, Stat, MakeDirectory, ReadDirectory, ReadDirectoryWithTypes, Remove, and Rename. The factory is session-scoped; POSIX virtual paths use the selected workspace (or /) and baseDirectory (or /session-state). SQLite is not advertised; implement SessionFSSqliteProvider and SessionFSSqliteTransactionProvider before opting into SQL capabilities.",
                 "The observer logs event types only, never prompts, tool arguments/results, credentials, or assistant content. The final assistant content is printed once as the application result; an idle turn without an assistant message is explicitly reported, including terminal-tool completion.",
+                ...goCsharpV3Notes(plan, "go"),
             ],
             sources: [
                 plan.target.runtime === "managed"

@@ -1,14 +1,216 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import type { HarnessPlan } from "../plan";
+import type { HarnessPlan, HostHandler, LifecycleHook } from "../plan";
 import { runtimeEndpoint } from "../target";
 import { commonRequirements, sessionData } from "./common";
-import { goCsharpToolData } from "./go-csharp-data";
+import {
+    clientLogLevel,
+    customToolsDefer,
+    customToolsSkipPermission,
+    goCsharpHostExtras,
+    goCsharpToolData,
+    goCsharpV3Notes,
+    replaceOnce,
+    responseSchemaText,
+    v3Requirements,
+} from "./go-csharp-data";
 import { SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 
 const sdkRevision = SDK_SOURCE_REVISION;
 const json = (value: unknown) => JSON.stringify(value, null, 2) + "\n";
 const shellQuote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
+
+/** SessionHooks properties (dotnet/src/Types.cs SessionHooks); each is Func<XHookInput, HookInvocation, Task<XHookOutput?>>. */
+const csharpHooks: Record<LifecycleHook, { slot: string; property: string; type: string }> = {
+    preMcpToolCall: { slot: "PreMcpToolCallHook", property: "OnPreMcpToolCall", type: "PreMcpToolCall" },
+    userPromptSubmitted: {
+        slot: "UserPromptSubmittedHook",
+        property: "OnUserPromptSubmitted",
+        type: "UserPromptSubmitted",
+    },
+    userPromptTransformed: {
+        slot: "UserPromptTransformedHook",
+        property: "OnUserPromptTransformed",
+        type: "UserPromptTransformed",
+    },
+    sessionStart: { slot: "SessionStartHook", property: "OnSessionStart", type: "SessionStart" },
+    sessionEnd: { slot: "SessionEndHook", property: "OnSessionEnd", type: "SessionEnd" },
+    errorOccurred: { slot: "ErrorOccurredHook", property: "OnErrorOccurred", type: "ErrorOccurred" },
+    agentStop: { slot: "AgentStopHook", property: "OnAgentStop", type: "AgentStop" },
+    subagentStart: { slot: "SubagentStartHook", property: "OnSubagentStart", type: "SubagentStart" },
+    subagentStop: { slot: "SubagentStopHook", property: "OnSubagentStop", type: "SubagentStop" },
+};
+
+/** SessionConfigBase request-handler properties and their exact delegate types. */
+const csharpHandlers: Record<HostHandler, { slot: string; property: string; type: string }> = {
+    elicitation: {
+        slot: "ElicitationRequestHandler",
+        property: "OnElicitationRequest",
+        type: "Func<ElicitationContext, Task<ElicitationResult>>",
+    },
+    exitPlanMode: {
+        slot: "ExitPlanModeRequestHandler",
+        property: "OnExitPlanModeRequest",
+        type: "Func<ExitPlanModeRequest, ExitPlanModeInvocation, Task<ExitPlanModeResult>>",
+    },
+    autoModeSwitch: {
+        slot: "AutoModeSwitchRequestHandler",
+        property: "OnAutoModeSwitchRequest",
+        type: "Func<AutoModeSwitchRequest, AutoModeSwitchInvocation, Task<AutoModeSwitchResponse>>",
+    },
+    mcpAuth: {
+        slot: "McpAuthRequestHandler",
+        property: "OnMcpAuthRequest",
+        type: "Func<McpAuthContext, Task<McpAuthResult?>>",
+    },
+};
+
+/** Applies plan schema v3 options. Each edit happens only when its option is selected. */
+function applyCsharpProgramOptions(source: string, plan: HarnessPlan): string {
+    let result = source;
+    if (Object.keys(goCsharpHostExtras(plan)).length)
+        result = replaceOnce(
+            result,
+            "    public bool PostToolHook { get; init; }\n}\n",
+            '    public bool PostToolHook { get; init; }\n    public string LogLevel { get; init; } = "";\n    public IList<string>? AllowedModels { get; init; }\n}\n',
+        );
+    if (customToolsDefer(plan))
+        result = replaceOnce(
+            result,
+            "    public bool SkipPermission { get; init; }\n}\n",
+            "    public bool SkipPermission { get; init; }\n    public string? Defer { get; init; }\n}\n",
+        );
+    if (clientLogLevel(plan))
+        result = replaceOnce(
+            result,
+            "            options.SessionIdleTimeoutSeconds = checked((int)settings.IdleTimeoutSeconds);\n",
+            "            options.SessionIdleTimeoutSeconds = checked((int)settings.IdleTimeoutSeconds);\n            options.LogLevel = new CopilotLogLevel(settings.LogLevel);\n",
+        );
+    if (responseSchemaText(plan)) {
+        result = replaceOnce(
+            result,
+            '            var tools = ReadConfiguration<ToolDefinition[]>("tools.json");\n',
+            `            var tools = ReadConfiguration<ToolDefinition[]>("tools.json");
+            var responseSchema = ReadConfiguration<JsonElement>("response-schema.json");
+            if (responseSchema.ValueKind != JsonValueKind.Object
+                || !responseSchema.TryGetProperty("type", out var schemaType)
+                || schemaType.ValueKind != JsonValueKind.String || schemaType.GetString() != "object")
+                throw new InvalidOperationException("response-schema.json must be an object JSON schema.");
+`,
+        );
+        result = replaceOnce(
+            result,
+            "new MessageOptions { Prompt = prompt },",
+            "new MessageOptions { Prompt = prompt, ResponseSchema = responseSchema },",
+        );
+    }
+    if (plan.model.allowedModels.length)
+        result = replaceOnce(
+            result,
+            "                await using var session = await client.CreateSessionAsync(config, cancellation.Token);\n",
+            `                await using var session = await client.CreateSessionAsync(config, cancellation.Token);
+                if (settings.AllowedModels is { Count: > 0 } allowedModels)
+                    await session.Rpc.Model.SetAllowedModelsAsync(allowedModels, cancellation.Token);
+`,
+        );
+    return result;
+}
+
+function applyCsharpHostOptions(source: string, plan: HarnessPlan): string {
+    let result = source;
+    const hooks = plan.policy.hooks.map((hook) => ({ name: hook, ...csharpHooks[hook] }));
+    const handlers = plan.policy.handlers.map((handler) => ({ name: handler, ...csharpHandlers[handler] }));
+    const slots = [
+        ...hooks.map(
+            (hook) =>
+                `    public static Func<${hook.type}HookInput, HookInvocation, Task<${hook.type}HookOutput?>>? ${hook.slot} { get; set; }\n`,
+        ),
+        ...handlers.map((handler) => `    public static ${handler.type}? ${handler.slot} { get; set; }\n`),
+        ...(plan.context.skillProvider
+            ? ["    public static ISkillProvider? SkillProvider { get; set; }\n"]
+            : []),
+    ];
+    const slotNames = [
+        ...hooks.map((hook) => hook.slot),
+        ...handlers.map((handler) => handler.slot),
+        ...(plan.context.skillProvider ? ["SkillProvider"] : []),
+    ];
+    if (slots.length) {
+        const postHook =
+            "    public static Func<PostToolUseHookInput, HookInvocation, Task<PostToolUseHookOutput?>>? PostToolHook { get; set; }\n";
+        result = replaceOnce(result, postHook, postHook + slots.join(""));
+        const preflightAnchor =
+            '        if (settings.Storage == "virtual" && SessionFilesystemFactory is null)\n';
+        result = replaceOnce(
+            result,
+            preflightAnchor,
+            slotNames
+                .map(
+                    (slot) =>
+                        `        if (${slot} is null)\n            problems.Add("- Implement and register ${slot} in Host.cs.");\n`,
+                )
+                .join("") + preflightAnchor,
+        );
+        const missing = (label: string) =>
+            `\n            ?? throw new NotImplementedException("Selected ${label} is not implemented.");\n`;
+        const binding = [
+            ...(hooks.length ? ["        config.Hooks ??= new SessionHooks();\n"] : []),
+            ...hooks.map(
+                (hook) =>
+                    `        config.Hooks.${hook.property} = ${hook.slot}${missing(`${hook.name} hook`)}`,
+            ),
+            ...handlers.map(
+                (handler) =>
+                    `        config.${handler.property} = ${handler.slot}${missing(`${handler.name} request handler`)}`,
+            ),
+            ...(plan.context.skillProvider
+                ? [`        config.SkillProvider = SkillProvider${missing("skill provider")}`]
+                : []),
+        ];
+        const bindAnchor =
+            '        if (settings.Storage == "virtual")\n            config.CreateSessionFsProvider';
+        result = replaceOnce(result, bindAnchor, binding.join("") + bindAnchor);
+    }
+    if (customToolsSkipPermission(plan)) {
+        result = replaceOnce(
+            result,
+            '            if (tool.SkipPermission)\n                problems.Add($"- Tool {tool.Name} must not skip the host permission policy.");\n',
+            "",
+        );
+        result = replaceOnce(
+            result,
+            "                    SkipPermission = false\n",
+            "                    SkipPermission = definition.SkipPermission\n",
+        );
+    }
+    if (customToolsDefer(plan))
+        result = replaceOnce(
+            result,
+            "                    IsTerminal = definition.IsTerminal,\n",
+            `                    IsTerminal = definition.IsTerminal,
+                    Defer = definition.Defer switch
+                    {
+                        null => null,
+                        "auto" => CopilotToolDefer.Auto,
+                        "never" => CopilotToolDefer.Never,
+                        _ => throw new InvalidOperationException($"Unknown defer mode for tool {definition.Name}.")
+                    },
+`,
+        );
+    return result;
+}
+
+function projectFile(plan: HarnessPlan): string {
+    const tools = '    <EmbeddedResource Include="config/tools.json" LogicalName="Harness.tools.json" />\n';
+    return responseSchemaText(plan)
+        ? replaceOnce(
+              projectSource,
+              tools,
+              tools +
+                  '    <EmbeddedResource Include="config/response-schema.json" LogicalName="Harness.response-schema.json" />\n',
+          )
+        : projectSource;
+}
 
 function renderCsharpSource(source: string, plan: HarnessPlan): string {
     const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
@@ -140,11 +342,26 @@ export const csharpAdapter: LanguageAdapter = {
                 file: "Host.cs",
                 kind: "runtime",
             });
+        requirements.push(
+            ...v3Requirements(plan, "Host.cs", requirements, {
+                hook: (hook) => `Host.${csharpHooks[hook].slot}`,
+                handler: (handler) => `Host.${csharpHandlers[handler].slot}`,
+                skillProvider: "ISkillProvider as Host.SkillProvider",
+            }),
+        );
         return {
             files: [
-                { path: "HarnessAgent.csproj", language: "xml", content: projectSource },
-                { path: "Program.cs", language: "csharp", content: renderCsharpSource(programSource, plan) },
-                { path: "Host.cs", language: "csharp", content: renderCsharpSource(hostSource, plan) },
+                { path: "HarnessAgent.csproj", language: "xml", content: projectFile(plan) },
+                {
+                    path: "Program.cs",
+                    language: "csharp",
+                    content: renderCsharpSource(applyCsharpProgramOptions(programSource, plan), plan),
+                },
+                {
+                    path: "Host.cs",
+                    language: "csharp",
+                    content: renderCsharpSource(applyCsharpHostOptions(hostSource, plan), plan),
+                },
                 { path: "setup-sdk.sh", language: "text", content: setupSource },
                 {
                     path: ".sdk-source/.gitignore",
@@ -153,6 +370,15 @@ export const csharpAdapter: LanguageAdapter = {
                 },
                 { path: "config/session.json", language: "json", content: json(sessionData(plan)) },
                 { path: "config/tools.json", language: "json", content: goCsharpToolData(plan) },
+                ...(responseSchemaText(plan)
+                    ? [
+                          {
+                              path: "config/response-schema.json",
+                              language: "json" as const,
+                              content: responseSchemaText(plan) ?? "",
+                          },
+                      ]
+                    : []),
                 {
                     path: "config/host.json",
                     language: "json",
@@ -172,6 +398,7 @@ export const csharpAdapter: LanguageAdapter = {
                         observer: plan.events.observer,
                         preToolHook: plan.policy.preToolHook,
                         postToolHook: plan.policy.postToolHook,
+                        ...goCsharpHostExtras(plan),
                     }),
                 },
             ],
@@ -204,7 +431,7 @@ export const csharpAdapter: LanguageAdapter = {
                 "setup-sdk.sh is preview-only without --run. It verifies and reuses only a clean checkout at the exact SHA; a different revision, modified checkout, symlink, or non-repository destination is refused. It never resets, cleans, or deletes files. An interrupted initial provisioning is left for explicit review rather than overwritten on the next run.",
                 "HarnessAgent.csproj targets net10.0, explicitly opts into experimental GHCP001 APIs, excludes SDK checkout sources from the app's compile glob, and disables automatic runtime downloads on the ProjectReference. The generated app requires an explicitly provisioned compatible runtime; the visualizer itself has no SDK/runtime dependency.",
                 "config/session.json contains SDK data only. Its prompt section keys and type-discriminated MCP configurations deserialize with the SDK's converters. Tools and host callbacks are bound separately before creation; all configuration files are embedded, so rebuild after editing them.",
-                "Each custom HostTool exposes the original JSON schema, not a reflected wrapper schema. CopilotTool.DefineTool supplies the SDK's exact override/terminal metadata, which the wrapper forwards unchanged. Register handlers in Host.ToolHandlers and validate authority and arguments before executing them. SkipPermission is never enabled.",
+                `Each custom HostTool exposes the original JSON schema, not a reflected wrapper schema. CopilotTool.DefineTool supplies the SDK's exact override/terminal metadata, which the wrapper forwards unchanged. Register handlers in Host.ToolHandlers and validate authority and arguments before executing them. ${customToolsSkipPermission(plan) ? "SkipPermission is forwarded only for custom tools the plan marks; selected defer modes are forwarded." : customToolsDefer(plan) ? "SkipPermission is never enabled; selected defer modes are forwarded." : "SkipPermission is never enabled."}`,
                 plan.policy.permissionMode === "host"
                     ? "Register PermissionPolicy, selected pre/post hooks, and SessionFilesystemFactory in Host.cs. Both --check and normal startup fail on missing host integrations; invocation paths throw rather than returning successful placeholders."
                     : "The generated host explicitly binds PermissionHandler.ApproveAll. It approves ordinary requests once; managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement still apply, while enabled sandbox bypass can also be approved.",
@@ -220,6 +447,7 @@ export const csharpAdapter: LanguageAdapter = {
                 "Virtual storage requires a SessionFsProvider subclass overriding ReadFileAsync, WriteFileAsync, AppendFileAsync, ExistsAsync, StatAsync, MakeDirectoryAsync, ReadDirectoryAsync, ReadDirectoryWithTypesAsync, RemoveAsync, and RenameAsync, then a session-scoped factory registration. POSIX logical paths use the selected workspace (or /) and baseDirectory (or /session-state). SQLite is not advertised; implement ISessionFsSqliteProvider/ISessionFsSqliteTransactionProvider before opting into SQL.",
                 "Local preflight never constructs a client, connects, loads a native runtime, or calls a model. Source provisioning and NuGet/build work are separate setup steps. The observer emits event types only; assistant content is printed only as the final application result. Idle completion without an assistant message is explicitly reported.",
                 "Working-directory, skills, plugins, discovery, file-hook, and Git controls address the runtime host's filesystem. A subprocess and a session filesystem provider are not general filesystem, network, or tenant sandboxes.",
+                ...goCsharpV3Notes(plan, "csharp"),
             ],
             sources: [
                 plan.target.runtime === "managed"

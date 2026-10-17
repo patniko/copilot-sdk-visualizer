@@ -86,7 +86,7 @@ describe.each(adapters)("$adapter.label bootstrap adapter", ({ adapter, dataPath
         plan.rootExcludedTools = ["bash", "documents-search"];
         plan.context.skillDirectories = ["/future-host/skills"];
         plan.context.pluginDirectories = ["/future-host/plugins"];
-        plan.policy = { permissionMode: "host", preToolHook: true, postToolHook: true };
+        plan.policy = { ...plan.policy, permissionMode: "host", preToolHook: true, postToolHook: true };
         plan.model = {
             ...plan.model,
             provider: "openai",
@@ -235,16 +235,26 @@ describe("language-specific bootstrap contracts", () => {
         plan.target.runtime = "inprocess";
         const project = javaAdapter.generate(plan);
         const pom = generatedFile(project, "pom.xml");
-        expect(pom).toContain("<copilot.version>1.0.14-SNAPSHOT</copilot.version>");
-        expect(pom).not.toContain("1.0.13");
+        expect(pom).toContain("<copilot.version>1.0.15-preview.1-SNAPSHOT</copilot.version>");
+        expect(pom).not.toContain("1.0.14-SNAPSHOT");
         expect(pom).toContain("5.19.1");
-        expect(pom).toContain("COPILOT_JAVA_RUNTIME_CLASSIFIER");
+        // The pinned source cannot build native classifier JARs; the runtime comes from COPILOT_CLI_PATH.
+        expect(pom).not.toContain("copilot-sdk-java-runtime");
+        expect(pom).not.toContain("COPILOT_JAVA_RUNTIME_CLASSIFIER");
+        expect(project.requirements.map((requirement) => requirement.id)).toContain("env-COPILOT_CLI_PATH");
         const setup = generatedFile(project, "setup-sdk.sh");
         expect(setup).toContain(JAVA_RUST_SDK_REVISION);
         expect(setup).toContain("git clone --filter=blob:none --no-checkout");
         expect(setup).toContain("status --porcelain --untracked-files=normal");
-        expect(setup).toContain("validate-native-host.mjs");
+        expect(setup).toContain("native_args=(-Dcopilot.native.skip.download=true)");
+        expect(setup).not.toMatch(/-Pnative-|validate-native-host/);
         expect(setup).not.toMatch(/git (reset|clean)|rm -rf/);
+        expect(JSON.parse(generatedFile(project, "src/main/resources/bootstrap-config.json"))).toMatchObject({
+            cliPathRuntime: true,
+        });
+        expect(generatedFile(project, "src/main/java/harness/HostExtensions.java")).toContain(
+            'System.getenv("COPILOT_CLI_PATH")',
+        );
         const configuration = generatedFile(project, "src/main/java/harness/Configuration.java");
         for (const setter of [
             "setEnableFileHooks",
@@ -293,5 +303,276 @@ describe("language-specific bootstrap contracts", () => {
             expect(file.content, file.path).not.toContain(".unwrap()");
             expect(file.content, file.path).not.toContain("..Default::default()");
         }
+    });
+});
+
+function v3Plan(language: "java" | "rust") {
+    const plan = createPreset("copilot");
+    plan.target.language = language;
+    plan.identity = "host-token";
+    plan.context = {
+        ...plan.context,
+        skills: true,
+        agentDirectories: ["/future-host/agents"],
+        hookDirectories: ["/future-host/hooks"],
+        instructionDirectories: ["/future-host/instructions"],
+        additionalDirectories: ["/future-host/extra"],
+        skillProvider: true,
+        includedBuiltinSkills: ["pdf"],
+        customInstructions: "skip",
+        onDemandInstructions: true,
+        refreshCustomInstructions: true,
+        organizationInstructions: "Follow org policy.",
+    };
+    plan.policy = {
+        ...plan.policy,
+        hooks: ["subagentStart", "userPromptSubmitted"],
+        handlers: ["elicitation", "mcpAuth"],
+        managed: { ...plan.policy.managed, load: true, enforceModelDefaults: true, deny: ["shell(rm)"] },
+    };
+    plan.model = {
+        ...plan.model,
+        id: "gpt-5",
+        autoTier: "balance",
+        reasoningSummary: "concise",
+        allowedModels: ["gpt-5", "claude-sonnet-4.5"],
+    };
+    plan.capabilities = {
+        imageGeneration: true,
+        toolSearch: "enabled",
+        toolSearchDeferThreshold: 40,
+        askUserVariant: "elicitation",
+    };
+    plan.excludedBuiltinAgents = ["explore"];
+    plan.session = { ...plan.session, name: "Nightly triage", interactiveUser: true, diagnostics: "debug" };
+    plan.events = { ...plan.events, subAgentStreaming: false, logLevel: "debug" };
+    plan.output = {
+        responseSchema: JSON.stringify({ type: "object", properties: { ok: { type: "boolean" } } }),
+    };
+    plan.customTools = [
+        { ...createCustomTool("tool", "lookup_record"), defer: "never", skipPermission: true },
+    ];
+    plan.agents = [
+        {
+            ...createAgent("agent", "reviewer"),
+            displayName: "Reviewer",
+            hooks: '{"preToolUse":[{"type":"command"}]}',
+        },
+    ];
+    return plan;
+}
+
+describe("plan schema v3 options", () => {
+    it.each(adapters)("maps new session keys and host data for $adapter.label", ({ adapter, dataPath }) => {
+        const plan = v3Plan(adapter.language as "java" | "rust");
+        expect(adapter.check(plan)).toEqual([]);
+        const project = adapter.generate(plan);
+        const data: unknown = JSON.parse(generatedFile(project, dataPath));
+        expect(data).toMatchObject({
+            hooks: ["subagentStart", "userPromptSubmitted"],
+            handlers: ["elicitation", "mcpAuth"],
+            skillProvider: true,
+            allowedModels: ["gpt-5", "claude-sonnet-4.5"],
+            logLevel: "debug",
+            responseSchema: { type: "object" },
+            session: {
+                agentDirectories: ["/future-host/agents"],
+                skipCustomInstructions: true,
+                capi: { autoTier: "balance" },
+                reasoningSummary: "concise",
+                managedSettings: { permissions: { deny: ["shell(rm)"] } },
+                toolSearch: { enabled: true, deferThreshold: 40 },
+                askUserVariant: "elicitation",
+                diagnostics: { sources: { mcp: { level: "debug" } } },
+                includeSubAgentStreamingEvents: false,
+                customAgents: [{ displayName: "Reviewer", hooks: { preToolUse: [{ type: "command" }] } }],
+            },
+            tools: [{ name: "lookup_record", defer: "never", skipPermission: true }],
+        });
+        expect(project.requirements.map((requirement) => requirement.id)).toEqual(
+            expect.arrayContaining([
+                "hook-subagentStart",
+                "hook-userPromptSubmitted",
+                "handler-elicitation",
+                "handler-mcpAuth",
+                "skill-provider",
+            ]),
+        );
+        for (const file of project.files) expect(file.content, file.path).not.toMatch(/<\/?opt:/);
+    });
+
+    it("binds Java setters, the allowlist RPC, hooks, handlers, skill provider, and response schema", () => {
+        const project = javaAdapter.generate(v3Plan("java"));
+        const main = generatedFile(project, "src/main/java/harness/Main.java");
+        expect(main).toContain("session.getRpc().model.setAllowedModels(");
+        expect(main).toContain("new SessionModelSetAllowedModelsParams(null, allowedModels)");
+        expect(main.indexOf("setAllowedModels")).toBeLessThan(main.indexOf("sendAndWait"));
+        expect(main).toContain("options.setResponseSchema(responseSchema)");
+        const configuration = generatedFile(project, "src/main/java/harness/Configuration.java");
+        for (const setter of [
+            "setCapi(new CapiSessionOptions().setAutoTier(AutoTier.fromValue(",
+            "setReasoningSummary",
+            "setAgentDirectories",
+            "setHookDirectories",
+            "setInstructionDirectories",
+            "setAdditionalDirectories",
+            "setIncludedBuiltinSkills",
+            "setSkipCustomInstructions",
+            "setEnableOnDemandInstructionDiscovery",
+            "setRefreshCustomInstructions",
+            "setOrganizationCustomInstructions",
+            "setEnableManagedSettings",
+            "setEnforceManagedModelDefaults",
+            "setManagedSettings",
+            "setImageGeneration",
+            "setToolSearch",
+            "setAskUserVariant",
+            "setExcludedBuiltInAgents",
+            "setName",
+            "setInteractiveUser",
+            "setDiagnostics",
+            "setIncludeSubAgentStreamingEvents",
+            "setDisplayName",
+            "value.setHooks(",
+            "ToolDefer.fromValue",
+            "options.setLogLevel",
+        ]) {
+            expect(configuration).toContain(setter);
+        }
+        expect(configuration).toContain("lifecycle.setOnSubagentStart(host::subagentStart)");
+        expect(configuration).toContain("lifecycle.setOnUserPromptSubmitted(host::userPromptSubmitted)");
+        expect(configuration).not.toContain("setOnSessionEnd");
+        expect(configuration).toContain("config.setOnElicitationRequest(host::elicitation)");
+        expect(configuration).toContain("config.setOnMcpAuthRequest(host::mcpAuth)");
+        expect(configuration).not.toContain("setOnExitPlanMode");
+        expect(configuration).toContain("config.setSkillProvider(host.skillProvider())");
+        const host = generatedFile(project, "src/main/java/harness/HostExtensions.java");
+        expect(host).toContain(
+            "CompletableFuture<SubagentStartHookOutput> subagentStart(SubagentStartHookInput _input, HookInvocation _context)",
+        );
+        expect(host).toContain(
+            "CompletableFuture<McpAuthResult> mcpAuth(McpAuthRequest _request, McpAuthInvocation _context)",
+        );
+        expect(host).toContain('"HOST TODO: implement and register the " + hook + " hook in HostExtensions"');
+        expect(host).toContain(
+            '"HOST TODO: implement and register the " + handler + " handler in HostExtensions"',
+        );
+        expect(host).toContain("HOST TODO: implement and register HostExtensions.skillProvider");
+        expect(host).toContain("import com.github.copilot.SkillProvider;");
+    });
+
+    it("blocks the Java errorOccurred hook, which has no SessionHooks setter", () => {
+        const plan = v3Plan("java");
+        plan.policy.hooks = ["errorOccurred"];
+        expect(javaAdapter.check(plan).map((blocker) => blocker.id)).toEqual(["java-hook-errorOccurred"]);
+        plan.target.language = "rust";
+        expect(rustAdapter.check(plan)).toEqual([]);
+    });
+
+    it("binds Rust config fields, the allowlist, hook overrides, handlers, skill provider, and response schema", () => {
+        const project = rustAdapter.generate(v3Plan("rust"));
+        const configuration = generatedFile(project, "src/config.rs");
+        for (const assignment of [
+            "config.with_allowed_models(models.clone())",
+            "CapiSessionOptions::new().with_auto_tier(tier)",
+            "config.reasoning_summary",
+            "config.agent_directories",
+            "config.hook_directories",
+            "config.instruction_directories",
+            "config.additional_directories",
+            "config.included_builtin_skills",
+            "config.skip_custom_instructions",
+            "config.enable_on_demand_instruction_discovery",
+            "config.refresh_custom_instructions",
+            "config.organization_custom_instructions",
+            "config.enable_managed_settings",
+            "config.enforce_managed_model_defaults",
+            "config.managed_settings",
+            "config.image_generation",
+            "config.tool_search",
+            "config.ask_user_variant",
+            "config.excluded_builtin_agents",
+            "config.name",
+            "config.interactive_user",
+            "config.diagnostics",
+            "config.include_sub_agent_streaming_events",
+            "value.display_name",
+            "value.hooks = agent.hooks.clone()",
+            ".with_skip_permission(tool.skip_permission)",
+            "value.with_defer(",
+            "options.log_level",
+            "config.with_elicitation_handler(Arc::new(host.clone()))",
+            "config.with_mcp_auth_handler(Arc::new(host.clone()))",
+            "config.with_skill_provider(Arc::new(host.skill_provider()))",
+            "HOST TODO: implement and register the {hook} hook in src/host.rs",
+        ]) {
+            expect(configuration).toContain(assignment);
+        }
+        expect(configuration).not.toContain("with_exit_plan_mode_handler");
+        const host = generatedFile(project, "src/host.rs");
+        expect(host).toContain("async fn on_subagent_start(");
+        expect(host).toContain("async fn on_user_prompt_submitted(");
+        expect(host).toContain('output.decision = Some("block".into());');
+        expect(host).not.toContain("async fn on_session_end(");
+        expect(host).toContain("impl github_copilot_sdk::handler::ElicitationHandler for Host");
+        expect(host).toContain("impl github_copilot_sdk::handler::McpAuthHandler for Host");
+        expect(host).not.toContain("ExitPlanModeHandler");
+        expect(host).toContain("impl github_copilot_sdk::SkillProvider for HostSkillProvider");
+        expect(generatedFile(project, "src/main.rs")).toContain(
+            "message.with_response_schema(schema.clone())",
+        );
+    });
+
+    it.each(adapters)("adds nothing to a default $adapter.label plan", ({ adapter, dataPath }) => {
+        const plan = createPreset("copilot");
+        plan.target.language = adapter.language;
+        const project = adapter.generate(plan);
+        const data = JSON.parse(generatedFile(project, dataPath)) as Record<string, unknown>;
+        for (const key of [
+            "hooks",
+            "handlers",
+            "skillProvider",
+            "allowedModels",
+            "logLevel",
+            "responseSchema",
+        ])
+            expect(data).not.toHaveProperty(key);
+        const session = data.session as Record<string, unknown>;
+        for (const key of [
+            "capi",
+            "managedSettings",
+            "diagnostics",
+            "name",
+            "includeSubAgentStreamingEvents",
+        ])
+            expect(session).not.toHaveProperty(key);
+        for (const file of project.files) {
+            expect(file.content, file.path).not.toMatch(/<\/?opt:/);
+            expect(file.content, file.path).not.toMatch(
+                /subagentStart|on_subagent_start|SkillProvider|skillProvider\(\)|ElicitationHandler|setOnElicitationRequest/,
+            );
+        }
+        expect(project.requirements.map((requirement) => requirement.id)).not.toEqual(
+            expect.arrayContaining(["skill-provider"]),
+        );
+    });
+
+    it("enables the Rust runtime feature for every non-bundled transport", () => {
+        const plan = createPreset("empty");
+        plan.target.language = "rust";
+        plan.target.runtime = "external";
+        plan.target.serverUrl = "tcp://127.0.0.1:4321";
+        const dependency = (cargo: string) =>
+            cargo.split("\n").find((line) => line.startsWith("github-copilot-sdk"));
+        expect(dependency(generatedFile(rustAdapter.generate(plan), "Cargo.toml"))).toContain(
+            'default-features = false, features = ["runtime"]',
+        );
+        plan.target.runtime = "managed";
+        plan.target.cliPath = "/opt/copilot/copilot-runtime";
+        expect(dependency(generatedFile(rustAdapter.generate(plan), "Cargo.toml"))).toContain(
+            'default-features = false, features = ["runtime"]',
+        );
+        plan.target.cliPath = "";
+        expect(dependency(generatedFile(rustAdapter.generate(plan), "Cargo.toml"))).not.toContain("features");
     });
 });

@@ -5,11 +5,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const REVISION = "efebfd34dfa68830b11f49302fd88d12950df2e4";
+const REVISION = "7d20899fc4c8b13a405aa621066e75a9e78e04cd";
 const PREFIX = "src/runtime/src/";
 const REGISTRY = `${PREFIX}tools/registry.rs`;
 const INITIALIZATION = `${PREFIX}session/tool_initialization.rs`;
-const INVOKER = `${PREFIX}tools/session_tool_invoker.rs`;
+const INVOKER = `${PREFIX}turn_engine/tools/session_tool_invoker.rs`;
 const SERIALIZERS = `${PREFIX}session/session_serializers.rs`;
 const ALIASES = `${PREFIX}tools_base/aliases.rs`;
 const CATALOG = `${PREFIX}tools/session_catalog.rs`;
@@ -205,6 +205,7 @@ const symbolFiles = new Map([
     [`${PREFIX}tools/file_edit.rs:STR_REPLACE_EDITOR_NAME`, ALIASES],
     [`${PREFIX}lsp/integration.rs:crate::tool`, `${PREFIX}tools_base/lsp.rs`],
     [`${CATALOG}:lsp_tool`, `${PREFIX}tools_base/lsp.rs`],
+    [`${PREFIX}tools/update_todo.rs:NAME`, `${PREFIX}todo_checklist_base/mod.rs`],
 ]);
 const evaluationSources = new Set();
 
@@ -364,7 +365,7 @@ for (const prefix of ["STORE", "VOTE"]) {
     record(name.value, description.value, undefined, "json-object", [
         name.source,
         description.source,
-        anchor(CATALOG, 1290, 1328),
+        anchor(CATALOG, 1391, 1430),
     ]);
 }
 
@@ -373,7 +374,7 @@ assert(grepSymbol, "The registry's grep module must resolve.");
 const grepAlias = constant(grepSymbol.file, grepSymbol.name);
 record(grepAlias.value, records.get("grep")?.description, undefined, "json-object", [
     grepAlias.source,
-    anchor(INITIALIZATION, 301, 307),
+    anchor(INITIALIZATION, 383, 388),
 ]);
 
 const shellFamilyTokens = source(REGISTRY).tokens;
@@ -414,7 +415,7 @@ for (let index = 0; index < shellFamilyTokens.length; index++) {
         assert.equal(typeof name, "string");
         record(name, description, label, "json-object", [
             sourceAnchor(REGISTRY, shellFamilyTokens[index].start, shellFamilyTokens[end].end),
-            anchor(`${PREFIX}tools/shell_tools.rs`, 947, 1128),
+            anchor(`${PREFIX}tools/shell_tools.rs`, 1057, 1247),
         ]);
     }
 }
@@ -451,8 +452,8 @@ const summaries = new Map([
         [
             "Delegate work to a configured built-in or custom subagent. The available agent list and native schema are assembled per session.",
             INITIALIZATION,
-            899,
-            941,
+            1090,
+            1145,
         ],
     ],
     [
@@ -460,8 +461,8 @@ const summaries = new Map([
         [
             "Load an available skill into the conversation. The native description incorporates the session's model-invocable skill catalog.",
             INITIALIZATION,
-            1140,
-            1171,
+            1670,
+            1690,
         ],
     ],
     [
@@ -488,7 +489,7 @@ const summaries = new Map([
             "Query and update the session SQLite database; some configurations also expose local cross-session history through this tool.",
             `${PREFIX}tools/storage_tools.rs`,
             1,
-            100,
+            105,
         ],
     ],
     [
@@ -497,16 +498,7 @@ const summaries = new Map([
             "Query cross-session history. Available local, personal-cloud, organization, and repository scopes depend on session capabilities and configuration.",
             `${PREFIX}tools/session_store_sql.rs`,
             1,
-            90,
-        ],
-    ],
-    [
-        "report_progress",
-        [
-            "Report pull-request-agent progress and publish the corresponding repository changes; the descriptor varies with push-only configuration.",
-            `${PREFIX}tools/report_progress.rs`,
-            1,
-            100,
+            105,
         ],
     ],
     [
@@ -519,12 +511,39 @@ const summaries = new Map([
         ],
     ],
     [
-        "factories_manage",
+        "list_agents",
         [
-            "Manage registered agent factories: discover definitions, inspect runs and resumable work, and, when enabled, author session-scoped JavaScript factories.",
-            `${PREFIX}tools/factories_manage.rs`,
+            "List background and sibling agents with their status and relation labels. The native description appends shared agent-communication guidance per session.",
+            `${PREFIX}tools/agent_tools.rs`,
+            24,
+            72,
+        ],
+    ],
+    [
+        "write_agent",
+        [
+            "Send a follow-up message to a running or idle background agent by its exact agent ID. The native description appends shared agent-communication guidance per session.",
+            `${PREFIX}tools/agent_tools.rs`,
+            28,
+            90,
+        ],
+    ],
+    [
+        "semantic_code_search",
+        [
+            "Search one GitHub repository's indexed default branch with a natural-language query. An experiment can select a focused-query description and schema.",
+            `${PREFIX}tools/blackbird_search.rs`,
+            301,
+            343,
+        ],
+    ],
+    [
+        "dynamic_workflows_manage",
+        [
+            "Manage registered agent workflows (formerly factories): discover definitions, inspect runs and resumable work, and, when enabled, author session-scoped JavaScript workflows.",
+            `${PREFIX}tools/dynamic_workflows_manage.rs`,
             16,
-            23,
+            22,
         ],
     ],
 ]);
@@ -538,8 +557,8 @@ function policy(
     workspace,
     defaultReason,
     file = INITIALIZATION,
-    start = 206,
-    end = 298,
+    start = 285,
+    end = 380,
 ) {
     return names
         .split(" ")
@@ -571,8 +590,8 @@ const policies = new Map([
         true,
         "Model-dependent editing/search alternative, not an additional always-on editor. Apply-patch style selects rg and apply_patch; replace style selects str_replace_editor and omits standalone view/create/edit.",
         INITIALIZATION,
-        206,
-        219,
+        285,
+        298,
     ),
     ...policy(
         "bash read_bash stop_bash list_bash",
@@ -580,8 +599,8 @@ const policies = new Map([
         true,
         "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
         REGISTRY,
-        1068,
-        1086,
+        1154,
+        1172,
     ),
     ...policy(
         "powershell read_powershell stop_powershell list_powershell",
@@ -589,8 +608,8 @@ const policies = new Map([
         true,
         "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
         REGISTRY,
-        1087,
-        1101,
+        1173,
+        1187,
     ),
     ...policy(
         "ask_user",
@@ -646,14 +665,14 @@ const policies = new Map([
         true,
         "Requires at least one visible dispatchable agent after model, agent-policy, and depth filtering. Workspace flag is conservative: delegated agents may use project files or host shells.",
         INITIALIZATION,
-        899,
-        941,
+        1090,
+        1145,
     ),
     ...policy(
         "read_agent list_agents",
         "conditional",
         false,
-        "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, factories, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
+        "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, workflows, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
     ),
     ...policy(
         "write_agent",
@@ -667,8 +686,8 @@ const policies = new Map([
         true,
         "Requires online mode, allowed search-subagent filters, an eligible resolved model, and the appropriate request context. May search local project code and use a remote model.",
         INITIALIZATION,
-        1263,
-        1275,
+        1814,
+        1835,
     ),
     ...policy(
         "execution_subagent",
@@ -676,14 +695,20 @@ const policies = new Map([
         true,
         "Requires online mode, the execution-subagent feature/experiment, and session/model availability. Delegates host command execution; not a universal default.",
         INITIALIZATION,
-        982,
-        1035,
+        1431,
+        1528,
     ),
     ...policy(
-        "run_factory factories_manage",
+        "run_dynamic_workflow dynamic_workflows_manage",
         "conditional",
         true,
-        "Requires factory availability, including session capabilities/feature and quota policy. Factories can launch agents; authoring can write session-scoped JavaScript on the host.",
+        "Experimental. Requires dynamic-workflow availability, including session capabilities/feature and quota policy. Workflows (formerly factories) can launch agents; authoring can write session-scoped JavaScript on the host.",
+    ),
+    ...policy(
+        "image_generation",
+        "conditional",
+        false,
+        "Experimental. Requires online mode, an authorized Copilot image model, and the session's imageGeneration opt-in (disabled by default). Not available with BYOK providers; tool filters and permissions still apply.",
     ),
     ...policy(
         "list_canvas_capabilities",
@@ -733,23 +758,8 @@ const policies = new Map([
         true,
         "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
         INITIALIZATION,
-        1120,
-        1138,
-    ),
-    ...policy(
-        "create_pull_request reply_to_comment",
-        "internal",
-        true,
-        "PR-agent-specific tool; requires an explicit by-name request, never the ordinary '*' coding wildcard. Its native workflow can inspect or publish repository work.",
-    ),
-    ...policy(
-        "report_progress",
-        "internal",
-        true,
-        "PR-agent-specific descriptor, materialized only by a literal request. Its push-only/pull-request behavior depends on repository settings.",
-        INITIALIZATION,
-        1175,
-        1185,
+        1644,
+        1661,
     ),
     ...policy(
         "report_dreaming_artifact",
@@ -757,8 +767,8 @@ const policies = new Map([
         false,
         "Requires the linked tool-handlers leaf and a literal Dreaming-job request. Delivers a progress artifact, not a project-file operation.",
         INITIALIZATION,
-        1187,
-        1192,
+        1698,
+        1703,
     ),
     ...policy(
         "store_memory vote_memory",
@@ -766,8 +776,8 @@ const policies = new Map([
         false,
         "Requires memory capability, an available memory service, and root-owned mutation eligibility; voting has its own enablement. Storage may be remote or local, but these are not arbitrary project-file APIs.",
         CATALOG,
-        1290,
-        1328,
+        1391,
+        1430,
     ),
     ...policy(
         "lexical_code_search semantic_code_search",
@@ -775,8 +785,8 @@ const policies = new Map([
         true,
         "Requires the corresponding Blackbird settings/experiment and online eligibility. Repository/authentication context is resolved at execution; workspace flag conservatively marks repository-context dependence.",
         INITIALIZATION,
-        1194,
-        1221,
+        1705,
+        1772,
     ),
     ...policy(
         "lsp",
@@ -784,8 +794,8 @@ const policies = new Map([
         true,
         "Requires the shipped LSP leaf and available session LSP configurations. It can read project code and launch language-server processes.",
         INITIALIZATION,
-        1247,
-        1262,
+        1798,
+        1813,
     ),
     ...policy(
         "tool_search_tool",
@@ -793,8 +803,8 @@ const policies = new Map([
         false,
         "Specialized tool-search surface selected by model/provider, search settings, experiments, and deferred catalog availability. Explicit native overrides are supported through the specialized client_tool_search_override path; generic-client search is a distinct branch.",
         `${PREFIX}session/session_external_tools.rs`,
-        135,
-        171,
+        212,
+        248,
     ),
     ...policy(
         "generic_tool_search",
@@ -802,17 +812,17 @@ const policies = new Map([
         false,
         "Internal descriptor variant for generic client tool search, gated by GENERIC_CLIENT_TOOL_SEARCH. It is not another always-on public search function; model-facing search is normalized separately.",
         REGISTRY,
-        971,
-        1000,
+        1007,
+        1036,
     ),
     ...policy(
         "update_todo",
         "conditional",
         false,
-        "Compiled descriptor, selected by the runtime request/factory and final agent-policy path. It is not a dedicated operation in the legacy tool_assembly_plan; do not infer a universal coding default from registry membership.",
+        "Compiled descriptor, selected by the runtime request/workflow and final agent-policy path. The runtime treats it as a required top-level-agent tool alongside skill, sql, and task_complete. It is not a dedicated operation in the legacy tool_assembly_plan; do not infer a universal coding default from registry membership.",
         REGISTRY,
-        238,
-        275,
+        247,
+        284,
     ),
     ...policy(
         "extensions_manage extensions_reload",
@@ -886,6 +896,21 @@ function illustrativeParameters(name) {
     );
 }
 
+// GitHub-internal, feature-flagged descriptors are intentionally excluded: this
+// catalog documents surfaces an SDK integrator can configure. Each name must
+// still be present at the pinned revision so removals are noticed.
+const INTERNAL_FEATURE_FLAGGED = [
+    "github_sql",
+    "catalog_select",
+    "session_artifacts",
+    "session_history",
+    "get_context_remaining",
+    "new_context",
+];
+for (const name of INTERNAL_FEATURE_FLAGGED) {
+    assert(records.delete(name), `Expected internal feature-flagged descriptor ${name} at ${REVISION}.`);
+}
+
 const missingPolicies = [...records.keys()].filter((name) => !policies.has(name));
 const missingDescriptors = [...policies.keys()].filter((name) => !records.has(name));
 const missingDescriptions = [...records.values()].filter((entry) => typeof entry.description !== "string");
@@ -931,8 +956,8 @@ const tools = [...records.values()]
                 ...new Set([
                     ...entry.sources,
                     classification.source,
-                    anchor(INVOKER, 2834, 2875),
-                    ...(entry.name === "catalog_search" ? [anchor(SERIALIZERS, 4480, 4503)] : []),
+                    anchor(INVOKER, 3035, 3080),
+                    ...(entry.name === "catalog_search" ? [anchor(SERIALIZERS, 4674, 4700)] : []),
                 ]),
             ],
         };
@@ -1009,18 +1034,18 @@ const catalog = {
             "The source-bound capture reader evaluates only static Rust expressions. It fails on new descriptor names lacking policy or unresolved descriptions rather than silently curating a smaller catalog.",
         ],
         sources: [
-            anchor(REGISTRY, 238, 275),
-            anchor(REGISTRY, 500, 550),
-            anchor(INITIALIZATION, 206, 298),
-            anchor(INITIALIZATION, 335, 355),
-            anchor(INITIALIZATION, 1090, 1138),
-            anchor(INITIALIZATION, 1175, 1275),
-            anchor(CATALOG, 1230, 1518),
-            anchor(`${PREFIX}feature_hooks.rs`, 623, 650),
-            anchor("src/native/runtime/src/lib.rs", 90, 110),
-            anchor(`${PREFIX}shared_api/server.rs`, 2207, 2240),
-            anchor(`${PREFIX}session/session_settings_tools.rs`, 410, 451),
-            anchor(ALIASES, 105, 169),
+            anchor(REGISTRY, 247, 284),
+            anchor(REGISTRY, 535, 583),
+            anchor(INITIALIZATION, 285, 380),
+            anchor(INITIALIZATION, 417, 438),
+            anchor(INITIALIZATION, 1611, 1661),
+            anchor(INITIALIZATION, 1695, 1835),
+            anchor(CATALOG, 1328, 1612),
+            anchor(`${PREFIX}feature_hooks.rs`, 855, 893),
+            anchor("src/native/runtime/src/lib.rs", 127, 155),
+            anchor(`${PREFIX}shared_api/server.rs`, 3582, 3630),
+            anchor(`${PREFIX}session/session_settings_tools.rs`, 395, 439),
+            anchor(ALIASES, 140, 220),
         ],
     },
     tools,

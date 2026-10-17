@@ -15,8 +15,19 @@ TOOL_HANDLERS = {}
 PERMISSION_HANDLER = None
 PRE_TOOL_HOOK = None
 POST_TOOL_HOOK = None
+# Selected lifecycle hooks, keyed by SessionHooks name (for example "on_subagent_start"):
+# name -> callable(hook_input, invocation) -> output/None/awaitable.
+LIFECYCLE_HOOKS = {}
+# Selected host request handlers, keyed by create_session keyword (for example
+# "on_elicitation_request"). Elicitation receives one context; the others receive (request, invocation).
+HOST_HANDLERS = {}
+# Experimental: a real copilot.SkillProvider (list_skills/read_skill) backed by your skill store.
+SKILL_PROVIDER = None
 SESSION_FS_FACTORY = None
 PROVIDER_ENDPOINT = None
+# Plan names -> SDK registration names at the pinned snapshot.
+HOOK_NAMES = __HOOK_NAMES__
+HANDLER_NAMES = __HANDLER_NAMES__
 _console_lock = asyncio.Lock()
 
 
@@ -132,6 +143,48 @@ async def on_post_tool_use(data, invocation):
     return await result if inspect.isawaitable(result) else result
 
 
+def selected_hooks(plan):
+    return [HOOK_NAMES[name] for name in plan["policy"]["hooks"]]
+
+
+def selected_handlers(plan):
+    return [HANDLER_NAMES[name] for name in plan["policy"]["handlers"]]
+
+
+def make_lifecycle_hook(name):
+    async def dispatch(data, invocation):
+        hook = LIFECYCLE_HOOKS.get(name)
+        if not callable(hook):
+            raise NotImplementedError(f"Implement LIFECYCLE_HOOKS[{name!r}] in host.py; a selected hook is not a no-op.")
+        result = hook(data, invocation)
+        return await result if inspect.isawaitable(result) else result
+    return dispatch
+
+
+def make_host_handler(name):
+    async def dispatch(*args):
+        handler = HOST_HANDLERS.get(name)
+        if not callable(handler):
+            raise NotImplementedError(f"Implement HOST_HANDLERS[{name!r}] in host.py.")
+        result = handler(*args)
+        return await result if inspect.isawaitable(result) else result
+    return dispatch
+
+
+def skill_provider_shape_ok():
+    return SKILL_PROVIDER is not None and all(
+        callable(getattr(SKILL_PROVIDER, method, None)) for method in ("list_skills", "read_skill")
+    )
+
+
+def skill_provider():
+    """Return the application's real SkillProvider; never a placeholder catalog."""
+    from copilot import SkillProvider
+    if not skill_provider_shape_ok() or not isinstance(SKILL_PROVIDER, SkillProvider):
+        raise NotImplementedError("Implement SKILL_PROVIDER in host.py with a real copilot.SkillProvider.")
+    return SKILL_PROVIDER
+
+
 def create_session_fs_handler(session):
     """Return a real synchronous factory result, not an awaitable or no-op store."""
     if not callable(SESSION_FS_FACTORY):
@@ -187,6 +240,14 @@ def integration_blockers(plan, tools):
         blockers.append("Implement PRE_TOOL_HOOK in host.py.")
     if plan["policy"]["postToolHook"] and not callable(POST_TOOL_HOOK):
         blockers.append("Implement POST_TOOL_HOOK in host.py.")
+    for name in selected_hooks(plan):
+        if not callable(LIFECYCLE_HOOKS.get(name)):
+            blockers.append(f"Implement and register LIFECYCLE_HOOKS[{name!r}] in host.py.")
+    for name in selected_handlers(plan):
+        if not callable(HOST_HANDLERS.get(name)):
+            blockers.append(f"Implement and register HOST_HANDLERS[{name!r}] in host.py.")
+    if plan["context"]["skillProvider"] and not skill_provider_shape_ok():
+        blockers.append("Implement and register SKILL_PROVIDER in host.py (a real SkillProvider).")
     if plan["session"]["storage"] == "virtual" and not callable(SESSION_FS_FACTORY):
         blockers.append("Implement SESSION_FS_FACTORY in host.py.")
     if plan["model"]["provider"] != "copilot" and not plan["model"]["endpoint"].strip():
@@ -237,22 +298,49 @@ def validate_plan(plan):
     groups = {
         "target": {"language", "runtime", "serverUrl", "cliPath"},
         "prompt": {"mode", "content", "sections"},
-        "context": {"workspace", "discovery", "skills", "fileHooks", "hostGit", "skillDirectories", "pluginDirectories"},
-        "policy": {"permissionMode", "preToolHook", "postToolHook"},
-        "model": {"id", "provider", "endpoint", "wireApi", "credential", "credentialEnv", "reasoningEffort", "contextTier"},
-        "session": {"storage", "baseDirectory", "idleTimeoutSeconds", "infinite", "largeOutput"},
-        "events": {"streaming", "observer"},
+        "context": {
+            "workspace", "discovery", "skills", "fileHooks", "hostGit", "skillDirectories", "pluginDirectories",
+            "agentDirectories", "hookDirectories", "instructionDirectories", "additionalDirectories",
+            "skillProvider", "includedBuiltinSkills", "customInstructions", "onDemandInstructions",
+            "refreshCustomInstructions", "organizationInstructions",
+        },
+        "policy": {"permissionMode", "preToolHook", "postToolHook", "hooks", "handlers", "managed"},
+        "model": {
+            "id", "provider", "endpoint", "wireApi", "credential", "credentialEnv", "reasoningEffort", "contextTier",
+            "autoTier", "reasoningSummary", "allowedModels", "modelProvider", "wireModel", "maxPromptTokens",
+            "maxOutputTokens",
+        },
+        "capabilities": {"imageGeneration", "toolSearch", "toolSearchDeferThreshold", "askUserVariant"},
+        "session": {
+            "storage", "baseDirectory", "idleTimeoutSeconds", "infinite", "largeOutput", "name", "interactiveUser",
+            "diagnostics", "sessionStore", "fileChangeTracking", "allowTranscriptRecovery", "continuePendingWork",
+        },
+        "events": {"streaming", "observer", "subAgentStreaming", "logLevel"},
+        "output": {"responseSchema"},
     }
     fields = {
         "schemaVersion", "toolCatalogRevision", "target", "name", "preset", "clientMode", "inventory", "prompt",
-        "tools", "customTools", "mcpServers", "agents", "selectedAgent", "rootExcludedTools",
-        "context", "policy", "model", "identity", "session", "events", "evaluation",
+        "tools", "customTools", "mcpServers", "agents", "selectedAgent", "rootExcludedTools", "excludedBuiltinAgents",
+        "context", "policy", "model", "capabilities", "identity", "session", "events", "output", "evaluation",
     }
     exact_fields(plan, fields, "plan", fields)
-    if plan["schemaVersion"] != 2 or plan["target"]["language"] != "python":
-        raise ValueError("This project requires a version 2 Python harness plan.")
+    if plan["schemaVersion"] != 3 or plan["target"]["language"] != "python":
+        raise ValueError("This project requires a version 3 Python harness plan.")
     for name, keys in groups.items():
         exact_fields(plan[name], keys, f"plan.{name}", keys)
+    managed = {"load", "enforceModelDefaults", "deny", "ask", "allow", "limitTo", "disableBypassPermissionsMode", "disableAssistedPermissionsMode"}
+    exact_fields(plan["policy"]["managed"], managed, "plan.policy.managed", managed)
+    if not set(plan["policy"]["hooks"]) <= set(host.HOOK_NAMES) or len(set(plan["policy"]["hooks"])) != len(plan["policy"]["hooks"]):
+        raise ValueError("Unsupported or repeated lifecycle hook selection.")
+    if not set(plan["policy"]["handlers"]) <= set(host.HANDLER_NAMES) or len(set(plan["policy"]["handlers"])) != len(plan["policy"]["handlers"]):
+        raise ValueError("Unsupported or repeated host handler selection.")
+    if plan["events"]["logLevel"] not in {"default", "none", "error", "warning", "info", "debug", "all"}:
+        raise ValueError("Unsupported client log level.")
+    allowed_models = plan["model"]["allowedModels"]
+    if not isinstance(allowed_models, list) or not all(isinstance(item, str) and item for item in allowed_models):
+        raise ValueError("plan.model.allowedModels must be a list of exact model IDs.")
+    if not isinstance(plan["output"]["responseSchema"], str):
+        raise ValueError("plan.output.responseSchema must be JSON Schema text.")
     if plan["target"]["runtime"] not in {"managed", "external", "inprocess"}:
         raise ValueError("Unsupported runtime selection; regenerate the bootstrap.")
     if plan["clientMode"] not in {"empty", "copilot-cli"}:
@@ -268,10 +356,11 @@ def validate_plan(plan):
     if plan["session"]["storage"] == "local" and not plan["session"]["baseDirectory"].strip():
         raise ValueError("Local storage requires an explicit baseDirectory.")
     for group, names in {
-        "context": ("discovery", "skills", "fileHooks", "hostGit"),
+        "context": ("discovery", "skills", "fileHooks", "hostGit", "skillProvider", "onDemandInstructions", "refreshCustomInstructions"),
         "policy": ("preToolHook", "postToolHook"),
-        "session": ("infinite", "largeOutput"),
-        "events": ("streaming", "observer"),
+        "capabilities": ("imageGeneration",),
+        "session": ("infinite", "largeOutput", "interactiveUser", "sessionStore", "fileChangeTracking", "allowTranscriptRecovery", "continuePendingWork"),
+        "events": ("streaming", "observer", "subAgentStreaming"),
     }.items():
         for name in names:
             if type(plan[group][name]) is not bool:
@@ -292,9 +381,9 @@ def validate_plan(plan):
         if value["action"] not in {"keep", "override", "remove"}:
             raise ValueError(f"Unknown action for {name}.")
     for name, keys in {
-        "customTools": {"id", "name", "description", "parameters", "terminal"},
+        "customTools": {"id", "name", "description", "parameters", "terminal", "defer", "skipPermission"},
         "mcpServers": {"id", "name", "url", "tools"},
-        "agents": {"id", "name", "description", "prompt", "model", "tools"},
+        "agents": {"id", "name", "displayName", "description", "prompt", "model", "tools", "hooks"},
     }.items():
         for value in plan[name]:
             exact_fields(value, keys, f"plan.{name}", keys)
@@ -322,7 +411,15 @@ def load_configuration():
     if data["plan"] != plan:
         raise ValueError("harness-plan.json and python-bootstrap.json disagree. Regenerate after changing the plan.")
     session = data["session"]
-    optional = {"model", "reasoning_effort", "context_tier", "system_message", "available_tools", "working_directory", "agent", "default_agent", "provider"}
+    optional = {
+        "model", "reasoning_effort", "context_tier", "system_message", "available_tools", "working_directory", "agent", "default_agent", "provider",
+        "agent_directories", "hook_directories", "instruction_directories", "additional_directories",
+        "included_builtin_skills", "skip_custom_instructions", "enable_on_demand_instruction_discovery",
+        "refresh_custom_instructions", "organization_custom_instructions", "enable_managed_settings",
+        "enforce_managed_model_defaults", "managed_settings", "capi", "reasoning_summary", "image_generation",
+        "tool_search", "ask_user_variant", "excluded_builtin_agents", "name", "interactive_user", "diagnostics",
+        "enable_session_store", "enable_file_change_tracking", "include_sub_agent_streaming_events",
+    }
     required = set(SESSION_FIELDS) - optional
     for field, selected in {
         "model": bool(plan["model"]["id"].strip()),
@@ -369,7 +466,7 @@ def load_configuration():
     for name, server in session["mcp_servers"].items():
         exact_fields(server, {"type", "url", "tools"}, f"mcp_servers.{name}", {"type", "url", "tools"})
     for agent in session["custom_agents"]:
-        exact_fields(agent, {"name", "description", "prompt", "model", "tools"}, "custom agent", {"name", "description", "prompt", "tools"})
+        exact_fields(agent, {"name", "display_name", "description", "prompt", "model", "tools", "hooks"}, "custom agent", {"name", "description", "prompt", "tools"})
     if "default_agent" in session:
         exact_fields(session["default_agent"], {"excluded_tools"}, "default_agent", {"excluded_tools"})
     for key in ("infinite_sessions", "large_output"):
@@ -377,9 +474,32 @@ def load_configuration():
         if type(session[key]["enabled"]) is not bool:
             raise ValueError(f"{key}.enabled must be a boolean.")
     if "provider" in session:
-        exact_fields(session["provider"], {"type", "base_url", "wire_api"}, "provider", {"type", "base_url"})
+        exact_fields(
+            session["provider"],
+            {"type", "base_url", "wire_api", "model_provider", "wire_model", "max_prompt_tokens", "max_output_tokens"},
+            "provider",
+            {"type", "base_url"},
+        )
+    if "managed_settings" in session:
+        exact_fields(session["managed_settings"], {"permissions"}, "managed_settings", {"permissions"})
+        exact_fields(
+            session["managed_settings"]["permissions"],
+            {"disable_bypass_permissions_mode", "disable_assisted_permissions_mode", "deny", "ask", "allow", "limit_to"},
+            "managed_settings.permissions",
+        )
+    if "capi" in session:
+        exact_fields(session["capi"], {"auto_tier"}, "capi", {"auto_tier"})
+    if "image_generation" in session:
+        exact_fields(session["image_generation"], {"enabled"}, "image_generation", {"enabled"})
+    if "tool_search" in session:
+        exact_fields(session["tool_search"], {"enabled", "defer_threshold"}, "tool_search")
+    if "diagnostics" in session:
+        exact_fields(session["diagnostics"], {"sources"}, "diagnostics", {"sources"})
+        exact_fields(session["diagnostics"]["sources"], {"mcp"}, "diagnostics.sources", {"mcp"})
+        exact_fields(session["diagnostics"]["sources"]["mcp"], {"level"}, "diagnostics.sources.mcp", {"level"})
+    optional_tool_fields = {"defer", "skip_permission"}
     for tool in data["tools"]:
-        exact_fields(tool, TOOL_FIELDS, "tool", TOOL_FIELDS)
+        exact_fields(tool, TOOL_FIELDS, "tool", TOOL_FIELDS - optional_tool_fields)
         if not isinstance(tool["parameters"], dict) or tool["parameters"].get("type") != "object":
             raise ValueError(f"Tool {tool['name']} needs an object JSON Schema.")
     if plan["target"]["runtime"] == "external":
@@ -493,8 +613,22 @@ def session_options(data):
         hooks["on_pre_tool_use"] = host.on_pre_tool_use
     if plan["policy"]["postToolHook"]:
         hooks["on_post_tool_use"] = host.on_post_tool_use
+    for name in host.selected_hooks(plan):
+        hooks[name] = host.make_lifecycle_hook(name)
     if hooks:
         options["hooks"] = hooks
+    for name in host.selected_handlers(plan):
+        options[name] = host.make_host_handler(name)
+    if plan["context"]["skillProvider"]:
+        options["skill_provider"] = host.skill_provider()
+    if "managed_settings" in options:
+        from copilot import ManagedSettings, ManagedSettingsPermissions
+        options["managed_settings"] = ManagedSettings(
+            permissions=ManagedSettingsPermissions(**options["managed_settings"]["permissions"])
+        )
+    if "diagnostics" in options:
+        from copilot.generated.rpc import DiagnosticsConfiguration
+        options["diagnostics"] = DiagnosticsConfiguration.from_dict(options["diagnostics"])
     if plan["events"]["observer"]:
         options["on_event"] = host.metadata_observer
     if plan["session"]["storage"] == "virtual":
@@ -542,6 +676,9 @@ async def run_agent(data, prompt, timeout):
             # __S2S_INPROCESS_ENV_END__
             connection = RuntimeConnection.for_inprocess()
         client_options["session_idle_timeout_seconds"] = plan["session"]["idleTimeoutSeconds"]
+        if plan["events"]["logLevel"] != "default":
+            # Ignored for RuntimeConnection.for_uri, so only locally hosted runtimes receive it.
+            client_options["log_level"] = plan["events"]["logLevel"]
         client_options["use_logged_in_user"] = (
             plan["model"]["provider"] == "copilot" and plan["identity"] == "developer"
         )
@@ -561,7 +698,15 @@ async def run_agent(data, prompt, timeout):
         client = CopilotClient(connection=connection, **client_options)
         await client.start()
         session = await client.create_session(**session_options(data))
-        response = await session.send_and_wait(prompt, timeout=timeout)
+        if plan["model"]["allowedModels"]:
+            from copilot.generated.rpc import ModelSetAllowedModelsRequest
+            await session.rpc.model.set_allowed_models(
+                ModelSetAllowedModelsRequest(allowed_models=list(plan["model"]["allowedModels"]))
+            )
+        send_options = {}
+        if plan["output"]["responseSchema"].strip():
+            send_options["response_schema"] = json.loads(plan["output"]["responseSchema"])
+        response = await session.send_and_wait(prompt, timeout=timeout, **send_options)
         if response is None:
             print("[complete] Runtime is idle; no final assistant message was emitted. Terminal-tool completion is supported.")
         elif isinstance(response.data, AssistantMessageData):

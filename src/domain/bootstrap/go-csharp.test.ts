@@ -11,9 +11,10 @@ import { createPreset } from "../presets";
 import { reference } from "../../content/reference";
 import { csharpAdapter } from "./csharp";
 import { goAdapter } from "./go";
+import { SDK_SOURCE_REVISION } from "./revisions";
 import type { LanguageAdapter } from "./types";
 
-const revision = "f45c46fd1812f8bed5b4cbc250f47177c83068f0";
+const revision = SDK_SOURCE_REVISION;
 const adapters = [goAdapter, csharpAdapter];
 const temporaryDirectories: string[] = [];
 
@@ -74,6 +75,7 @@ function selectedPlan(adapter: LanguageAdapter): HarnessPlan {
     plan.selectedAgent = "reviewer";
     plan.rootExcludedTools = ["bash"];
     plan.context = {
+        ...plan.context,
         workspace: "/logical/workspace",
         discovery: true,
         skills: true,
@@ -82,15 +84,16 @@ function selectedPlan(adapter: LanguageAdapter): HarnessPlan {
         skillDirectories: ["/skills/with spaces"],
         pluginDirectories: ["/plugins/selected"],
     };
-    plan.policy = { permissionMode: "host", preToolHook: true, postToolHook: true };
+    plan.policy = { ...plan.policy, permissionMode: "host", preToolHook: true, postToolHook: true };
     plan.session = {
+        ...plan.session,
         storage: "virtual",
         baseDirectory: "/logical/state",
         idleTimeoutSeconds: 321,
         infinite: false,
         largeOutput: true,
     };
-    plan.events = { streaming: false, observer: true };
+    plan.events = { ...plan.events, streaming: false, observer: true };
     return HarnessPlanSchema.parse(plan);
 }
 
@@ -333,3 +336,381 @@ describe("source dependency policy and setup safety", () => {
         expect(existsSync(join(existing, ".git"))).toBe(false);
     });
 });
+
+const responseSchema =
+    '{"type":"object","properties":{"total":{"type":"integer","maximum":9007199254740993}},"required":["total"]}';
+
+function v3Plan(adapter: LanguageAdapter): HarnessPlan {
+    const plan = selectedPlan(adapter);
+    plan.target.runtime = "managed";
+    plan.target.serverUrl = "";
+    plan.context = {
+        ...plan.context,
+        agentDirectories: ["/agents"],
+        hookDirectories: ["/hooks"],
+        instructionDirectories: ["/instructions"],
+        additionalDirectories: ["/extra"],
+        skillProvider: true,
+        includedBuiltinSkills: ["docs"],
+        customInstructions: "skip",
+        onDemandInstructions: true,
+        refreshCustomInstructions: true,
+        organizationInstructions: "Follow organization rules.",
+    };
+    plan.policy = {
+        ...plan.policy,
+        hooks: ["subagentStart", "preMcpToolCall"],
+        handlers: ["elicitation", "mcpAuth"],
+        managed: {
+            ...plan.policy.managed,
+            load: true,
+            enforceModelDefaults: true,
+            deny: ["Shell(rm *)"],
+            limitTo: ["Domain(example.com)"],
+            disableBypassPermissionsMode: "disable",
+            disableAssistedPermissionsMode: true,
+        },
+    };
+    plan.model = {
+        ...plan.model,
+        autoTier: "balance",
+        reasoningSummary: "concise",
+        allowedModels: ["selected-model", "other-model"],
+        modelProvider: "azure_openai",
+        wireModel: "deployment-a",
+        maxPromptTokens: 1000,
+        maxOutputTokens: 500,
+    };
+    plan.capabilities = {
+        imageGeneration: true,
+        toolSearch: "enabled",
+        toolSearchDeferThreshold: 12,
+        askUserVariant: "elicitation",
+    };
+    plan.excludedBuiltinAgents = ["explore"];
+    plan.session = {
+        ...plan.session,
+        name: "Nightly run",
+        interactiveUser: true,
+        diagnostics: "debug",
+        sessionStore: true,
+        fileChangeTracking: true,
+    };
+    plan.events = { ...plan.events, subAgentStreaming: false, logLevel: "debug" };
+    plan.output = { responseSchema };
+    plan.customTools = plan.customTools.map((tool) => ({ ...tool, defer: "never", skipPermission: true }));
+    plan.agents = plan.agents.map((agent) => ({
+        ...agent,
+        displayName: "Reviewer",
+        hooks: '{"preToolUse":[{"type":"command","bash":"./check.sh"}]}',
+    }));
+    return HarnessPlanSchema.parse(plan);
+}
+
+/**
+ * Session-config members at SDK b96cd2b5 that each session.json key binds to. Go decodes
+ * case-insensitively into untagged SessionConfig fields (go/types.go ~1603-2000); .NET uses
+ * JsonSerializerDefaults.Web over SessionConfigBase/SessionConfig (dotnet/src/Types.cs ~3787-4630).
+ */
+const sdkMembers = {
+    go: {
+        agentDirectories: "AgentDirectories",
+        hookDirectories: "HookDirectories",
+        instructionDirectories: "InstructionDirectories",
+        additionalDirectories: "AdditionalDirectories",
+        includedBuiltinSkills: "IncludedBuiltinSkills",
+        skipCustomInstructions: "SkipCustomInstructions",
+        enableOnDemandInstructionDiscovery: "EnableOnDemandInstructionDiscovery",
+        refreshCustomInstructions: "RefreshCustomInstructions",
+        organizationCustomInstructions: "OrganizationCustomInstructions",
+        enableManagedSettings: "EnableManagedSettings",
+        enforceManagedModelDefaults: "EnforceManagedModelDefaults",
+        managedSettings: "ManagedSettings",
+        capi: "Capi",
+        reasoningSummary: "ReasoningSummary",
+        imageGeneration: "ImageGeneration",
+        toolSearch: "ToolSearch",
+        askUserVariant: "AskUserVariant",
+        excludedBuiltinAgents: "ExcludedBuiltInAgents",
+        name: "Name",
+        interactiveUser: "InteractiveUser",
+        diagnostics: "Diagnostics",
+        enableSessionStore: "EnableSessionStore",
+        enableFileChangeTracking: "EnableFileChangeTracking",
+        includeSubAgentStreamingEvents: "IncludeSubAgentStreamingEvents",
+    },
+    csharp: {
+        agentDirectories: "AgentDirectories",
+        hookDirectories: "HookDirectories",
+        instructionDirectories: "InstructionDirectories",
+        additionalDirectories: "AdditionalDirectories",
+        includedBuiltinSkills: "IncludedBuiltinSkills",
+        skipCustomInstructions: "SkipCustomInstructions",
+        enableOnDemandInstructionDiscovery: "EnableOnDemandInstructionDiscovery",
+        refreshCustomInstructions: "RefreshCustomInstructions",
+        organizationCustomInstructions: "OrganizationCustomInstructions",
+        enableManagedSettings: "EnableManagedSettings",
+        enforceManagedModelDefaults: "EnforceManagedModelDefaults",
+        managedSettings: "ManagedSettings",
+        capi: "Capi",
+        reasoningSummary: "ReasoningSummary",
+        imageGeneration: "ImageGeneration",
+        toolSearch: "ToolSearch",
+        askUserVariant: "AskUserVariant",
+        excludedBuiltinAgents: "ExcludedBuiltInAgents",
+        name: "Name",
+        interactiveUser: "InteractiveUser",
+        diagnostics: "Diagnostics",
+        enableSessionStore: "EnableSessionStore",
+        enableFileChangeTracking: "EnableFileChangeTracking",
+        includeSubAgentStreamingEvents: "IncludeSubAgentStreamingEvents",
+    },
+} as const;
+
+const legacyHostKeys = [
+    "runtime",
+    "serverAddress",
+    "cliPath",
+    "clientMode",
+    "identity",
+    "credential",
+    "credentialEnv",
+    "permissionMode",
+    "storage",
+    "baseDirectory",
+    "idleTimeoutSeconds",
+    "userInput",
+    "observer",
+    "preToolHook",
+    "postToolHook",
+];
+
+describe.each(adapters)("$label plan schema v3 options", (adapter) => {
+    const go = adapter.language === "go";
+    const mainFile = go ? "main.go" : "Program.cs";
+    const hostFile = go ? "host.go" : "Host.cs";
+
+    it("maps every new session key to a pinned SessionConfig member with a compatible shape", () => {
+        const plan = v3Plan(adapter);
+        const data = JSON.parse(file(adapter, plan, "config/session.json")) as Record<string, unknown>;
+        expect(data).toMatchObject({
+            agentDirectories: ["/agents"],
+            hookDirectories: ["/hooks"],
+            instructionDirectories: ["/instructions"],
+            additionalDirectories: ["/extra"],
+            includedBuiltinSkills: ["docs"],
+            skipCustomInstructions: true,
+            enableOnDemandInstructionDiscovery: true,
+            refreshCustomInstructions: true,
+            organizationCustomInstructions: "Follow organization rules.",
+            enableManagedSettings: true,
+            enforceManagedModelDefaults: true,
+            managedSettings: {
+                permissions: {
+                    disableBypassPermissionsMode: "disable",
+                    disableAssistedPermissionsMode: true,
+                    deny: ["Shell(rm *)"],
+                    limitTo: ["Domain(example.com)"],
+                },
+            },
+            capi: { autoTier: "balance" },
+            reasoningSummary: "concise",
+            imageGeneration: { enabled: true },
+            toolSearch: { enabled: true, deferThreshold: 12 },
+            askUserVariant: "elicitation",
+            excludedBuiltinAgents: ["explore"],
+            name: "Nightly run",
+            interactiveUser: true,
+            diagnostics: { sources: { mcp: { level: "debug" } } },
+            enableSessionStore: true,
+            enableFileChangeTracking: true,
+            includeSubAgentStreamingEvents: false,
+            provider: {
+                modelProvider: "azure_openai",
+                wireModel: "deployment-a",
+                maxPromptTokens: 1000,
+                maxOutputTokens: 500,
+            },
+            customAgents: [
+                {
+                    name: "reviewer",
+                    displayName: "Reviewer",
+                    hooks: { preToolUse: [{ type: "command", bash: "./check.sh" }] },
+                },
+            ],
+        });
+        expect(data).not.toHaveProperty("autoTier");
+        expect(data).not.toHaveProperty("allowedModels");
+        const members: Record<string, string> = sdkMembers[go ? "go" : "csharp"];
+        expect(Object.keys(sessionKeysBeyond(data)).sort()).toEqual(Object.keys(members).sort());
+        for (const key of Object.keys(sessionKeysBeyond(data)))
+            expect(members[key]?.toLowerCase(), key).toBe(key.toLowerCase());
+    });
+
+    it("applies allowedModels through session.model.setAllowedModels right after creation", () => {
+        const plan = v3Plan(adapter);
+        expect(JSON.parse(file(adapter, plan, "config/host.json"))).toMatchObject({
+            allowedModels: ["selected-model", "other-model"],
+            logLevel: "debug",
+        });
+        const main = file(adapter, plan, mainFile);
+        if (go) {
+            expect(main).toContain("AllowedModels []string");
+            expect(main).toMatch(
+                /session, err := client\.CreateSession\(ctx, config\)[\s\S]*?session\.Disconnect\(\)[^\n]*\n\tif len\(settings\.AllowedModels\) > 0 \{\n\t\tif _, err := session\.RPC\.Model\.SetAllowedModels\(ctx, &rpc\.ModelSetAllowedModelsRequest\{/,
+            );
+            expect(main).toContain('return fmt.Errorf("apply allowed models: %w", err)');
+        } else {
+            expect(main).toContain("public IList<string>? AllowedModels { get; init; }");
+            expect(main).toContain(
+                "await using var session = await client.CreateSessionAsync(config, cancellation.Token);\n                if (settings.AllowedModels is { Count: > 0 } allowedModels)\n                    await session.Rpc.Model.SetAllowedModelsAsync(allowedModels, cancellation.Token);",
+            );
+        }
+    });
+
+    it("binds selected lifecycle hooks, request handlers, and the skill provider with preflight checks", () => {
+        const plan = v3Plan(adapter);
+        const host = file(adapter, plan, hostFile);
+        if (go) {
+            for (const fragment of [
+                "var SubagentStartHook copilot.SubagentStartHandler",
+                "var PreMCPToolCallHook copilot.PreMCPToolCallHandler",
+                "var ElicitationRequestHandler copilot.ElicitationHandler",
+                "var MCPAuthRequestHandler copilot.MCPAuthHandler",
+                "var SkillProvider copilot.SkillProvider",
+                'add(errors.New("implement and register SubagentStartHook in host.go"))',
+                'add(errors.New("implement and register MCPAuthRequestHandler in host.go"))',
+                'add(errors.New("implement and register SkillProvider in host.go"))',
+                "config.Hooks.OnSubagentStart = SubagentStartHook",
+                "config.Hooks.OnPreMCPToolCall = PreMCPToolCallHook",
+                "config.OnElicitationRequest = ElicitationRequestHandler",
+                "config.OnMCPAuthRequest = MCPAuthRequestHandler",
+                "config.SkillProvider = SkillProvider",
+            ])
+                expect(host).toContain(fragment);
+            expect(host).not.toContain("SessionStartHook");
+        } else {
+            for (const fragment of [
+                "public static Func<SubagentStartHookInput, HookInvocation, Task<SubagentStartHookOutput?>>? SubagentStartHook { get; set; }",
+                "public static Func<PreMcpToolCallHookInput, HookInvocation, Task<PreMcpToolCallHookOutput?>>? PreMcpToolCallHook { get; set; }",
+                "public static Func<ElicitationContext, Task<ElicitationResult>>? ElicitationRequestHandler { get; set; }",
+                "public static Func<McpAuthContext, Task<McpAuthResult?>>? McpAuthRequestHandler { get; set; }",
+                "public static ISkillProvider? SkillProvider { get; set; }",
+                'problems.Add("- Implement and register SubagentStartHook in Host.cs.");',
+                'problems.Add("- Implement and register McpAuthRequestHandler in Host.cs.");',
+                'problems.Add("- Implement and register SkillProvider in Host.cs.");',
+                "config.Hooks ??= new SessionHooks();",
+                "config.Hooks.OnSubagentStart = SubagentStartHook",
+                "config.Hooks.OnPreMcpToolCall = PreMcpToolCallHook",
+                "config.OnElicitationRequest = ElicitationRequestHandler",
+                "config.OnMcpAuthRequest = McpAuthRequestHandler",
+                "config.SkillProvider = SkillProvider",
+            ])
+                expect(host).toContain(fragment);
+        }
+        const ids = adapter.generate(plan).requirements.map((item) => item.id);
+        expect(ids).toEqual(
+            expect.arrayContaining([
+                "hook-subagentStart",
+                "hook-preMcpToolCall",
+                "handler-elicitation",
+                "handler-mcpAuth",
+                "skill-provider",
+            ]),
+        );
+        expect(new Set(ids).size).toBe(ids.length);
+    });
+
+    it("passes the response schema verbatim with the run prompt and sets the client log level", () => {
+        const plan = v3Plan(adapter);
+        expect(file(adapter, plan, "config/response-schema.json")).toBe(responseSchema + "\n");
+        const main = file(adapter, plan, mainFile);
+        if (go) {
+            expect(main).toContain("config/tools.json config/response-schema.json");
+            expect(main).toContain("Prompt: prompt, ResponseSchema: responseSchema,");
+            expect(main).toContain("options.LogLevel = settings.LogLevel");
+        } else {
+            expect(file(adapter, plan, "HarnessAgent.csproj")).toContain(
+                'LogicalName="Harness.response-schema.json"',
+            );
+            expect(main).toContain('ReadConfiguration<JsonElement>("response-schema.json")');
+            expect(main).toContain("new MessageOptions { Prompt = prompt, ResponseSchema = responseSchema }");
+            expect(main).toContain("options.LogLevel = new CopilotLogLevel(settings.LogLevel);");
+        }
+        plan.target.runtime = "external";
+        plan.target.serverUrl = "tcp://127.0.0.1:45123";
+        const external = adapter.generate(plan);
+        const externalMain = external.files.find((entry) => entry.path === mainFile)?.content ?? "";
+        expect(externalMain).not.toContain("LogLevel = ");
+        expect(JSON.parse(file(adapter, plan, "config/host.json"))).not.toHaveProperty("logLevel");
+        expect(external.notes.some((note) => note.includes("log level (debug) is not applied"))).toBe(true);
+    });
+
+    it("forwards custom tool defer and skipPermission", () => {
+        const plan = v3Plan(adapter);
+        const tools = JSON.parse(file(adapter, plan, "config/tools.json")) as Record<string, unknown>[];
+        expect(tools.find((tool) => tool.name === "lookup_record")).toMatchObject({
+            defer: "never",
+            skipPermission: true,
+        });
+        expect(tools.find((tool) => tool.name === "bash")).not.toHaveProperty("defer");
+        const host = file(adapter, plan, hostFile);
+        expect(host).not.toContain("must not skip the host permission policy");
+        if (!go) {
+            expect(host).toContain("SkipPermission = definition.SkipPermission");
+            expect(host).toContain('"never" => CopilotToolDefer.Never');
+            expect(file(adapter, plan, mainFile)).toContain("public string? Defer { get; init; }");
+        }
+    });
+
+    it("leaves default-plan output free of v3 bindings", () => {
+        for (const plan of [createPreset("empty"), selectedPlan(adapter)]) {
+            plan.target.language = adapter.language;
+            const files = adapter.generate(plan).files;
+            expect(Object.keys(JSON.parse(file(adapter, plan, "config/host.json")))).toEqual(legacyHostKeys);
+            expect(files.some((entry) => entry.path === "config/response-schema.json")).toBe(false);
+            const source = files.map((entry) => entry.content).join("\n");
+            for (const marker of [
+                "SetAllowedModels",
+                "ResponseSchema",
+                "SkillProvider",
+                "LogLevel",
+                "SubagentStart",
+                "OnElicitationRequest",
+                '"defer"',
+            ])
+                expect(source, marker).not.toContain(marker);
+            expect(source).toContain(
+                go ? "must not skip the host permission policy" : "SkipPermission = false",
+            );
+        }
+    });
+});
+
+/** session.json keys introduced by plan schema v3 (everything else predates it). */
+function sessionKeysBeyond(data: Record<string, unknown>): Record<string, unknown> {
+    const legacy = new Set([
+        "model",
+        "reasoningEffort",
+        "contextTier",
+        "systemMessage",
+        "availableTools",
+        "excludedTools",
+        "workingDirectory",
+        "enableConfigDiscovery",
+        "enableSkills",
+        "enableFileHooks",
+        "enableHostGitOperations",
+        "skillDirectories",
+        "pluginDirectories",
+        "mcpServers",
+        "customAgents",
+        "agent",
+        "defaultAgent",
+        "infiniteSessions",
+        "largeOutput",
+        "streaming",
+        "provider",
+    ]);
+    return Object.fromEntries(Object.entries(data).filter(([key]) => !legacy.has(key)));
+}

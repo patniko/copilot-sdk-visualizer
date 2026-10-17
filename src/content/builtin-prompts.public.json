@@ -93,7 +93,7 @@
             "title": "Runtime-added instructions",
             "kind": "dynamic",
             "content": "{{mode_memory_model_mcp_agent_and_extension_guidance}}",
-            "note": "The runtime composes this from materialized session inputs and enabled capabilities. The builder cannot reproduce it faithfully without the chosen runtime/model/session.",
+            "note": "The runtime composes this from materialized session inputs and enabled capabilities, such as system notifications, memories, workspace context, and content-exclusion policy. Mode-specific instructions can travel in transition messages instead. The builder cannot reproduce it faithfully without the chosen runtime/model/session.",
             "source": ""
         },
         {
@@ -101,7 +101,7 @@
             "title": "Final guidance",
             "kind": "fragment",
             "content": "Your goal is to deliver complete, working solutions. If your first approach doesn't fully solve the problem, iterate with alternative approaches. Don't settle for partial fixes. Verify your changes actually work before considering the task done.\n\nRespond concisely to the user, but be thorough in your work.\n\n{{model_specific_and_subagent_guidance}}",
-            "note": "Excerpts of default final guidance; model and configured-subagent additions vary. This is not the final cache-block or wire ordering.",
+            "note": "Excerpts of default final guidance; model additions vary. When the task tool is available it also carries configured subagent-model guidance; overrides change that prose, not runtime model selection or tool availability. This is not the final cache-block or wire ordering.",
             "source": ""
         }
     ]

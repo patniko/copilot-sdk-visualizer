@@ -13,6 +13,8 @@ The builder does not start agents, call model services, execute tools, or store 
 ## What you can do
 
 - Configure prompts, tools, MCP servers, context, agents, models, policies, sessions, and evaluation criteria.
+- Cover newer SDK session options: discovery-only agent/hook/instruction roots, custom-instruction loading, SDK lifecycle hooks and host request handlers, host-injected managed policy, model allowlists and routing preferences, custom-provider overrides, tool search and deferral, session naming, diagnostics, resume behavior, and per-run structured output.
+- See SDK options the SDK marks as experimental (such as the skill provider and image generation) flagged with an **Experimental** badge.
 - Explore runtime capabilities and trace an illustrative model/tool turn.
 - Compare local, container, managed-cloud, and production hosting architectures.
 - Choose managed-process, existing-service, or experimental in-process runtime placement.

@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { BUILTIN_NAMES } from "../plan";
-import type { HarnessPlan } from "../plan";
+import type { HarnessPlan, HostHandler, LifecycleHook } from "../plan";
 import { runtimeEndpoint } from "../target";
 import { commonRequirements, sessionData, toolDefinitions } from "./common";
-import { SDK_SOURCE_REVISION } from "./revisions";
+import { COPILOT_CLI_VERSION, SDK_SOURCE_REVISION } from "./revisions";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 import { pythonAgent, pythonHost, pythonProvision, pythonRunner, pythonSetup } from "./python-templates";
 
 const SDK_COMMIT = SDK_SOURCE_REVISION;
-const RUNTIME_VERSION = "1.0.84-5";
+const RUNTIME_VERSION = COPILOT_CLI_VERSION;
 const HOST_FILE = "host.py";
 
 const SESSION_ALIASES = {
@@ -33,7 +33,34 @@ const SESSION_ALIASES = {
     largeOutput: "large_output",
     streaming: "streaming",
     provider: "provider",
+    agentDirectories: "agent_directories",
+    hookDirectories: "hook_directories",
+    instructionDirectories: "instruction_directories",
+    additionalDirectories: "additional_directories",
+    includedBuiltinSkills: "included_builtin_skills",
+    skipCustomInstructions: "skip_custom_instructions",
+    enableOnDemandInstructionDiscovery: "enable_on_demand_instruction_discovery",
+    refreshCustomInstructions: "refresh_custom_instructions",
+    organizationCustomInstructions: "organization_custom_instructions",
+    enableManagedSettings: "enable_managed_settings",
+    enforceManagedModelDefaults: "enforce_managed_model_defaults",
+    managedSettings: "managed_settings",
+    // CapiSessionOptions (python/copilot/client.py) carries auto_tier.
+    capi: "capi",
+    reasoningSummary: "reasoning_summary",
+    imageGeneration: "image_generation",
+    toolSearch: "tool_search",
+    askUserVariant: "ask_user_variant",
+    excludedBuiltinAgents: "excluded_builtin_agents",
+    name: "name",
+    interactiveUser: "interactive_user",
+    diagnostics: "diagnostics",
+    enableSessionStore: "enable_session_store",
+    enableFileChangeTracking: "enable_file_change_tracking",
+    includeSubAgentStreamingEvents: "include_sub_agent_streaming_events",
 } satisfies Record<keyof ReturnType<typeof sessionData>, string>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
 
 const TOOL_ALIASES = {
     name: "name",
@@ -41,7 +68,30 @@ const TOOL_ALIASES = {
     parameters: "parameters",
     overridesBuiltInTool: "overrides_built_in_tool",
     isTerminal: "is_terminal",
-} satisfies Record<keyof ReturnType<typeof toolDefinitions>[number], string>;
+    defer: "defer",
+    skipPermission: "skip_permission",
+} satisfies Record<KeysOfUnion<ReturnType<typeof toolDefinitions>[number]>, string>;
+
+/** SDK SessionHooks keys (python/copilot/session.py SessionHooks) for each selectable lifecycle hook. */
+export const PYTHON_HOOKS = {
+    preMcpToolCall: "on_pre_mcp_tool_call",
+    userPromptSubmitted: "on_user_prompt_submitted",
+    userPromptTransformed: "on_user_prompt_transformed",
+    sessionStart: "on_session_start",
+    sessionEnd: "on_session_end",
+    errorOccurred: "on_error_occurred",
+    agentStop: "on_agent_stop",
+    subagentStart: "on_subagent_start",
+    subagentStop: "on_subagent_stop",
+} satisfies Record<LifecycleHook, string>;
+
+/** create_session keyword for each selectable host request handler. */
+export const PYTHON_HANDLERS = {
+    elicitation: "on_elicitation_request",
+    exitPlanMode: "on_exit_plan_mode_request",
+    autoModeSwitch: "on_auto_mode_switch_request",
+    mcpAuth: "on_mcp_auth_request",
+} satisfies Record<HostHandler, string>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -70,7 +120,16 @@ function pythonSession(plan: HarnessPlan): Record<string, unknown> {
     output.custom_agents = data.customAgents.map((agent) =>
         aliases(
             agent,
-            { name: "name", description: "description", prompt: "prompt", model: "model", tools: "tools" },
+            {
+                name: "name",
+                displayName: "display_name",
+                description: "description",
+                prompt: "prompt",
+                model: "model",
+                tools: "tools",
+                // Declarative hook payloads are forwarded verbatim (camelCase event keys).
+                hooks: "hooks",
+            },
             `customAgents.${agent.name}`,
         ),
     );
@@ -84,12 +143,46 @@ function pythonSession(plan: HarnessPlan): Record<string, unknown> {
     if (data.provider) {
         output.provider = aliases(
             data.provider,
-            { type: "type", baseUrl: "base_url", wireApi: "wire_api" },
+            {
+                type: "type",
+                baseUrl: "base_url",
+                wireApi: "wire_api",
+                modelProvider: "model_provider",
+                wireModel: "wire_model",
+                maxPromptTokens: "max_prompt_tokens",
+                maxOutputTokens: "max_output_tokens",
+            },
             "provider",
         );
     }
     output.infinite_sessions = aliases(data.infiniteSessions, { enabled: "enabled" }, "infiniteSessions");
     output.large_output = aliases(data.largeOutput, { enabled: "enabled" }, "largeOutput");
+    if (data.managedSettings) {
+        output.managed_settings = {
+            permissions: aliases(
+                data.managedSettings.permissions,
+                {
+                    disableBypassPermissionsMode: "disable_bypass_permissions_mode",
+                    disableAssistedPermissionsMode: "disable_assisted_permissions_mode",
+                    deny: "deny",
+                    ask: "ask",
+                    allow: "allow",
+                    limitTo: "limit_to",
+                },
+                "managedSettings.permissions",
+            ),
+        };
+    }
+    if (data.capi) output.capi = aliases(data.capi, { autoTier: "auto_tier" }, "capi");
+    if (data.imageGeneration)
+        output.image_generation = aliases(data.imageGeneration, { enabled: "enabled" }, "imageGeneration");
+    if (data.toolSearch)
+        output.tool_search = aliases(
+            data.toolSearch,
+            { enabled: "enabled", deferThreshold: "defer_threshold" },
+            "toolSearch",
+        );
+    // DiagnosticsConfiguration.from_dict reads the wire shape {sources: {mcp: {level}}} unchanged.
     return output;
 }
 
@@ -158,7 +251,9 @@ function render(template: string, plan: HarnessPlan): string {
         .replaceAll("__RUNTIME_VERSION__", RUNTIME_VERSION)
         .replaceAll("__SESSION_FIELDS__", JSON.stringify(Object.values(SESSION_ALIASES)))
         .replaceAll("__TOOL_FIELDS__", JSON.stringify(Object.values(TOOL_ALIASES)))
-        .replaceAll("__BUILTIN_NAMES__", JSON.stringify(BUILTIN_NAMES));
+        .replaceAll("__BUILTIN_NAMES__", JSON.stringify(BUILTIN_NAMES))
+        .replaceAll("__HOOK_NAMES__", JSON.stringify(PYTHON_HOOKS))
+        .replaceAll("__HANDLER_NAMES__", JSON.stringify(PYTHON_HANDLERS));
 }
 
 export const pythonAdapter = {
@@ -300,6 +395,43 @@ export const pythonAdapter = {
                           : "GitHub App S2S identity reads COPILOT_GITHUB_TOKEN from the trusted host environment and injects it into the managed child runtime. The client disables logged-in-user fallback and does not register a session token callback."
                     : "GitHub host-token mode reads GITHUB_TOKEN and GITHUB_TOKEN_EXPIRES_AT (absolute UNIX seconds). BYOK API keys use the plan's credentialEnv; bearer callbacks read MODEL_BEARER_TOKEN. These single-process environment adapters are starters, not production refresh or tenant identity services.",
                 "The console input handler honors choices and allowFreeform and returns answer/wasFreeform. Hook payloads also retain SDK camelCase keys even though Python registration names use snake_case.",
+                ...(plan.policy.hooks.length
+                    ? [
+                          `Selected lifecycle hooks must be registered in host.py LIFECYCLE_HOOKS under their SessionHooks names (${plan.policy.hooks.map((hook) => PYTHON_HOOKS[hook]).join(", ")}); preflight rejects each missing callable. user_prompt_submitted can return {"decision": "block", "reason": ...}; subagent_stop can block with a nonempty reason or rewrite the response.`,
+                      ]
+                    : []),
+                ...(plan.policy.handlers.length
+                    ? [
+                          `Selected host request handlers must be registered in host.py HOST_HANDLERS (${plan.policy.handlers.map((handler) => PYTHON_HANDLERS[handler]).join(", ")}); preflight rejects each missing callable.`,
+                      ]
+                    : []),
+                ...(plan.context.skillProvider
+                    ? [
+                          "Experimental skill provider: assign a real copilot.SkillProvider (list_skills/read_skill backed by your skill store) to host.py SKILL_PROVIDER. Calls are cancelled after 30 seconds; preflight rejects a missing provider and no placeholder catalog is supplied.",
+                      ]
+                    : []),
+                ...(plan.model.allowedModels.length
+                    ? [
+                          "The Python SDK has no allowed-models session option. Immediately after create_session, the runner applies the plan's allowlist with session.rpc.model.set_allowed_models (session.model.setAllowedModels); a rejection disconnects the session, stops the client, and fails the run.",
+                      ]
+                    : []),
+                ...(plan.events.logLevel !== "default"
+                    ? [
+                          plan.target.runtime === "external"
+                              ? "The selected runtime log level is not applied: the Python client ignores log_level when connecting to an existing runtime with RuntimeConnection.for_uri. Configure logging on the separately operated server."
+                              : `The client passes log_level=${JSON.stringify(plan.events.logLevel)} to the locally hosted runtime.`,
+                      ]
+                    : []),
+                ...(plan.output.responseSchema.trim()
+                    ? [
+                          "The run prompt is sent with send_and_wait(response_schema=...) using the plan's JSON object schema; the final assistant message content is the structured JSON text.",
+                      ]
+                    : []),
+                ...(plan.model.autoTier !== "default"
+                    ? [
+                          'The Auto routing tier is passed as capi={"auto_tier": ...}; it applies when the session model is auto.',
+                      ]
+                    : []),
                 "Virtual session storage requires a real SessionFsProvider returned by create_session_fs_handler. The starter advertises no SQLite capability. Session storage is not universal host-filesystem virtualization; large-output handling and selected native tools retain their own behavior.",
                 "Cleanup preserves the primary failure, adds any cleanup errors as notes, and still attempts both session disconnect and client stop. Disconnect preserves durable state. An idle turn without a final assistant message prints an explicit completion notice, including the terminal-tool case.",
                 ...(endpoint

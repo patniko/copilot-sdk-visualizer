@@ -22,6 +22,32 @@ const contents = Object.fromEntries(
     ),
 );
 const decode = (literal) => JSON.parse(literal.replace(/\\\r?\n\s*/g, ""));
+const stringLiteral = /"(?:\\.|[^"\\])*"/g;
+// Expands `const NAME: &str = macro_name!("optional literal");` where the macro
+// body is a `concat!` of string literals plus one optional `$($arg, "\n",)?` slot.
+function macroConstant(source, name) {
+    const use = source.match(
+        new RegExp(
+            `\\bconst\\s+${name}\\s*:\\s*&str\\s*=\\s*(\\w+)!\\(\\s*("(?:\\\\.|[^"\\\\])*")?\\s*\\)\\s*;`,
+        ),
+    );
+    if (!use) return undefined;
+    const [, macro, argument] = use;
+    const body = source.match(
+        new RegExp(`macro_rules!\\s+${macro}\\s*\\{[\\s\\S]*?concat!\\(([\\s\\S]*?)\\)\\s*\\};\\s*\\}`),
+    )?.[1];
+    if (!body) throw new Error(`Cannot expand prompt macro ${macro} for ${name}.`);
+    const optional = body.match(/\$\(\$\w+\s*,\s*("(?:\\.|[^"\\])*")\s*,\s*\)\?/);
+    return body
+        .split(/\$\(\$\w+\s*,\s*"(?:\\.|[^"\\])*"\s*,\s*\)\?/)
+        .map((part, index) =>
+            [
+                ...[...part.matchAll(stringLiteral)].map((match) => decode(match[0])),
+                ...(index === 0 && optional && argument ? [decode(argument), decode(optional[1])] : []),
+            ].join(""),
+        )
+        .join("");
+}
 function constant(file, name) {
     const source = contents[file];
     const raw = source.match(new RegExp(`\\bconst\\s+${name}\\s*:\\s*&str\\s*=\\s*r(#+)"([\\s\\S]*?)"\\1;`));
@@ -29,8 +55,10 @@ function constant(file, name) {
     const normal = source.match(
         new RegExp(`\\bconst\\s+${name}\\s*:\\s*&str\\s*=\\s*("(?:\\\\.|[^"\\\\])*")\\s*;`),
     );
-    if (!normal) throw new Error(`Cannot find prompt constant ${name}.`);
-    return decode(normal[1]).trim();
+    if (normal) return decode(normal[1]).trim();
+    const expanded = macroConstant(source, name);
+    if (expanded === undefined) throw new Error(`Cannot find prompt constant ${name}.`);
+    return expanded.trim();
 }
 const link = (file, lines) =>
     `https://github.com/github/copilot-agent-runtime/blob/${revision}/${paths[file]}#${lines}`;
@@ -50,7 +78,7 @@ const sections = [
         kind: "literal",
         content: identity,
         note: "Exact model-agnostic product identity constant. This is a repository reference, not this assistant's live prompt.",
-        source: link("assembler", "L59-L65"),
+        source: link("assembler", "L129-L130"),
     },
     {
         id: "identity",
@@ -58,7 +86,7 @@ const sections = [
         kind: "assembly",
         content: `${identity}\n\n{{interaction_mode}}\n\n${tone}\n\n{{search_and_delegation}}\n\n{{tool_efficiency}}\n\n{{version_information}}\n\n{{model_information}}\n\n${constant("assembler", "IDENTITY_TASK_INSTRUCTIONS")}`,
         note: "Assembly reference for the group. Braced markers stand for runtime inputs, not SDK expansion macros. The identity group contains preamble, tone, and tool_efficiency plus non-addressable mode/search/version/model/task members; environment_context is separate.",
-        source: link("assembler", "L558-L623"),
+        source: link("assembler", "L692-L755"),
         members: ["preamble", "tone", "tool_efficiency"],
     },
     {
@@ -67,7 +95,7 @@ const sections = [
         kind: "literal",
         content: tone,
         note: "Rendered from the generic fallback constant. Model-specific profiles can replace this text; the builder does not resolve a live model.",
-        source: link("fragments", "L151-L166"),
+        source: link("fragments", "L117-L118"),
     },
     {
         id: "tool_efficiency",
@@ -75,7 +103,7 @@ const sections = [
         kind: "template",
         content: decode(efficiencyFormat),
         note: "Actual format text, with unresolved Rust-format slots. The runtime selects tool names and delegation guidance from the active inventory.",
-        source: link("fragments", "L264-L320"),
+        source: link("fragments", "L266-L322"),
     },
     {
         id: "environment_context",
@@ -84,7 +112,7 @@ const sections = [
         content:
             "<environment_context>\n{{working_directory}}\n{{repository_and_git_root}}\n{{operating_system}}\n{{available_tool_names}}\n{{platform_specific_guidance}}\n</environment_context>",
         note: "Illustrative structure, not a captured user's environment. Values are assembled from the future host/session; no local workspace or credentials are read by this web app.",
-        source: link("assembler", "L807-L853"),
+        source: link("assembler", "L974-L1020"),
     },
     {
         id: "code_change_rules",
@@ -92,7 +120,7 @@ const sections = [
         kind: "fragment",
         content: `<rules_for_code_changes>\n${constant("templates", "CODING_RULES_PREAMBLE")}\n${constant("templates", "CODING_RULES_DEFAULT_VALIDATION")}\n{{model_or_host_additional_rules}}\n</rules_for_code_changes>\n\n<linting_building_testing>\n${constant("fragments", "LINTING_BUILDING_TESTING")}\n</linting_building_testing>\n\n${constant("fragments", "ECOSYSTEM_TOOL_INSTRUCTIONS")}`,
         note: "Source fragments from the default assembly; additional rules and model-specific tuning are runtime inputs. Braced markers are explanatory placeholders.",
-        source: link("assembler", "L858-L877"),
+        source: link("assembler", "L1025-L1058"),
     },
     {
         id: "guidelines",
@@ -101,7 +129,7 @@ const sections = [
         content:
             "{{capability_specific_guidance}}\n\n<tips_and_tricks>\n{{tips_selected_for_available_tools}}\n* Do not create markdown files for planning, notes, or tracking unless explicitly requested; session artifacts may go in the session workspace.\n</tips_and_tricks>",
         note: "The runtime conditionally adds collaboration, documentation, execution-subagent, and tool-specific tips. This is an assembly outline, not a complete resolved section.",
-        source: link("assembler", "L878-L908"),
+        source: link("assembler", "L1059-L1089"),
     },
     {
         id: "safety",
@@ -110,7 +138,7 @@ const sections = [
         content:
             "{{sandbox_or_host_environment_limitations}}\n\n<prohibited_actions>\n{{runtime_safety_and_data_handling_guidance}}\n</prohibited_actions>",
         note: "The host's sandbox and environment determine this section. Inspect the linked repository template for its static rules. It is not a live instruction dump, and changing prompt text does not change enforced host/organization policy.",
-        source: link("templates", "L35-L63"),
+        source: link("templates", "L45-L66"),
     },
     {
         id: "tool_instructions",
@@ -118,7 +146,7 @@ const sections = [
         kind: "assembly",
         content: `${constant("templates", "DEFAULT_TOOL_INSTRUCTIONS_INTRO")}\n\n<tools>\n{{instructions_for_each_configured_tool}}\n</tools>`,
         note: "A group containing the static introduction and generated per-tool bodies. The actual contents depend on the active tool catalog, model, and host.",
-        source: link("assembler", "L611-L622"),
+        source: link("assembler", "L744-L753"),
     },
     {
         id: "custom_instructions",
@@ -126,23 +154,23 @@ const sections = [
         kind: "dynamic",
         content: "{{organization_repository_and_host_instruction_content}}",
         note: "This section is populated from configured/discovered instruction sources. The reference intentionally includes no personal, repository-local, or tenant content.",
-        source: link("assembler", "L930-L932"),
+        source: link("assembler", "L1135-L1137"),
     },
     {
         id: "runtime_instructions",
         title: "Runtime-added instructions",
         kind: "dynamic",
         content: "{{mode_memory_model_mcp_agent_and_extension_guidance}}",
-        note: "The runtime composes this from materialized session inputs and enabled capabilities. The builder cannot reproduce it faithfully without the chosen runtime/model/session.",
-        source: link("assembler", "L934-L936"),
+        note: "The runtime composes this from materialized session inputs and enabled capabilities, such as system notifications, memories, workspace context, and content-exclusion policy. Mode-specific instructions can travel in transition messages instead. The builder cannot reproduce it faithfully without the chosen runtime/model/session.",
+        source: link("assembler", "L1139-L1140"),
     },
     {
         id: "last_instructions",
         title: "Final guidance",
         kind: "fragment",
         content: `${constant("assembler", "PERSISTENCE_QUALITY_AND_PERSISTENCE")}\n\n${constant("assembler", "RESPOND_CONCISELY")}\n\n{{model_specific_and_subagent_guidance}}`,
-        note: "Excerpts of default final guidance; model and configured-subagent additions vary. This is not the final cache-block or wire ordering.",
-        source: link("assembler", "L43-L52"),
+        note: "Excerpts of default final guidance; model additions vary. When the task tool is available it also carries configured subagent-model guidance; overrides change that prose, not runtime model selection or tool availability. This is not the final cache-block or wire ordering.",
+        source: link("assembler", "L56-L65"),
     },
 ];
 const output = {

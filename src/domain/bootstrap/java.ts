@@ -1,18 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import type { HarnessPlan } from "../plan";
 import { projectName } from "./common";
+import { COPILOT_CLI_VERSION } from "./revisions";
 import {
     JAVA_RUST_SDK_REVISION,
     javaRustChecks,
     javaRustConfiguration,
     javaRustRequirements,
     javaRustServerFiles,
+    javaRustOptionalBlocks,
     javaRustSources,
+    renderOptionalBlocks,
 } from "./java-rust-shared";
-import { JAVA_CONFIG, JAVA_HOST, JAVA_MAIN, javaSetupScript } from "./java-templates";
+import {
+    JAVA_CONFIG,
+    JAVA_HOOKS,
+    JAVA_HOST,
+    JAVA_MAIN,
+    JAVA_SDK_VERSION,
+    javaSetupScript,
+} from "./java-templates";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 
-function renderJavaSource(source: string, plan: HarnessPlan): string {
+function renderJavaSource(template: string, plan: HarnessPlan): string {
+    const source = renderOptionalBlocks(template, javaRustOptionalBlocks(plan));
     const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
     if (!s2s)
         return source
@@ -75,10 +86,19 @@ function checkJava(plan: HarnessPlan): BootstrapBlocker[] {
             sources: javaRustSources(plan),
         });
     }
+    for (const hook of plan.policy.hooks.filter((hook) => !JAVA_HOOKS[hook])) {
+        blockers.push({
+            id: `java-hook-${hook}`,
+            title: `Java SessionHooks has no ${hook} callback`,
+            detail: `Remove the ${hook} hook or choose another language. The pinned Java SDK SessionHooks exposes no setter for it, and silently dropping a selected hook would change the plan.`,
+            fields: ["policy.hooks"],
+            sources: javaRustSources(plan),
+        });
+    }
     return blockers;
 }
 
-function javaPom(plan: HarnessPlan, bundled: boolean): string {
+function javaPom(plan: HarnessPlan): string {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) Microsoft Corporation. All rights reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -91,29 +111,21 @@ function javaPom(plan: HarnessPlan, bundled: boolean): string {
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
-    <copilot.version>1.0.14-SNAPSHOT</copilot.version>
-${bundled ? "    <copilot.runtime.classifier>${env.COPILOT_JAVA_RUNTIME_CLASSIFIER}</copilot.runtime.classifier>\n" : ""}  </properties>
+    <copilot.version>${JAVA_SDK_VERSION}</copilot.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.github</groupId><artifactId>copilot-sdk-java</artifactId>
       <version>\${copilot.version}</version>
     </dependency>
 ${
-    bundled
+    plan.target.runtime === "inprocess"
         ? `    <dependency>
-      <groupId>com.github</groupId><artifactId>copilot-sdk-java-runtime</artifactId>
-      <version>\${copilot.version}</version><classifier>\${copilot.runtime.classifier}</classifier>
-    </dependency>
-`
-        : ""
-}${
-        plan.target.runtime === "inprocess"
-            ? `    <dependency>
       <groupId>net.java.dev.jna</groupId><artifactId>jna</artifactId><version>5.19.1</version>
     </dependency>
 `
-            : ""
-    }  </dependencies>
+        : ""
+}  </dependencies>
   <build>
     <plugins>
       <plugin>
@@ -128,14 +140,7 @@ ${
         <version>3.5.0</version>
         <configuration>
           <mainClass>harness.Main</mainClass>
-${
-    bundled
-        ? `          <systemProperties>
-            <systemProperty><key>copilot.runtime.classifier</key><value>\${copilot.runtime.classifier}</value></systemProperty>
-          </systemProperties>
-`
-        : ""
-}        </configuration>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -150,33 +155,35 @@ export const javaAdapter: LanguageAdapter = {
     generate(plan) {
         const blockers = checkJava(plan);
         if (blockers.length) throw new Error(blockers.map((blocker) => blocker.detail).join("\n"));
-        const bundled =
+        // The pinned source cannot build native classifier artifacts (copilot-native's fetch script imports
+        // repository-root scripts absent at this revision), so these runtimes use a host-provisioned package.
+        const cliPathRuntime =
             plan.target.runtime === "inprocess" ||
             (plan.target.runtime === "managed" && !plan.target.cliPath.trim());
         const requirements = javaRustRequirements(plan, "src/main/java/harness/HostExtensions.java");
         requirements.push({
             id: "java-source-sdk",
             title: "Build the pinned SDK source with Maven and JDK 25",
-            detail: `Install JDK 25, Maven, Git, and Node.js, then run setup-sdk.sh --run. It checks out ${JAVA_RUST_SDK_REVISION} into .sdk-source/copilot-sdk and installs matching 1.0.14-SNAPSHOT artifacts in your local Maven repository. It refuses to reset, replace, or build over a dirty/different existing checkout. The generated application targets Java 17 bytecode.`,
+            detail: `Install JDK 25, Maven, Git, and Node.js, then run setup-sdk.sh --run. It checks out ${JAVA_RUST_SDK_REVISION} into .sdk-source/copilot-sdk and installs matching ${JAVA_SDK_VERSION} artifacts in your local Maven repository. It refuses to reset, replace, or build over a dirty/different existing checkout. The generated application targets Java 17 bytecode.`,
             file: "setup-sdk.sh",
             kind: "runtime",
         });
-        if (bundled) {
+        if (cliPathRuntime) {
             requirements.push({
-                id: "env-COPILOT_JAVA_RUNTIME_CLASSIFIER",
-                environmentVariable: "COPILOT_JAVA_RUNTIME_CLASSIFIER",
-                title: "Set COPILOT_JAVA_RUNTIME_CLASSIFIER explicitly",
-                detail: "Choose the native build/deployment host: linux-x64 or linux-arm64 (glibc only), win32-x64, win32-arm64, or darwin-arm64. For example: export COPILOT_JAVA_RUNTIME_CLASSIFIER=darwin-arm64. The setup script validates the host and refuses unsupported artifacts; do not use darwin-x64 or linuxmusl classifiers.",
-                file: "setup-sdk.sh",
+                id: "env-COPILOT_CLI_PATH",
+                environmentVariable: "COPILOT_CLI_PATH",
+                title: "Set COPILOT_CLI_PATH to a provisioned runtime package",
+                detail: `The pinned SDK source cannot build its bundled native classifier artifacts: copilot-native/scripts/fetch-native.mjs imports repository-root scripts that ${JAVA_RUST_SDK_REVISION} no longer contains, so every native-* Maven profile fails. Install a compatible Copilot runtime package (CLI ${COPILOT_CLI_VERSION}) on this host and point COPILOT_CLI_PATH at its executable${plan.target.runtime === "inprocess" ? ", with an adjacent runtime.node or prebuilds/<platform>/runtime.node" : ""}. ${plan.target.runtime === "managed" ? "Alternatively set target.cliPath in the plan. " : ""}Preflight checks the path.`,
+                file: "src/main/java/harness/HostExtensions.java",
                 kind: "environment",
             });
         }
         return {
             files: [
-                { path: "pom.xml", content: javaPom(plan, bundled), language: "xml" },
+                { path: "pom.xml", content: javaPom(plan), language: "xml" },
                 {
                     path: "setup-sdk.sh",
-                    content: javaSetupScript(JAVA_RUST_SDK_REVISION, bundled),
+                    content: javaSetupScript(JAVA_RUST_SDK_REVISION, cliPathRuntime),
                     language: "text",
                 },
                 {
@@ -187,8 +194,7 @@ export const javaAdapter: LanguageAdapter = {
                 {
                     path: "src/main/resources/bootstrap-config.json",
                     content:
-                        JSON.stringify({ ...javaRustConfiguration(plan), bundledRuntime: bundled }, null, 2) +
-                        "\n",
+                        JSON.stringify({ ...javaRustConfiguration(plan), cliPathRuntime }, null, 2) + "\n",
                     language: "json",
                 },
                 {
@@ -218,7 +224,18 @@ export const javaAdapter: LanguageAdapter = {
             },
             requirements,
             notes: [
-                "This project deliberately uses locally built 1.0.14-SNAPSHOT SDK artifacts, not release 1.0.13. Source API support does not prove Maven Central availability. setup-sdk.sh pins and checks the SDK commit before installing.",
+                `This project deliberately uses locally built ${JAVA_SDK_VERSION} SDK artifacts (the pinned java/pom.xml revision), not a Maven Central release. setup-sdk.sh pins and checks the SDK commit before installing.`,
+                "Bundled native runtime classifier JARs are not buildable from the pinned SDK source (its native Maven profiles run a fetch script whose imported repository scripts were removed), so managed children without target.cliPath and in-process hosting load a host-provisioned runtime package from COPILOT_CLI_PATH.",
+                ...(plan.model.allowedModels.length
+                    ? [
+                          "The Java SessionConfig has no allowedModels field. Main.java applies the allowlist with the experimental session.getRpc().model.setAllowedModels immediately after createSession and before the first message; a failure closes the session and stops the client.",
+                      ]
+                    : []),
+                ...(plan.events.logLevel !== "default" && plan.target.runtime === "external"
+                    ? [
+                          "The client log level is a launch option for runtimes the SDK starts; it is not sent to an existing server. Configure the server's --log-level in start-runtime.sh on the runtime host.",
+                      ]
+                    : []),
                 "bootstrap-config.json is mapped field-by-field into Java SDK setters. It is not deserialized into SessionConfig: Jackson ignores several of that class's Boolean properties. Edit Configuration.java when adding a new configuration field.",
                 plan.model.provider === "copilot" && plan.identity === "s2s-installation"
                     ? plan.target.runtime === "external"
@@ -232,7 +249,7 @@ export const javaAdapter: LanguageAdapter = {
                     : "The configuration explicitly binds PermissionHandler.APPROVE_ALL. It approves ordinary requests once; managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement still apply, while enabled sandbox bypass can also be approved.",
                 "Console input is serialized on a daemon host thread; EOF, forbidden freeform answers, and unavailable input fail explicitly. Observers print event class names only, never prompts, arguments, tool results, or credentials. Streaming still reaches the SDK when selected.",
                 "Session close detaches before client shutdown. Explicit stop errors are retained as suppressed errors when a primary operation failed. A completed turn without an assistant message is reported explicitly, including terminal-tool turns.",
-                "For in-process hosting, set process-global settings before application startup. COPILOT_CLI_PATH can select a compatible package with adjacent runtime.node or prebuilds/<classifier>/runtime.node; it is not a bare-library argument. No mode or permission filter provides OS-level sandboxing.",
+                "For in-process hosting, set process-global settings before application startup. COPILOT_CLI_PATH must select a compatible package with adjacent runtime.node or prebuilds/<classifier>/runtime.node; it is not a bare-library argument. No mode or permission filter provides OS-level sandboxing.",
                 "Paths are interpreted on the future runtime host. For external services, start-runtime.sh applies server-owned COPILOT_HOME, idle timeout, and login policy there; --check does not probe or reconfigure the server.",
             ],
             sources: javaRustSources(plan),

@@ -1,18 +1,38 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
-import { Badge, Button, ChoiceField, Notice, Panel, SelectField, TextField } from "./ui";
+import {
+    Badge,
+    Button,
+    ChoiceField,
+    CountField,
+    LineListField,
+    Notice,
+    Panel,
+    SelectField,
+    TextField,
+} from "./ui";
 import { SettingHelp } from "./SettingHelp";
 import { valueHelp } from "../content/setting-help";
 import { ExternalLink } from "lucide-react";
 import { S2S_AUTH_AVAILABILITY, S2S_AUTH_DOCS } from "../content/sdk-docs";
 import { copilotModelOptions } from "../content/models";
+import { MODEL_PROVIDER_PRODUCTS } from "../domain/plan";
 
 const endpointExamples = {
     openai: "https://api.openai.com/v1",
     azure: "https://your-resource.openai.azure.com",
     anthropic: "https://api.anthropic.com",
 };
+
+function modelOptions(currentId: string) {
+    const [hostSupplied, ...rest] = copilotModelOptions(currentId === "auto" ? "" : currentId);
+    return [
+        ...(hostSupplied ? [hostSupplied] : []),
+        { value: "auto", label: "auto (Copilot routing)" },
+        ...rest,
+    ];
+}
 
 export function ModelsEditor({ plan, edit, issues }: EditorProps) {
     const byok = plan.model.provider !== "copilot";
@@ -51,6 +71,13 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     onValueChange={(value) =>
                         edit((draft) => {
                             draft.model.provider = value === "copilot" ? "copilot" : "openai";
+                            if (value === "copilot") {
+                                // Provider-only fields are invalid on the Copilot route.
+                                draft.model.modelProvider = "";
+                                draft.model.wireModel = "";
+                                draft.model.maxPromptTokens = 0;
+                                draft.model.maxOutputTokens = 0;
+                            }
                         })
                     }
                 />
@@ -139,6 +166,87 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                             }
                         />
                     )}
+                    <div>
+                        <h4 className="hb-subsection-title">Optional provider overrides</h4>
+                        <div className="hb-field-grid">
+                            <SelectField
+                                label="Serving product"
+                                help={
+                                    <SettingHelp
+                                        help={valueHelp.providerProduct}
+                                        value={plan.model.modelProvider || "Unset"}
+                                    />
+                                }
+                                value={plan.model.modelProvider}
+                                options={[
+                                    { value: "", label: "Unset" },
+                                    ...MODEL_PROVIDER_PRODUCTS.map((product) => ({
+                                        value: product,
+                                        label: product,
+                                    })),
+                                ]}
+                                onValueChange={(value) =>
+                                    edit((draft) => {
+                                        draft.model.modelProvider = value;
+                                    })
+                                }
+                                error={issueFor(issues, "model.modelProvider")}
+                                hint="Telemetry only: names the product serving the model. It does not change routing."
+                            />
+                            <TextField
+                                label="Wire model name"
+                                help={<SettingHelp help={valueHelp.wireModel} />}
+                                value={plan.model.wireModel}
+                                maxLength={120}
+                                monospace
+                                spellCheck={false}
+                                placeholder="Defaults to the model ID"
+                                onValueChange={(value) =>
+                                    edit((draft) => {
+                                        draft.model.wireModel = value;
+                                    })
+                                }
+                                error={issueFor(issues, "model.wireModel")}
+                                hint="Use when the provider's name differs, such as an Azure deployment name."
+                            />
+                            <CountField
+                                label="Max prompt tokens"
+                                help={
+                                    <SettingHelp
+                                        help={valueHelp.maxPromptTokens}
+                                        value={plan.model.maxPromptTokens || "Unset"}
+                                    />
+                                }
+                                value={plan.model.maxPromptTokens}
+                                max={100_000_000}
+                                onValueChange={(value) =>
+                                    edit((draft) => {
+                                        draft.model.maxPromptTokens = value;
+                                    })
+                                }
+                                error={issueFor(issues, "model.maxPromptTokens")}
+                                hint="Blank or 0 keeps the model default. Compaction runs before this limit."
+                            />
+                            <CountField
+                                label="Max output tokens"
+                                help={
+                                    <SettingHelp
+                                        help={valueHelp.maxOutputTokens}
+                                        value={plan.model.maxOutputTokens || "Unset"}
+                                    />
+                                }
+                                value={plan.model.maxOutputTokens}
+                                max={100_000_000}
+                                onValueChange={(value) =>
+                                    edit((draft) => {
+                                        draft.model.maxOutputTokens = value;
+                                    })
+                                }
+                                error={issueFor(issues, "model.maxOutputTokens")}
+                                hint="Blank or 0 keeps the model default. Responses stop and truncate at this limit."
+                            />
+                        </div>
+                    </div>
                 </Panel>
             ) : (
                 <Panel
@@ -295,7 +403,7 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                                 />
                             }
                             value={plan.model.id}
-                            options={copilotModelOptions(plan.model.id)}
+                            options={modelOptions(plan.model.id)}
                             onValueChange={(value) =>
                                 edit((draft) => {
                                     draft.model.id = value;
@@ -338,11 +446,109 @@ export function ModelsEditor({ plan, edit, issues }: EditorProps) {
                     }
                     hint="Model availability, reasoning levels, and context tiers depend on the active account or provider."
                 />
+                <div className="hb-field-grid">
+                    {!byok && (
+                        <SelectField
+                            label="Auto routing tier"
+                            help={<SettingHelp help={valueHelp.autoTier} value={plan.model.autoTier} />}
+                            value={plan.model.autoTier}
+                            options={[
+                                { value: "default", label: "Runtime default" },
+                                { value: "efficiency", label: "Efficiency" },
+                                { value: "balance", label: "Balance" },
+                                { value: "intelligence", label: "Intelligence" },
+                                { value: "fast", label: "Fast (integrator latency preset)" },
+                            ]}
+                            onValueChange={(value) =>
+                                edit((draft) => {
+                                    draft.model.autoTier = value;
+                                })
+                            }
+                            hint={
+                                plan.model.id.trim() === "auto"
+                                    ? "Routing preference for the auto model."
+                                    : "Only meaningful when the model is auto; ignored for a specific model."
+                            }
+                        />
+                    )}
+                    <SelectField
+                        label="Reasoning summary"
+                        help={
+                            <SettingHelp
+                                help={valueHelp.reasoningSummary}
+                                value={plan.model.reasoningSummary}
+                            />
+                        }
+                        value={plan.model.reasoningSummary}
+                        options={[
+                            { value: "default", label: "Model default" },
+                            { value: "none", label: "None" },
+                            { value: "concise", label: "Concise" },
+                            { value: "detailed", label: "Detailed" },
+                        ]}
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.model.reasoningSummary = value;
+                            })
+                        }
+                        hint="Applies to models with configurable reasoning summaries."
+                    />
+                </div>
+                <LineListField
+                    label="Allowed models"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.allowedModels}
+                            value={
+                                plan.model.allowedModels.length
+                                    ? `${plan.model.allowedModels.length} models`
+                                    : "Runtime policy"
+                            }
+                        />
+                    }
+                    values={plan.model.allowedModels}
+                    onValuesChange={(values) =>
+                        edit((draft) => {
+                            draft.model.allowedModels = values;
+                        })
+                    }
+                    rows={3}
+                    monospace
+                    spellCheck={false}
+                    placeholder={"gpt-5.5\nclaude-sonnet-5"}
+                    error={issueFor(issues, "model.allowedModels")}
+                    hint="Exact model IDs, one per line; include the session model. TypeScript and Rust set allowedModels in session config; Python, Go, C#, and Java call session.model.setAllowedModels right after create."
+                />
                 <p className="hb-field-hint">
                     This planner does not discover live account models, verify entitlements, test endpoint
                     compatibility, or make inference requests.
                 </p>
             </Panel>
+
+            {!byok && (issueFor(issues, "model.modelProvider") || issueFor(issues, "model.wireModel")) && (
+                <Panel
+                    title="Retained provider overrides"
+                    description="These custom-provider values are invalid for the GitHub Copilot route."
+                >
+                    <Notice title="Provider-only values are set" tone="error">
+                        {issueFor(issues, "model.modelProvider") ?? issueFor(issues, "model.wireModel")}
+                        <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={() =>
+                                edit((draft) => {
+                                    draft.model.modelProvider = "";
+                                    draft.model.wireModel = "";
+                                    draft.model.maxPromptTokens = 0;
+                                    draft.model.maxOutputTokens = 0;
+                                })
+                            }
+                        >
+                            Clear provider overrides
+                        </Button>
+                    </Notice>
+                </Panel>
+            )}
 
             {!byok && issueFor(issues, "model.endpoint") && (
                 <Panel

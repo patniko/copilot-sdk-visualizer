@@ -9,7 +9,17 @@ import type { Agent, HarnessPlan } from "../domain/plan";
 import { issueFor, uniqueName } from "./editor";
 import type { EditorProps } from "./editor";
 import { ADVANCED_TOOL_NAMES, PRIMARY_TOOL_NAMES } from "./tool-catalog-ui";
-import { Badge, Button, EmptyState, Notice, Panel, SelectField, TextAreaField, TextField } from "./ui";
+import {
+    Badge,
+    Button,
+    EmptyState,
+    LineListField,
+    Notice,
+    Panel,
+    SelectField,
+    TextAreaField,
+    TextField,
+} from "./ui";
 
 export function AgentsEditor(props: EditorProps) {
     const { plan, edit, issues } = props;
@@ -83,6 +93,27 @@ export function AgentsEditor(props: EditorProps) {
                     error={issueFor(issues, "selectedAgent")}
                 />
                 <RootToolExclusions {...props} />
+                <LineListField
+                    label="Excluded built-in agents"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.excludedBuiltinAgents}
+                            value={`${plan.excludedBuiltinAgents.length} agents`}
+                        />
+                    }
+                    values={plan.excludedBuiltinAgents}
+                    onValuesChange={(values) =>
+                        edit((draft) => {
+                            draft.excludedBuiltinAgents = values;
+                        })
+                    }
+                    rows={3}
+                    monospace
+                    spellCheck={false}
+                    placeholder="built-in-agent-name"
+                    error={issueFor(issues, "excludedBuiltinAgents")}
+                    hint="One runtime-provided agent name per line. Excluded built-ins cannot be selected or invoked unless a custom agent uses the same name."
+                />
             </Panel>
         </div>
     );
@@ -329,6 +360,22 @@ function AgentRow({ agent, index, plan, edit, issues }: EditorProps & { agent: A
                     error={issueFor(issues, `agents.${index}.model`)}
                     hint="A preference can fall back. It is not a hard model allowlist."
                 />
+                <TextField
+                    label="Agent display name"
+                    help={
+                        <SettingHelp help={valueHelp.agentDisplayName} value={agent.displayName || "Unset"} />
+                    }
+                    value={agent.displayName}
+                    maxLength={80}
+                    placeholder="Optional, e.g. Security reviewer"
+                    onValueChange={(value) =>
+                        editAgent((target) => {
+                            target.displayName = value;
+                        })
+                    }
+                    error={issueFor(issues, `agents.${index}.displayName`)}
+                    hint="A UI label. The agent name stays the identifier."
+                />
             </div>
             <TextAreaField
                 label="Agent description"
@@ -353,6 +400,23 @@ function AgentRow({ agent, index, plan, edit, issues }: EditorProps & { agent: A
                     })
                 }
                 error={issueFor(issues, `agents.${index}.prompt`)}
+            />
+            <TextAreaField
+                label="Agent-scoped hooks (JSON)"
+                help={<SettingHelp help={valueHelp.agentHooks} />}
+                value={agent.hooks}
+                rows={4}
+                maxLength={12000}
+                monospace
+                spellCheck={false}
+                placeholder='{ "postToolUse": [ { …action… } ] }'
+                onValueChange={(value) =>
+                    editAgent((target) => {
+                        target.hooks = value;
+                    })
+                }
+                error={issueFor(issues, `agents.${index}.hooks`)}
+                hint="Optional declarative hooks active only while this agent runs. They execute like file hooks; review them as code."
             />
             <ToolSelectionPicker
                 plan={plan}

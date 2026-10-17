@@ -2,8 +2,26 @@
 import type { LanguageAdapter } from "./types";
 import { commonRequirements, environmentNames, toolDefinitions } from "./common";
 import { sourceSetupScript } from "./source-setup";
-import { generateSdkCode } from "../export";
+import type { SourceCheckout } from "./source-setup";
+import { COPILOT_CLI_VERSION, RUNTIME_SOURCE_REVISION } from "./revisions";
+import { HANDLER_CALLBACKS, generateSdkCode, hookCallbackName } from "../export";
 import { runtimeEndpoint } from "../target";
+
+/** The TypeScript SDK is built from the runtime repository, where it now lives (src/sdk/nodejs). */
+export const NODE_SDK_CHECKOUT: SourceCheckout = {
+    repository: "https://github.com/github/copilot-agent-runtime.git",
+    revision: RUNTIME_SOURCE_REVISION,
+    directory: ".sdk-source/copilot-agent-runtime",
+    // The SDK's build tools are vendored outside the package directory.
+    sparse: [
+        "src/sdk/nodejs",
+        "third_party/build-tools/prettier-3.8.1",
+        "third_party/build-tools/tsx-4.22.4",
+        "third_party/build-tools/vite-8.3.4",
+    ],
+    access: "read access to the private github/copilot-agent-runtime repository (cli-1.0.100-1)",
+};
+const NODE_SDK_PATH = `${NODE_SDK_CHECKOUT.directory}/src/sdk/nodejs`;
 
 export const typescriptAdapter: LanguageAdapter = {
     language: "typescript",
@@ -18,6 +36,9 @@ export const typescriptAdapter: LanguageAdapter = {
             permissionMode: plan.policy.permissionMode,
             preToolHook: plan.policy.preToolHook,
             postToolHook: plan.policy.postToolHook,
+            hooks: plan.policy.hooks.map(hookCallbackName),
+            handlers: plan.policy.handlers.map((handler) => HANDLER_CALLBACKS[handler]),
+            skillProvider: plan.context.skillProvider,
             virtualStorage: plan.session.storage === "virtual",
             userInput: plan.tools.ask_user.action === "keep",
             observeEvents: plan.events.observer,
@@ -64,21 +85,32 @@ import type { HostBindings } from "./harness.js";
 interface IntegrationSpec {
     env: string[]; tools: string[];
     permissionMode: "host" | "allow-all";
-    preToolHook: boolean; postToolHook: boolean; virtualStorage: boolean;
+    preToolHook: boolean; postToolHook: boolean;
+    hooks: LifecycleHookName[]; handlers: HandlerName[]; skillProvider: boolean;
+    virtualStorage: boolean;
     userInput: boolean; observeEvents: boolean; githubProvider: boolean;
     providerCallback: boolean; providerEndpoint: boolean; model: string;
 }
 const spec: IntegrationSpec = JSON.parse(readFileSync(new URL("../integration.json", import.meta.url), "utf8"));
 type Callbacks = HostBindings["callbacks"];
 type Handler = HostBindings["toolHandlers"][string];
+type Hooks = NonNullable<Callbacks["hooks"]>;
+type LifecycleHookName = Exclude<keyof Hooks, "onPreToolUse" | "onPostToolUse">;
+type HandlerName = "onElicitationRequest" | "onExitPlanModeRequest" | "onAutoModeSwitchRequest" | "onMcpAuthRequest";
 
 // HOST INTEGRATION: add implementations here. No callback is represented by JSON.
 // Example shape: tools: { view: async (args, invocation) => { ...validated service call... } }
 export const extensions: {
     tools: Record<string, Handler>;
     permissionPolicy?: Callbacks["onPermissionRequest"];
-    preToolUse?: NonNullable<Callbacks["hooks"]>["onPreToolUse"];
-    postToolUse?: NonNullable<Callbacks["hooks"]>["onPostToolUse"];
+    preToolUse?: Hooks["onPreToolUse"];
+    postToolUse?: Hooks["onPostToolUse"];
+    // Selected lifecycle hooks, keyed by SDK name (for example onSubagentStart).
+    lifecycleHooks?: Partial<Pick<Hooks, LifecycleHookName>>;
+    // Selected host request handlers, keyed by SDK name (for example onElicitationRequest).
+    handlers?: Partial<Pick<Callbacks, HandlerName>>;
+    // Experimental: skills served from host storage (listSkills/readSkill).
+    skillProvider?: Callbacks["skillProvider"];
     sessionFs?: Callbacks["createSessionFsProvider"];
 ${githubExtension}\
     providerToken?: HostBindings["providerToken"];
@@ -107,6 +139,13 @@ ${githubPreflight}
     if (spec.permissionMode === "host" && !extensions.permissionPolicy) issues.push("Implement src/host.ts extensions.permissionPolicy");
     if (spec.preToolHook && !extensions.preToolUse) issues.push("Implement src/host.ts extensions.preToolUse");
     if (spec.postToolHook && !extensions.postToolUse) issues.push("Implement src/host.ts extensions.postToolUse");
+    for (const name of spec.hooks) {
+        if (!extensions.lifecycleHooks?.[name]) issues.push(\`Implement src/host.ts extensions.lifecycleHooks.\${name}\`);
+    }
+    for (const name of spec.handlers) {
+        if (!extensions.handlers?.[name]) issues.push(\`Implement src/host.ts extensions.handlers.\${name}\`);
+    }
+    if (spec.skillProvider && !extensions.skillProvider) issues.push("Implement src/host.ts extensions.skillProvider (real SkillProvider)");
     if (spec.virtualStorage && !extensions.sessionFs) issues.push("Implement src/host.ts extensions.sessionFs (real SessionFsProvider)");
     if (spec.providerEndpoint && !extensions.providerEndpoint?.trim()) issues.push("Provide src/host.ts extensions.providerEndpoint (provider endpoint string)");
     return issues;
@@ -141,7 +180,10 @@ ${githubBinding}
     callbacks.hooks = {
         ...(spec.preToolHook ? { onPreToolUse: extensions.preToolUse } : {}),
         ...(spec.postToolHook ? { onPostToolUse: extensions.postToolUse } : {}),
+        ...Object.fromEntries(spec.hooks.map(name => [name, extensions.lifecycleHooks?.[name]])),
     };
+    for (const name of spec.handlers) Object.assign(callbacks, { [name]: extensions.handlers?.[name] });
+    if (spec.skillProvider) callbacks.skillProvider = extensions.skillProvider;
     const host: HostBindings = {
         callbacks, toolHandlers: extensions.tools,
         model: spec.model || env("COPILOT_MODEL"),
@@ -151,8 +193,9 @@ ${githubBinding}
     return { host, close: () => abort.abort() };
 }
 `;
+        const structured = Boolean(plan.output.responseSchema.trim());
         const main = `// Copyright (c) Microsoft Corporation. All rights reserved.
-import { createHarness } from "./harness.js";
+import { createHarness${structured ? ", responseSchema" : ""} } from "./harness.js";
 import { createHostBindings, integrationIssues } from "./host.js";
 
 async function main() {
@@ -174,7 +217,7 @@ async function main() {
     let failed = false;
     try {
         running = await createHarness(bindings.host);
-        const response = await running.session.sendAndWait({ prompt }, 120_000);
+        const response = await running.session.sendAndWait({ prompt${structured ? ", responseSchema" : ""} }, 120_000);
         if (response) console.log(response.data.content);
         else console.error("The turn completed without an assistant message (for example, a terminal tool). Inspect the emitted events.");
     } catch (error) { failed = true; failure = error; }
@@ -216,7 +259,7 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                                     start: "tsx src/main.ts",
                                 },
                                 dependencies: {
-                                    "@github/copilot-sdk": "file:.sdk-source/copilot-sdk/nodejs",
+                                    "@github/copilot-sdk": `file:${NODE_SDK_PATH}`,
                                 },
                                 devDependencies: {
                                     typescript: "^6.0.3",
@@ -253,11 +296,19 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                 {
                     path: "setup-sdk.sh",
                     language: "text",
-                    content: sourceSetupScript([
-                        'npm --prefix "$SDK_DIRECTORY/nodejs" install',
-                        'npm --prefix "$SDK_DIRECTORY/nodejs" run build',
-                        "npm install",
-                    ]),
+                    content: sourceSetupScript(
+                        [
+                            `NODE_SDK="$SDK_DIRECTORY/src/sdk/nodejs"`,
+                            'npm --prefix "$NODE_SDK" ci',
+                            "# The in-repo SDK is versioned 0.0.0-dev; bake in the runtime it should download.",
+                            `(cd "$NODE_SDK" && node scripts/set-cli-version.js ${COPILOT_CLI_VERSION})`,
+                            'npm --prefix "$NODE_SDK" run build',
+                            "# Restore the two version files so a rerun still sees a clean pinned checkout.",
+                            'git -C "$SDK_DIRECTORY" checkout --quiet -- src/sdk/nodejs/package.json src/sdk/nodejs/src/cliVersion.ts',
+                            "npm install",
+                        ],
+                        NODE_SDK_CHECKOUT,
+                    ),
                 },
                 {
                     path: "integration.json",
@@ -279,6 +330,21 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                         "- `extensions.permissionPolicy`: required when the plan selects host permission handling. Supply production authorization and approval rules before allowing effects.",
                         "- `extensions.providerEndpoint`: supply the endpoint string when it was left blank in the planner. Preflight and startup fail until it is provided.",
                         "- `extensions.preToolUse` / `postToolUse`: required only if selected; replace with real policy/result processing.",
+                        ...(plan.policy.hooks.length
+                            ? [
+                                  `- \`extensions.lifecycleHooks\`: implement ${plan.policy.hooks.map((hook) => `\`${hookCallbackName(hook)}\``).join(", ")}. userPromptSubmitted can return { decision: "block", reason }; subagentStop can block with a nonempty reason or rewrite the response.`,
+                              ]
+                            : []),
+                        ...(plan.policy.handlers.length
+                            ? [
+                                  `- \`extensions.handlers\`: implement ${plan.policy.handlers.map((handler) => `\`${HANDLER_CALLBACKS[handler]}\``).join(", ")}.`,
+                              ]
+                            : []),
+                        ...(plan.context.skillProvider
+                            ? [
+                                  "- `extensions.skillProvider` (experimental): return skill descriptors and SKILL.md text from your skill store. Calls must finish within 30 seconds; pass the provider again when resuming.",
+                              ]
+                            : []),
                         "- `extensions.sessionFs`: return a real SDK SessionFsProvider when virtual storage is selected.",
                         ...(s2s
                             ? [
@@ -298,7 +364,7 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
                                   "The environment GitHub adapter expects GITHUB_TOKEN_EXPIRES_AT as the token issuer's actual absolute UNIX expiry. It computes remaining lifetime, never resets a static token's expiry.",
                               ]),
                         "",
-                        "The source SDK is pinned because this snapshot is newer than a verified published package. Setup provisions it locally under .sdk-source; the visualizer itself does not fetch or run it.",
+                        "The TypeScript SDK now lives in github/copilot-agent-runtime (src/sdk/nodejs). Setup sparse-checks out the pinned cli-1.0.100-1 commit under .sdk-source, sets the runtime version it downloads, and builds it locally; the visualizer itself does not fetch or run it.",
                         "",
                     ].join("\n"),
                 },
@@ -320,7 +386,7 @@ main().catch(error => { console.error(error); process.exitCode = 1; });
             },
             requirements,
             notes: [
-                "The SDK source is pinned to the inspected commit, not the unpublished 0.0.0-dev package on a registry. Setup requires Git, npm, and network/access to that source.",
+                `The SDK source is pinned to copilot-agent-runtime tag cli-1.0.100-1 (src/sdk/nodejs), not a registry package. Setup requires Git, npm, network access, and read access to that private repository; the built SDK downloads Copilot CLI runtime ${COPILOT_CLI_VERSION}.`,
                 plan.target.runtime === "inprocess"
                     ? "RuntimeConnection.forInProcess is experimental. Supply the matching native bundle; COPILOT_CLI_PATH can point into a runtime package before startup. Process state and the loaded native library are shared."
                     : plan.target.runtime === "external"

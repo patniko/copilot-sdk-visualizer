@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { BUILTIN_NAMES } from "../plan";
+import { BUILTIN_NAMES, parseAgentHooks } from "../plan";
 import type { HarnessPlan } from "../plan";
 import { reference } from "../../content/reference";
 import { S2S_AUTH_AVAILABILITY } from "../../content/sdk-docs";
@@ -35,8 +35,109 @@ export function toolDefinitions(plan: HarnessPlan) {
             parameters: JSON.parse(tool.parameters) as unknown,
             overridesBuiltInTool: false,
             isTerminal: tool.terminal,
+            ...(tool.defer === "default" ? {} : { defer: tool.defer }),
+            ...(tool.skipPermission ? { skipPermission: true } : {}),
         })),
     ];
+}
+
+/** Managed-settings payload, or undefined when the plan injects no managed rules. */
+export function managedSettingsData(plan: HarnessPlan) {
+    const managed = plan.policy.managed;
+    const permissions = {
+        ...(managed.disableBypassPermissionsMode
+            ? { disableBypassPermissionsMode: managed.disableBypassPermissionsMode }
+            : {}),
+        ...(managed.disableAssistedPermissionsMode ? { disableAssistedPermissionsMode: true } : {}),
+        ...(managed.deny.length ? { deny: managed.deny } : {}),
+        ...(managed.ask.length ? { ask: managed.ask } : {}),
+        ...(managed.allow.length ? { allow: managed.allow } : {}),
+        ...(managed.limitTo.length ? { limitTo: managed.limitTo } : {}),
+    };
+    return Object.keys(permissions).length ? { permissions } : undefined;
+}
+
+/**
+ * SDK session options introduced or first modeled by plan schema v3. Every key is
+ * emitted only when the plan departs from the SDK default, so earlier plans keep
+ * byte-identical configuration. allowedModels is deliberately excluded: hosts
+ * without a session-config field apply it with session.model.setAllowedModels.
+ */
+export function extendedSessionData(plan: HarnessPlan) {
+    const { context, model, capabilities, session, events } = plan;
+    const managed = managedSettingsData(plan);
+    return {
+        ...(context.agentDirectories.length ? { agentDirectories: context.agentDirectories } : {}),
+        ...(context.hookDirectories.length ? { hookDirectories: context.hookDirectories } : {}),
+        ...(context.instructionDirectories.length
+            ? { instructionDirectories: context.instructionDirectories }
+            : {}),
+        ...(context.additionalDirectories.length
+            ? { additionalDirectories: context.additionalDirectories }
+            : {}),
+        ...(context.includedBuiltinSkills.length
+            ? { includedBuiltinSkills: context.includedBuiltinSkills }
+            : {}),
+        ...(context.customInstructions === "default"
+            ? {}
+            : { skipCustomInstructions: context.customInstructions === "skip" }),
+        ...(context.onDemandInstructions ? { enableOnDemandInstructionDiscovery: true } : {}),
+        ...(context.refreshCustomInstructions ? { refreshCustomInstructions: true } : {}),
+        ...(context.organizationInstructions.trim()
+            ? { organizationCustomInstructions: context.organizationInstructions }
+            : {}),
+        ...(plan.policy.managed.load ? { enableManagedSettings: true } : {}),
+        ...(plan.policy.managed.enforceModelDefaults ? { enforceManagedModelDefaults: true } : {}),
+        ...(managed ? { managedSettings: managed } : {}),
+        ...(model.autoTier === "default" ? {} : { capi: { autoTier: model.autoTier } }),
+        ...(model.reasoningSummary === "default" ? {} : { reasoningSummary: model.reasoningSummary }),
+        ...(capabilities.imageGeneration ? { imageGeneration: { enabled: true } } : {}),
+        ...(capabilities.toolSearch === "default" && !capabilities.toolSearchDeferThreshold
+            ? {}
+            : {
+                  toolSearch: {
+                      ...(capabilities.toolSearch === "default"
+                          ? {}
+                          : { enabled: capabilities.toolSearch === "enabled" }),
+                      ...(capabilities.toolSearchDeferThreshold
+                          ? { deferThreshold: capabilities.toolSearchDeferThreshold }
+                          : {}),
+                  },
+              }),
+        ...(capabilities.askUserVariant === "default" ? {} : { askUserVariant: capabilities.askUserVariant }),
+        ...(plan.excludedBuiltinAgents.length ? { excludedBuiltinAgents: plan.excludedBuiltinAgents } : {}),
+        ...(session.name ? { name: session.name } : {}),
+        ...(session.interactiveUser ? { interactiveUser: true } : {}),
+        ...(session.diagnostics === "off"
+            ? {}
+            : { diagnostics: { sources: { mcp: { level: session.diagnostics } } } }),
+        ...(session.sessionStore ? { enableSessionStore: true } : {}),
+        ...(session.fileChangeTracking ? { enableFileChangeTracking: true } : {}),
+        ...(events.subAgentStreaming ? {} : { includeSubAgentStreamingEvents: false }),
+    };
+}
+
+/** Optional provider fields beyond type/baseUrl/wireApi. */
+export function providerExtras(plan: HarnessPlan) {
+    return {
+        ...(plan.model.modelProvider ? { modelProvider: plan.model.modelProvider } : {}),
+        ...(plan.model.wireModel.trim() ? { wireModel: plan.model.wireModel.trim() } : {}),
+        ...(plan.model.maxPromptTokens ? { maxPromptTokens: plan.model.maxPromptTokens } : {}),
+        ...(plan.model.maxOutputTokens ? { maxOutputTokens: plan.model.maxOutputTokens } : {}),
+    };
+}
+
+/** Customer-facing custom-agent payload shared by every language. */
+export function customAgentData(plan: HarnessPlan) {
+    return plan.agents.map((agent) => ({
+        name: agent.name,
+        ...(agent.displayName.trim() ? { displayName: agent.displayName.trim() } : {}),
+        description: agent.description,
+        prompt: agent.prompt,
+        ...(agent.model.trim() ? { model: agent.model.trim() } : {}),
+        tools: agent.tools,
+        ...(agent.hooks.trim() ? { hooks: parseAgentHooks(agent.hooks) } : {}),
+    }));
 }
 
 export function sessionData(plan: HarnessPlan) {
@@ -98,13 +199,7 @@ export function sessionData(plan: HarnessPlan) {
                 },
             ]),
         ),
-        customAgents: plan.agents.map((agent) => ({
-            name: agent.name,
-            description: agent.description,
-            prompt: agent.prompt,
-            ...(agent.model.trim() ? { model: agent.model.trim() } : {}),
-            tools: agent.tools,
-        })),
+        customAgents: customAgentData(plan),
         ...(plan.selectedAgent ? { agent: plan.selectedAgent } : {}),
         ...(plan.rootExcludedTools.length ? { defaultAgent: { excludedTools: plan.rootExcludedTools } } : {}),
         infiniteSessions: { enabled: plan.session.infinite },
@@ -117,8 +212,10 @@ export function sessionData(plan: HarnessPlan) {
                       type: plan.model.provider,
                       baseUrl: plan.model.endpoint,
                       ...(plan.model.provider === "anthropic" ? {} : { wireApi: plan.model.wireApi }),
+                      ...providerExtras(plan),
                   },
               }),
+        ...extendedSessionData(plan),
     };
 }
 

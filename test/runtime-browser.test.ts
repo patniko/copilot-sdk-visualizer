@@ -24,6 +24,7 @@ async function openRuntime(page: Page) {
         .getByRole("navigation", { name: "Harness workflow" })
         .getByRole("button", { name: /^Runtime\b/ })
         .click();
+    await page.locator(".hb-loading").waitFor({ state: "detached" });
     await page.getByRole("heading", { name: "Meet the engine behind your harness." }).waitFor();
     await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe("editor-heading");
 }
@@ -81,6 +82,7 @@ it("explores every capability and the configurator without modifying the draft",
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Base Profile\b/ })
             .click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         await page.getByRole("heading", { name: "Compose the behavior." }).waitFor();
         expect(await saved(page)).toBe(original);
         await page.goBack();

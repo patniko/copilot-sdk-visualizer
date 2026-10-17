@@ -1,7 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { BUILTIN_NAMES, BUILTIN_SPECS } from "./plan";
-import type { HarnessPlan } from "./plan";
+import type { HarnessPlan, HostHandler } from "./plan";
 import { S2S_AUTH_AVAILABILITY } from "../content/sdk-docs";
+
+export const HANDLER_LABELS: Record<HostHandler, string> = {
+    elicitation: "elicitation requests",
+    exitPlanMode: "exit-plan-mode requests",
+    autoModeSwitch: "auto-mode switch requests",
+    mcpAuth: "MCP OAuth requests",
+};
 
 export interface Decision {
     id: string;
@@ -26,6 +33,22 @@ export function toolSummary(plan: HarnessPlan) {
 }
 
 export function hostContracts(plan: HarnessPlan): string[] {
+    return hostContractList(plan);
+}
+
+function managedRuleCount(plan: HarnessPlan): number {
+    const managed = plan.policy.managed;
+    return (
+        managed.deny.length +
+        managed.ask.length +
+        managed.allow.length +
+        managed.limitTo.length +
+        (managed.disableBypassPermissionsMode ? 1 : 0) +
+        (managed.disableAssistedPermissionsMode ? 1 : 0)
+    );
+}
+
+function hostContractList(plan: HarnessPlan): string[] {
     const required = plan.policy.permissionMode === "host" ? ["Permission policy"] : [];
     if (!plan.model.id.trim()) required.push("Model selection");
     if (plan.model.provider !== "copilot" && !plan.model.endpoint.trim()) required.push("Provider endpoint");
@@ -43,6 +66,9 @@ export function hostContracts(plan: HarnessPlan): string[] {
     if (plan.tools.ask_user.action === "keep") required.push("User input handler");
     if (plan.policy.preToolHook) required.push("Pre-tool policy hook");
     if (plan.policy.postToolHook) required.push("Post-tool result hook");
+    for (const hook of plan.policy.hooks) required.push(`Lifecycle hook: ${hook}`);
+    for (const handler of plan.policy.handlers) required.push(`Host handler: ${HANDLER_LABELS[handler]}`);
+    if (plan.context.skillProvider) required.push("Skill provider (listSkills/readSkill)");
     if (plan.events.observer) required.push("Event observer");
     for (const name of BUILTIN_NAMES) {
         if (plan.tools[name].action === "override") required.push(`Tool handler: ${name}`);
@@ -141,8 +167,84 @@ export function analyzePlan(plan: HarnessPlan): Decision[] {
             id: "file-packs",
             kind: "gap",
             title: "Capability packs still have path and lifecycle boundaries",
-            detail: "Explicit directories are supported, but a directory is not a programmatic registry or an atomic live swap. The runtime's skill-provider transport is ahead of the inspected Node host callback surface.",
-            sources: ["sdk-pack-inputs", "runtime-skills", "sdk-callbacks", "plugin-reload-boundary"],
+            detail: "Explicit directories are supported, but a directory is not a programmatic registry or an atomic live swap. Use the experimental skill provider when skills live in host storage.",
+            sources: ["sdk-pack-inputs", "runtime-skills", "sdk-skill-provider", "plugin-reload-boundary"],
+        });
+    if (
+        plan.context.agentDirectories.length ||
+        plan.context.hookDirectories.length ||
+        plan.context.instructionDirectories.length
+    )
+        decisions.push({
+            id: "discovery-roots",
+            kind: "review",
+            title: "Explicit roots load customizations without broad discovery",
+            detail: "Agent, hook, and instruction roots are discovery-only and work without config discovery. They grant no general filesystem access, but hook roots run commands: review their contents like code. Managed and source disables still apply.",
+            sources: ["sdk-discovery-roots"],
+        });
+    if (plan.context.skillProvider)
+        decisions.push({
+            id: "skill-provider",
+            kind: "host",
+            title: "Host-stored skills need a provider on every resume",
+            detail: "The experimental provider supplies skill metadata and SKILL.md text from host storage. Calls can run concurrently, must finish within 30 seconds, and the provider is not persisted: pass it again when resuming. Provider errors are hidden from the model.",
+            sources: ["sdk-skill-provider"],
+        });
+    if (plan.policy.hooks.includes("subagentStop") || plan.policy.hooks.includes("userPromptSubmitted"))
+        decisions.push({
+            id: "blocking-hooks",
+            kind: "review",
+            title: "Selected hooks can block work",
+            detail: "userPromptSubmitted can refuse a prompt (decision: block) and subagentStop can keep a sub-agent working (decision: block with a nonempty reason). Both run on every matching event; keep them fast and deterministic.",
+            sources: ["sdk-prompt-block", "sdk-subagent-hooks"],
+        });
+    if (plan.agents.some((agent) => agent.hooks.trim()))
+        decisions.push({
+            id: "agent-hooks",
+            kind: "review",
+            title: "Agent-scoped hooks run commands",
+            detail: "Declarative hooks on a custom agent are active only while that agent runs. They execute like file hooks, so review commands and keep secrets out of the plan.",
+            sources: ["sdk-agent-hooks"],
+        });
+    if (plan.policy.managed.load || managedRuleCount(plan))
+        decisions.push({
+            id: "managed-settings",
+            kind: "review",
+            title: "Managed policy constrains this session",
+            detail: `${plan.policy.managed.load ? "The runtime fetches enterprise managed settings with the session's GitHub token and fails closed without one. " : ""}${managedRuleCount(plan) ? "Host-injected rules are enforced as managed policy; limitTo is a closed-world host boundary and an empty list denies all hosts. " : ""}Managed rules cannot be relaxed by the session.`,
+            sources: ["sdk-managed-settings", "sdk-managed-session"],
+        });
+    if (plan.model.allowedModels.length)
+        decisions.push({
+            id: "model-allowlist",
+            kind: "review",
+            title: "Model changes are limited to the allowlist",
+            detail: "TypeScript and Rust set allowedModels in session config. Python, Go, C#, and Java projects call session.model.setAllowedModels right after create and resume, so the allowlist applies from the first turn but not to session creation itself.",
+            sources: ["sdk-model-allowlist"],
+        });
+    if (plan.capabilities.imageGeneration)
+        decisions.push({
+            id: "image-generation",
+            kind: plan.model.provider === "copilot" ? "review" : "gap",
+            title: "Image generation is experimental",
+            detail: `The opt-in is not persisted, so the host must supply it again after a runtime restart. Policy, permissions, offline mode, and tool filters still apply.${plan.model.provider === "copilot" ? "" : " It is not available with a custom (BYOK) provider."}`,
+            sources: ["sdk-image-generation"],
+        });
+    if (["debug", "trace"].includes(plan.session.diagnostics))
+        decisions.push({
+            id: "diagnostics",
+            kind: "review",
+            title: "Verbose diagnostics capture sensitive payloads",
+            detail: "At debug and trace levels, MCP diagnostic entries can contain payloads, tool arguments, paths, and server stderr. Do not upload them as telemetry or export them without deliberate host action.",
+            sources: ["sdk-diagnostics"],
+        });
+    if (plan.session.continuePendingWork)
+        decisions.push({
+            id: "continue-pending",
+            kind: "review",
+            title: "Resume continues interrupted tool calls",
+            detail: "Pending tool calls and permission prompts resume instead of being treated as interrupted. Hosts must be ready to answer re-emitted permission requests and re-bind tool handlers before resuming.",
+            sources: ["sdk-resume-recovery"],
         });
     if (plan.tools.skill.action === "keep" && !plan.context.skills)
         decisions.push({

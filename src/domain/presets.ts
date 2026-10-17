@@ -1,5 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { BUILTIN_NAMES, HarnessPlanSchema, ToolMapSchema, defaultToolSettings } from "./plan";
+import {
+    BUILTIN_NAMES,
+    HarnessPlanSchema,
+    PLAN_SCHEMA_VERSION,
+    ToolMapSchema,
+    defaultToolSettings,
+    v3Defaults,
+} from "./plan";
 import type { HarnessPlan, PresetId } from "./plan";
 import { defaultTarget } from "./target";
 import { TOOL_CATALOG_REVISION } from "../content/builtin-tools";
@@ -39,8 +46,9 @@ export function createPreset(preset: PresetId): HarnessPlan {
             ]),
         ),
     );
+    const extra = v3Defaults();
     return HarnessPlanSchema.parse({
-        schemaVersion: 2,
+        schemaVersion: PLAN_SCHEMA_VERSION,
         toolCatalogRevision: TOOL_CATALOG_REVISION,
         target: defaultTarget(),
         name: minimal ? "My minimal harness" : coding ? "My coding harness" : "My custom harness",
@@ -62,7 +70,9 @@ export function createPreset(preset: PresetId): HarnessPlan {
         agents: [],
         selectedAgent: "",
         rootExcludedTools: [],
+        excludedBuiltinAgents: extra.excludedBuiltinAgents,
         context: {
+            ...extra.context,
             workspace: coding ? "./workspace" : "",
             discovery: coding,
             skills: coding,
@@ -71,7 +81,7 @@ export function createPreset(preset: PresetId): HarnessPlan {
             skillDirectories: [],
             pluginDirectories: [],
         },
-        policy: { permissionMode: "host", preToolHook: false, postToolHook: false },
+        policy: { ...extra.policy, permissionMode: "host", preToolHook: false, postToolHook: false },
         model: {
             id: "",
             provider: "copilot",
@@ -81,7 +91,9 @@ export function createPreset(preset: PresetId): HarnessPlan {
             credentialEnv: "MODEL_API_KEY",
             reasoningEffort: "default",
             contextTier: "default",
+            ...extra.model,
         },
+        capabilities: extra.capabilities,
         identity: coding ? "developer" : "host-token",
         session: {
             storage: minimal ? "virtual" : "local",
@@ -89,8 +101,10 @@ export function createPreset(preset: PresetId): HarnessPlan {
             idleTimeoutSeconds: minimal ? 900 : 0,
             infinite: true,
             largeOutput: coding,
+            ...extra.session,
         },
-        events: { streaming: true, observer: true },
+        events: { ...extra.events, streaming: true, observer: true },
+        output: extra.output,
         evaluation:
             "Define representative tasks, expected tool behavior, authority checks, and measurable acceptance criteria before shipping.",
     });
@@ -102,20 +116,24 @@ export function changedAxes(plan: HarnessPlan): string[] {
         ["Runtime & language", plan.target, base.target],
         ["Client baseline", [plan.clientMode, plan.inventory], [base.clientMode, base.inventory]],
         ["Prompt", plan.prompt, base.prompt],
-        ["Built-in tools", plan.tools, base.tools],
+        ["Built-in tools", [plan.tools, plan.capabilities], [base.tools, base.capabilities]],
         ["Custom tools", plan.customTools, base.customTools],
         ["MCP integrations", plan.mcpServers, base.mcpServers],
         [
             "Agents",
-            [plan.agents, plan.selectedAgent, plan.rootExcludedTools],
-            [base.agents, base.selectedAgent, base.rootExcludedTools],
+            [plan.agents, plan.selectedAgent, plan.rootExcludedTools, plan.excludedBuiltinAgents],
+            [base.agents, base.selectedAgent, base.rootExcludedTools, base.excludedBuiltinAgents],
         ],
         ["Context", plan.context, base.context],
         ["Policy", plan.policy, base.policy],
         ["Models", plan.model, base.model],
         ["Identity", plan.identity, base.identity],
         ["Session state", plan.session, base.session],
-        ["Events / evaluation", [plan.events, plan.evaluation], [base.events, base.evaluation]],
+        [
+            "Events / evaluation",
+            [plan.events, plan.output, plan.evaluation],
+            [base.events, base.output, base.evaluation],
+        ],
     ];
     return groups
         .filter(([, current, initial]) => JSON.stringify(current) !== JSON.stringify(initial))

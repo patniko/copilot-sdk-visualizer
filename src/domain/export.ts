@@ -1,9 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema } from "./plan";
-import type { HarnessPlan } from "./plan";
+import { BUILTIN_NAMES, BUILTIN_SPECS, HarnessPlanSchema, LIFECYCLE_HOOKS } from "./plan";
+import type { HarnessPlan, HostHandler, LifecycleHook } from "./plan";
 import { analyzePlan, hostContracts, toolSummary } from "./analysis";
 import { LANGUAGES, RUNTIME_OPTIONS, runtimeEndpoint } from "./target";
 import { S2S_AUTH_AVAILABILITY } from "../content/sdk-docs";
+import { customAgentData, extendedSessionData, providerExtras } from "./bootstrap/common";
+
+/** SDK hook-callback property for a plan lifecycle hook, e.g. subagentStart -> onSubagentStart. */
+export function hookCallbackName(hook: LifecycleHook | "preToolUse" | "postToolUse"): string {
+    return `on${hook[0]?.toUpperCase()}${hook.slice(1)}`;
+}
+
+export const HANDLER_CALLBACKS: Record<HostHandler, string> = {
+    elicitation: "onElicitationRequest",
+    exitPlanMode: "onExitPlanModeRequest",
+    autoModeSwitch: "onAutoModeSwitchRequest",
+    mcpAuth: "onMcpAuthRequest",
+};
+
+/** Session options that only session.create accepts. */
+const CREATE_ONLY_KEYS = new Set(["name", "refreshCustomInstructions"]);
 
 function json(value: unknown): string {
     if (Array.isArray(value)) return `[${value.map(json).join(", ")}]`;
@@ -41,6 +57,32 @@ function quoted(value: string): string {
     return JSON.stringify(value);
 }
 
+function advancedInstructionLines(plan: HarnessPlan): string[] {
+    const extended = extendedSessionData(plan);
+    const lines = Object.entries(extended).map(
+        ([key, value]) => `- Session option ${key}: ${JSON.stringify(value)}.`,
+    );
+    if (plan.model.allowedModels.length)
+        lines.push(
+            `- Model allowlist: ${plan.model.allowedModels.join(", ")}. Use the SessionConfig field where the SDK language has one; otherwise call session.model.setAllowedModels immediately after create and resume.`,
+        );
+    const extras = providerExtras(plan);
+    if (Object.keys(extras).length) lines.push(`- Provider extras: ${JSON.stringify(extras)}.`);
+    if (plan.context.skillProvider)
+        lines.push(
+            "- Skill provider (experimental): implement listSkills/readSkill against the host's skill store; pass it again on resume.",
+        );
+    if (plan.events.logLevel !== "default") lines.push(`- Client logLevel: ${plan.events.logLevel}.`);
+    lines.push(
+        `- Resume behavior: allowTranscriptRecovery=${plan.session.allowTranscriptRecovery}; continuePendingWork=${plan.session.continuePendingWork}.`,
+    );
+    if (plan.output.responseSchema.trim())
+        lines.push(
+            `- Structured output: send each run with responseSchema ${plan.output.responseSchema.trim().replace(/\s+/g, " ")}.`,
+        );
+    return lines;
+}
+
 export function generateCopilotCliInstructions(input: HarnessPlan): string {
     const plan = HarnessPlanSchema.parse(input);
     const language =
@@ -71,7 +113,7 @@ export function generateCopilotCliInstructions(input: HarnessPlan): string {
     });
     const customToolDetails = plan.customTools.map(
         (tool) =>
-            `${tool.name}${tool.terminal ? " (terminal)" : ""}: ${tool.description}; parameters: ${tool.parameters}`,
+            `${tool.name}${tool.terminal ? " (terminal)" : ""}${tool.defer === "default" ? "" : ` (defer: ${tool.defer})`}${tool.skipPermission ? " (skips permission prompt)" : ""}: ${tool.description}; parameters: ${tool.parameters}`,
     );
     const mcpDetails = plan.mcpServers.map(
         (server) =>
@@ -81,9 +123,9 @@ export function generateCopilotCliInstructions(input: HarnessPlan): string {
     );
     const agentDetails = plan.agents.map(
         (agent) =>
-            `${agent.name}: ${agent.description}; model: ${agent.model.trim() || "inherit session model"}; tools: ${
+            `${agent.name}${agent.displayName.trim() ? ` (${agent.displayName.trim()})` : ""}: ${agent.description}; model: ${agent.model.trim() || "inherit session model"}; tools: ${
                 agent.tools.length ? agent.tools.join(", ") : "none"
-            }; instructions: ${quoted(agent.prompt)}`,
+            }; instructions: ${quoted(agent.prompt)}${agent.hooks.trim() ? `; agent-scoped hooks: ${agent.hooks.trim().replace(/\s+/g, " ")}` : ""}`,
     );
     const modelDetail =
         plan.model.provider === "copilot"
@@ -126,7 +168,15 @@ export function generateCopilotCliInstructions(input: HarnessPlan): string {
                 ? "deliberately use the SDK approve-all helper for ordinary runtime permission requests"
                 : "bind a real host permission callback; do not substitute allow-all"
         }.`,
-        `- Hooks: pre-tool=${plan.policy.preToolHook}; post-tool=${plan.policy.postToolHook}.`,
+        `- Hooks: pre-tool=${plan.policy.preToolHook}; post-tool=${plan.policy.postToolHook}${
+            plan.policy.hooks.length ? `; lifecycle hooks: ${plan.policy.hooks.join(", ")}` : ""
+        }.`,
+        ...(plan.policy.handlers.length
+            ? [
+                  `- Host request handlers: ${plan.policy.handlers.map((name) => HANDLER_CALLBACKS[name]).join(", ")}.`,
+              ]
+            : []),
+        ...advancedInstructionLines(plan),
         "",
         "## Tool and agent integrations",
         "Built-in overrides:",
@@ -190,6 +240,8 @@ export function generateSdkCode(input: HarnessPlan): string {
             schema: plan.tools[name].parameters,
             override: true,
             terminal: false,
+            defer: "default",
+            skipPermission: false,
         })),
         ...plan.customTools.map((tool) => ({
             name: tool.name,
@@ -197,6 +249,8 @@ export function generateSdkCode(input: HarnessPlan): string {
             schema: tool.parameters,
             override: false,
             terminal: tool.terminal,
+            defer: tool.defer,
+            skipPermission: tool.skipPermission,
         })),
     ];
     const toolDefinitions = handlers
@@ -207,6 +261,10 @@ export function generateSdkCode(input: HarnessPlan): string {
                 "            parameters: " + json(JSON.parse(tool.schema)) + ",",
                 ...(tool.override ? ["            overridesBuiltInTool: true,"] : []),
                 ...(tool.terminal ? ["            isTerminal: true,"] : []),
+                ...(tool.defer && tool.defer !== "default"
+                    ? [`            defer: ${json(tool.defer)},`]
+                    : []),
+                ...(tool.skipPermission ? ["            skipPermission: true,"] : []),
                 `            handler: toolHandler(host, ${json(tool.name)}),`,
                 "        }),",
             ].join("\n"),
@@ -214,6 +272,7 @@ export function generateSdkCode(input: HarnessPlan): string {
         .join("\n");
     const client = [
         `        mode: ${json(plan.clientMode)},`,
+        ...(plan.events.logLevel === "default" ? [] : [`        logLevel: ${json(plan.events.logLevel)},`]),
         plan.target.runtime === "inprocess"
             ? "        connection: RuntimeConnection.forInProcess(),"
             : plan.target.runtime === "external"
@@ -285,6 +344,9 @@ export function generateSdkCode(input: HarnessPlan): string {
                   plan.model.credential === "api-key"
                       ? `                apiKey: required(process.env[${json(plan.model.credentialEnv)}], ${json(plan.model.credentialEnv)}),`
                       : '                bearerTokenProvider: required(host.providerToken, "provider bearer-token callback"),',
+                  ...Object.entries(providerExtras(plan)).map(
+                      ([key, value]) => `                ${key}: ${json(value)},`,
+                  ),
                   "            },",
               ].join("\n");
     const session = [
@@ -316,15 +378,7 @@ export function generateSdkCode(input: HarnessPlan): string {
                 ]),
             ),
         )},`,
-        `            customAgents: ${json(
-            plan.agents.map((agent) => ({
-                name: agent.name,
-                description: agent.description,
-                prompt: agent.prompt,
-                ...(agent.model.trim() ? { model: agent.model.trim() } : {}),
-                tools: agent.tools,
-            })),
-        )},`,
+        `            customAgents: ${json(customAgentData(plan))},`,
         ...(plan.selectedAgent ? [`            agent: ${json(plan.selectedAgent)},`] : []),
         ...(plan.rootExcludedTools.length
             ? [`            defaultAgent: { excludedTools: ${json(plan.rootExcludedTools)} },`]
@@ -350,6 +404,13 @@ export function generateSdkCode(input: HarnessPlan): string {
         ...(plan.events.observer
             ? ['            onEvent: required(host.callbacks.onEvent, "event observer"),']
             : []),
+        ...plan.policy.handlers.map(
+            (handler) =>
+                `            ${HANDLER_CALLBACKS[handler]}: required(host.callbacks.${HANDLER_CALLBACKS[handler]}, ${json(`${handler} handler`)}),`,
+        ),
+        ...(plan.context.skillProvider
+            ? ['            skillProvider: required(host.callbacks.skillProvider, "skill provider"),']
+            : []),
         "            hooks: {",
         ...(plan.policy.preToolHook
             ? ['                onPreToolUse: required(host.callbacks.hooks?.onPreToolUse, "pre-tool hook"),']
@@ -359,12 +420,30 @@ export function generateSdkCode(input: HarnessPlan): string {
                   '                onPostToolUse: required(host.callbacks.hooks?.onPostToolUse, "post-tool hook"),',
               ]
             : []),
+        ...LIFECYCLE_HOOKS.filter((hook) => plan.policy.hooks.includes(hook)).map(
+            (hook) =>
+                `                ${hookCallbackName(hook)}: required(host.callbacks.hooks?.${hookCallbackName(hook)}, ${json(`${hook} hook`)}),`,
+        ),
         "            },",
         `            infiniteSessions: { enabled: ${plan.session.infinite} },`,
         `            largeOutput: { enabled: ${plan.session.largeOutput} },`,
         `            streaming: ${plan.events.streaming},`,
         ...(provider ? [provider] : []),
+        ...(plan.model.allowedModels.length
+            ? [`            allowedModels: ${json(plan.model.allowedModels)},`]
+            : []),
+        ...Object.entries(extendedSessionData(plan)).map(
+            ([key, value]) => `            ${key}: ${json(value)},`,
+        ),
     ];
+    const resumeSession = [
+        ...session.filter((line) => !CREATE_ONLY_KEYS.has(line.trim().split(":")[0] ?? "")),
+        `            allowTranscriptRecovery: ${plan.session.allowTranscriptRecovery},`,
+        `            continuePendingWork: ${plan.session.continuePendingWork},`,
+    ];
+    const responseSchema = plan.output.responseSchema.trim()
+        ? (JSON.parse(plan.output.responseSchema) as unknown)
+        : undefined;
     return [
         "// Copyright (c) Microsoft Corporation. All rights reserved.",
         "// Generated integration sketch. Supply host implementations; review before execution.",
@@ -394,7 +473,7 @@ export function generateSdkCode(input: HarnessPlan): string {
         `import { CopilotClient, RuntimeConnection, defineTool${allowAllPermissions ? ", approveAll" : ""}, type SessionConfig, type Tool, type ProviderConfig } from "@github/copilot-sdk";`,
         "",
         "export interface HostBindings {",
-        `    callbacks: Pick<SessionConfig, "onPermissionRequest" | "onUserInputRequest"${s2s ? "" : ' | "gitHubTokenProvider"'} | "createSessionFsProvider" | "onEvent" | "hooks">;`,
+        `    callbacks: Pick<SessionConfig, "onPermissionRequest" | "onUserInputRequest"${s2s ? "" : ' | "gitHubTokenProvider"'} | "createSessionFsProvider" | "onEvent" | "hooks" | "skillProvider" | "onElicitationRequest" | "onExitPlanModeRequest" | "onAutoModeSwitchRequest" | "onMcpAuthRequest">;`,
         '    toolHandlers: Record<string, NonNullable<Tool["handler"]>>;',
         "    model?: string;",
         "    providerEndpoint?: string;",
@@ -412,35 +491,63 @@ export function generateSdkCode(input: HarnessPlan): string {
         "    return handler;",
         "}",
         "",
-        "export async function createHarness(host: HostBindings) {",
-        ...(plan.model.provider === "copilot" &&
-        plan.identity === "s2s-installation" &&
-        plan.target.runtime === "inprocess"
-            ? [
-                  '    required(process.env.COPILOT_GITHUB_TOKEN, "GitHub App installation token in the host environment before runtime load");',
-              ]
-            : []),
-        "    const tools: Tool[] = [",
-        toolDefinitions,
-        "    ];",
-        "    const client = new CopilotClient({",
-        ...client,
-        "    });",
-        "    try {",
-        "        const session = await client.createSession({",
-        ...session,
-        "        });",
-        "        // The caller owns cleanup: call client.stop() when finished.",
-        "        return { client, session };",
-        "    } catch (error) {",
-        "        try {",
-        "            await client.stop();",
-        "        } catch (cleanupError) {",
-        '            throw new AggregateError([error, cleanupError], "Session setup and runtime cleanup both failed.");',
-        "        }",
-        "        throw error;",
-        "    }",
-        "}",
+        ...(responseSchema === undefined
+            ? []
+            : [
+                  "// Structured output for each run's sendAndWait call (MessageOptions.responseSchema).",
+                  `export const responseSchema: Record<string, unknown> = ${json(responseSchema)};`,
+                  "",
+              ]),
+        ...harnessFunction("createHarness", "host: HostBindings", "client.createSession", session),
+        "",
+        "// Resume a persisted session with the same configuration. Create-only options are omitted.",
+        ...harnessFunction(
+            "resumeHarness",
+            "host: HostBindings, sessionId: string",
+            "client.resumeSession",
+            resumeSession,
+            "sessionId, ",
+        ),
         "",
     ].join("\n");
+
+    function harnessFunction(
+        name: string,
+        parameters: string,
+        call: string,
+        options: string[],
+        leadingArgument = "",
+    ): string[] {
+        return [
+            `export async function ${name}(${parameters}) {`,
+            ...(plan.model.provider === "copilot" &&
+            plan.identity === "s2s-installation" &&
+            plan.target.runtime === "inprocess"
+                ? [
+                      '    required(process.env.COPILOT_GITHUB_TOKEN, "GitHub App installation token in the host environment before runtime load");',
+                  ]
+                : []),
+            "    const tools: Tool[] = [",
+            toolDefinitions,
+            "    ];",
+            "    const client = new CopilotClient({",
+            ...client,
+            "    });",
+            "    try {",
+            `        const session = await ${call}(${leadingArgument}{`,
+            ...options,
+            "        });",
+            "        // The caller owns cleanup: call client.stop() when finished.",
+            "        return { client, session };",
+            "    } catch (error) {",
+            "        try {",
+            "            await client.stop();",
+            "        } catch (cleanupError) {",
+            '            throw new AggregateError([error, cleanupError], "Session setup and runtime cleanup both failed.");',
+            "        }",
+            "        throw error;",
+            "    }",
+            "}",
+        ];
+    }
 }

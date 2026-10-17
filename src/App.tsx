@@ -33,21 +33,31 @@ import { useStoredBoolean } from "./hooks/useStoredBoolean";
 import { useViewNavigation } from "./hooks/useViewNavigation";
 import { PRESETS, changedAxes, createPreset } from "./domain/presets";
 import type { HarnessPlan, PresetId } from "./domain/plan";
-import { AgentsEditor } from "./components/AgentsEditor";
-import { ContextEditor } from "./components/ContextEditor";
 import { CopilotMark } from "./components/CopilotMark";
 import { EvidenceDialog } from "./components/EvidenceDialog";
-import { ModelsEditor } from "./components/ModelsEditor";
 import { BaseProfileEditor, OverviewEditor } from "./components/OverviewEditor";
 import { PlanInspector } from "./components/PlanInspector";
-import { PolicyEditor } from "./components/PolicyEditor";
 import { PromptEditor } from "./components/PromptEditor";
-import { ToolsEditor } from "./components/ToolsEditor";
 import { viewForPath } from "./components/editor";
 import type { EditorProps, Evidence, ViewId } from "./components/editor";
 import { Button, Modal, Notice } from "./components/ui";
 import "./builder.css";
 
+const ToolsEditor = lazy(() =>
+    import("./components/ToolsEditor").then((module) => ({ default: module.ToolsEditor })),
+);
+const ContextEditor = lazy(() =>
+    import("./components/ContextEditor").then((module) => ({ default: module.ContextEditor })),
+);
+const AgentsEditor = lazy(() =>
+    import("./components/AgentsEditor").then((module) => ({ default: module.AgentsEditor })),
+);
+const ModelsEditor = lazy(() =>
+    import("./components/ModelsEditor").then((module) => ({ default: module.ModelsEditor })),
+);
+const PolicyEditor = lazy(() =>
+    import("./components/PolicyEditor").then((module) => ({ default: module.PolicyEditor })),
+);
 const BootstrapEditor = lazy(() =>
     import("./components/BootstrapEditor").then((module) => ({ default: module.BootstrapEditor })),
 );

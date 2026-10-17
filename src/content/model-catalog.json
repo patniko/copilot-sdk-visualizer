@@ -1,22 +1,27 @@
 {
     "revisions": {
-        "sdk": "f45c46fd1812f8bed5b4cbc250f47177c83068f0",
-        "runtime": "efebfd34dfa68830b11f49302fd88d12950df2e4"
+        "sdk": "b96cd2b54f7eb87458fd50f485a751c712e88f62",
+        "runtime": "7d20899fc4c8b13a405aa621066e75a9e78e04cd"
     },
     "sources": {
-        "sdk": "https://github.com/github/copilot-sdk/blob/f45c46fd1812f8bed5b4cbc250f47177c83068f0/nodejs/src/client.ts",
-        "runtime": "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/files/session-limit-baseline/session_limit_public_models.json"
+        "sdk": "https://github.com/github/copilot-sdk/blob/b96cd2b54f7eb87458fd50f485a751c712e88f62/nodejs/src/client.ts",
+        "runtime": "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/files/session-limit-baseline/session_limit_public_models.json"
     },
     "modelIds": [
+        "claude-sonnet-5.5",
         "claude-sonnet-5",
         "claude-fable-5.1",
         "claude-fable-5",
+        "claude-opus-5.5",
         "claude-opus-5",
         "claude-opus-4.8",
         "claude-opus-4.8-fast",
-        "claude-opus-4.7",
         "claude-sonnet-4.6",
+        "claude-haiku-5.5",
         "claude-haiku-4.5",
+        "gpt-6.1-sol",
+        "gpt-6-sol",
+        "gpt-6-luna",
         "gpt-6-astra",
         "gpt-5.6-sol",
         "gpt-5.6-terra",
@@ -27,13 +32,12 @@
         "gpt-5.3-codex",
         "gpt-5-mini",
         "mai-code-1.1-flash",
-        "mai-code-1-flash-picker",
+        "gemini-4-argon",
         "gemini-3.8-flash",
         "gemini-3.7-flash",
-        "gemini-3.6-flash",
-        "gemini-3.5-flash",
+        "grok-4.7",
+        "grok-4.6",
         "grok-4.5",
-        "kimi-k3",
-        "kimi-k2.7-code"
+        "kimi-k3"
     ]
 }

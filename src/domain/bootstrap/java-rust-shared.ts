@@ -81,7 +81,37 @@ export function javaRustConfiguration(plan: HarnessPlan) {
         postToolHook: plan.policy.postToolHook,
         session: sessionData(plan),
         tools: toolDefinitions(plan),
+        ...(plan.policy.hooks.length ? { hooks: plan.policy.hooks } : {}),
+        ...(plan.policy.handlers.length ? { handlers: plan.policy.handlers } : {}),
+        ...(plan.context.skillProvider ? { skillProvider: true } : {}),
+        ...(plan.model.allowedModels.length ? { allowedModels: plan.model.allowedModels } : {}),
+        ...(plan.events.logLevel === "default" ? {} : { logLevel: plan.events.logLevel }),
+        ...(plan.output.responseSchema.trim()
+            ? { responseSchema: JSON.parse(plan.output.responseSchema) as unknown }
+            : {}),
     };
+}
+
+/** Names of the optional template blocks selected by the plan. */
+export function javaRustOptionalBlocks(plan: HarnessPlan): Set<string> {
+    const blocks = new Set<string>();
+    if (plan.policy.hooks.length) blocks.add("lifecycle-hooks");
+    for (const hook of plan.policy.hooks) blocks.add(`hook-${hook}`);
+    if (plan.policy.handlers.length) blocks.add("handlers");
+    for (const handler of plan.policy.handlers) blocks.add(`handler-${handler}`);
+    if (plan.context.skillProvider) blocks.add("skill-provider");
+    return blocks;
+}
+
+/**
+ * Keeps `// <opt:name>` ... `// </opt:name>` template blocks whose name is selected (dropping
+ * only the marker lines) and removes unselected blocks, so unused integrations add no source.
+ */
+export function renderOptionalBlocks(source: string, selected: Set<string>): string {
+    return source.replace(
+        /^[ \t]*\/\/ <opt:([\w-]+)>\n([\s\S]*?)^[ \t]*\/\/ <\/opt:\1>\n/gm,
+        (_block, name: string, body: string) => (selected.has(name) ? body : ""),
+    );
 }
 
 export function javaRustRequirements(plan: HarnessPlan, hostFile: string): BootstrapRequirement[] {
@@ -147,6 +177,28 @@ export function javaRustRequirements(plan: HarnessPlan, hostFile: string): Boots
             kind: "review",
         });
     }
+    const hostCode = (id: string, title: string, detail: string) => {
+        if (!requirements.some((requirement) => requirement.id === id))
+            requirements.push({ id, title, detail, file: hostFile, kind: "host-code" });
+    };
+    for (const hook of plan.policy.hooks)
+        hostCode(
+            `hook-${hook}`,
+            `Implement and register the ${hook} hook`,
+            "Preflight fails until the generated failing callback is replaced and marked implemented. A selected hook is not satisfied by a no-op.",
+        );
+    for (const handler of plan.policy.handlers)
+        hostCode(
+            `handler-${handler}`,
+            `Implement and register the ${handler} handler`,
+            "Preflight fails until the generated failing handler is replaced and marked implemented. It must return a real decision, not an automatic approval.",
+        );
+    if (plan.context.skillProvider)
+        hostCode(
+            "skill-provider",
+            "Implement and register the skill provider",
+            "Experimental. Preflight fails until the generated failing SkillProvider lists and reads your real skills and is marked implemented.",
+        );
     return requirements;
 }
 
