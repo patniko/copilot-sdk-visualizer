@@ -21,9 +21,9 @@ const originalNames = [
 
 describe("complete built-in catalog and draft migration", () => {
     it("covers the full extracted descriptor set, aliases, and qualified defaults", () => {
-        expect(BUILTIN_NAMES).toHaveLength(59);
-        expect(new Set(BUILTIN_NAMES).size).toBe(59);
-        expect(toolCatalog.context.aliases).toHaveLength(33);
+        expect(BUILTIN_NAMES).toHaveLength(57);
+        expect(new Set(BUILTIN_NAMES).size).toBe(57);
+        expect(toolCatalog.context.aliases).toHaveLength(41);
         expect(
             BUILTIN_NAMES.filter((name) => BUILTIN_SPECS[name].defaultStatus === "baseline-enabled"),
         ).toEqual(["create", "edit", "glob", "grep", "view", "web_fetch"]);
@@ -54,7 +54,7 @@ describe("complete built-in catalog and draft migration", () => {
             };
             const migrated = parsePlan(JSON.stringify(old));
             expect(migrated.toolCatalogRevision).toBe(TOOL_CATALOG_REVISION);
-            expect(Object.keys(migrated.tools)).toHaveLength(59);
+            expect(Object.keys(migrated.tools)).toHaveLength(57);
             for (const name of originalNames) expect(migrated.tools[name]).toEqual(current.tools[name]);
             for (const name of BUILTIN_NAMES) {
                 if (originalNames.some((original) => original === name)) continue;

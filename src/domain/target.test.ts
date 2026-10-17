@@ -16,7 +16,7 @@ describe("runtime target and legacy draft migration", () => {
         const legacy = { ...fields, schemaVersion: 1 };
         const migrated = parsePlan(JSON.stringify(legacy));
         expect(migrated).toEqual({ ...current, target: defaultTarget() });
-        expect(migrated.schemaVersion).toBe(2);
+        expect(migrated.schemaVersion).toBe(3);
     });
 
     it("keeps the saved legacy bytes intact until a user change", () => {

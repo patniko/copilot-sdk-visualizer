@@ -85,4 +85,65 @@ describe("shared educational help", () => {
         expect(valueHelp.runtime.boundary).toContain("not a sandbox");
         expect(valueHelp.rootExclusions.summary).toContain("retaining them for subagent use");
     });
+
+    it("names the session keys that schema v3 options actually export", () => {
+        const plan = createPreset("minimal");
+        plan.context.onDemandInstructions = true;
+        plan.context.refreshCustomInstructions = true;
+        plan.policy.managed.load = true;
+        plan.policy.managed.enforceModelDefaults = true;
+        plan.session.interactiveUser = true;
+        plan.session.sessionStore = true;
+        plan.session.fileChangeTracking = true;
+        plan.context.agentDirectories = ["./agents"];
+        plan.context.hookDirectories = ["./hooks"];
+        plan.context.instructionDirectories = ["./instructions"];
+        plan.context.additionalDirectories = ["../shared"];
+        plan.context.includedBuiltinSkills = ["skill-one"];
+        plan.excludedBuiltinAgents = ["builtin-one"];
+        const data: Record<string, unknown> = sessionData(plan);
+        for (const help of [
+            toggleHelp.onDemandInstructions,
+            toggleHelp.refreshCustomInstructions,
+            toggleHelp.managedLoad,
+            toggleHelp.enforceModelDefaults,
+            toggleHelp.interactiveUser,
+            toggleHelp.sessionStore,
+            toggleHelp.fileChangeTracking,
+        ])
+            expect(data[help.option], help.title).toBe(true);
+        for (const help of [
+            valueHelp.agentDirectories,
+            valueHelp.hookDirectories,
+            valueHelp.instructionDirectories,
+            valueHelp.additionalDirectories,
+            valueHelp.includedBuiltinSkills,
+            valueHelp.excludedBuiltinAgents,
+        ])
+            expect(Array.isArray(data[help.option]), help.title).toBe(true);
+        plan.events.subAgentStreaming = false;
+        expect(
+            sessionData(plan)[toggleHelp.subAgentStreaming.option as "includeSubAgentStreamingEvents"],
+        ).toBe(false);
+    });
+
+    it("labels experimental options and keeps GitHub-internal surfaces out of help", () => {
+        for (const help of [toggleHelp.skillProvider, toggleHelp.imageGeneration])
+            expect(help.scope).toContain("Experimental");
+        expect(toggleHelp.disableAssisted.boundary).toContain("experimental");
+        expect(toggleHelp.skillProvider.boundary).toContain("resume");
+        expect(toggleHelp.imageGeneration.boundary).toContain("bring-your-own");
+        const text = JSON.stringify([toggleHelp, valueHelp]);
+        for (const internal of [
+            "github_sql",
+            "GitHubCacheStore",
+            "session_artifacts",
+            "session_history",
+            "get_context_remaining",
+            "new_context",
+            "catalog_select",
+            "factories",
+        ])
+            expect(text).not.toContain(internal);
+    });
 });

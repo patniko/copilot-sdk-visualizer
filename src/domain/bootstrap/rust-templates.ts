@@ -76,6 +76,10 @@ impl Observer {
 }
 
 async fn run_session(client: &Client, configuration: &Configuration, host: &Host, prompt: String) -> Result<Completion> {
+    let mut message = MessageOptions::new(prompt).with_wait_timeout(Duration::from_secs(120));
+    if let Some(schema) = &configuration.response_schema {
+        message = message.with_response_schema(schema.clone());
+    }
     let prepared = client.prepare_session(configuration.session_config(host)?)?;
     let observer = if configuration.observer {
         Some(Observer::start(prepared.subscribe(), host.clone()))
@@ -101,9 +105,7 @@ async fn run_session(client: &Client, configuration: &Configuration, host: &Host
                     Ok(()) => Err(anyhow!("Interrupted")),
                     Err(error) => Err(error.into()),
                 },
-                response = session.send_and_wait(
-                    MessageOptions::new(prompt).with_wait_timeout(Duration::from_secs(120)),
-                ) => response.map_err(anyhow::Error::from).and_then(completion),
+                response = session.send_and_wait(message) => response.map_err(anyhow::Error::from).and_then(completion),
             };
             let primary = with_cleanup(primary, host.ensure_healthy(), "host callback");
             let primary = if primary.is_err() {
@@ -155,11 +157,16 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use anyhow::{Context, Result, anyhow, bail};
+use github_copilot_sdk::session_events::ReasoningSummary;
 use github_copilot_sdk::session_fs::{SessionFsConfig, SessionFsConventions};
 use github_copilot_sdk::{
-    ClientMode, ClientOptions, CliProgram, CustomAgentConfig, DefaultAgentConfig,
-    InfiniteSessionConfig, LargeToolOutputConfig, McpHttpServerConfig, McpServerConfig,
-    ProviderConfig, SectionOverride, SessionConfig, SystemMessageConfig, Tool, Transport,
+    AskUserVariant, AutoTier, CapiSessionOptions, ClientMode, ClientOptions, CliProgram,
+    CustomAgentConfig, DefaultAgentConfig, DeferMode, DiagnosticLogLevel,
+    DiagnosticSourcesConfiguration, DiagnosticsConfiguration, ImageGenerationConfig,
+    InfiniteSessionConfig, LargeToolOutputConfig, LogLevel, ManagedSettings,
+    ManagedSettingsPermissions, McpDiagnosticSourceConfiguration, McpHttpServerConfig,
+    McpServerConfig, ProviderConfig, SectionOverride, SessionConfig, SystemMessageConfig, Tool,
+    ToolSearchConfig, Transport,
 };
 use indexmap::IndexMap;
 use serde::Deserialize;
@@ -231,13 +238,15 @@ struct McpData {
 }
 
 #[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct AgentData {
     name: String,
+    display_name: Option<String>,
     description: String,
     prompt: String,
     model: Option<String>,
     tools: Vec<String>,
+    hooks: Option<IndexMap<String, Vec<IndexMap<String, Value>>>>,
 }
 
 #[derive(Deserialize)]
@@ -250,11 +259,53 @@ struct Toggle { enabled: bool }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ManagedData { permissions: ManagedPermissionsData }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ManagedPermissionsData {
+    disable_bypass_permissions_mode: Option<String>,
+    disable_assisted_permissions_mode: Option<bool>,
+    deny: Option<Vec<String>>,
+    ask: Option<Vec<String>>,
+    allow: Option<Vec<String>>,
+    limit_to: Option<Vec<String>>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CapiData { auto_tier: String }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ToolSearchData {
+    enabled: Option<bool>,
+    defer_threshold: Option<u32>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct DiagnosticsData { sources: DiagnosticSourcesData }
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct DiagnosticSourcesData { mcp: DiagnosticLevelData }
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct DiagnosticLevelData { level: String }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct ProviderData {
     #[serde(rename = "type")]
     provider_type: String,
     base_url: String,
     wire_api: Option<String>,
+    model_provider: Option<String>,
+    wire_model: Option<String>,
+    max_prompt_tokens: Option<i64>,
+    max_output_tokens: Option<i64>,
 }
 
 #[derive(Deserialize)]
@@ -265,6 +316,9 @@ struct ToolData {
     parameters: IndexMap<String, Value>,
     overrides_built_in_tool: bool,
     is_terminal: bool,
+    defer: Option<String>,
+    #[serde(default)]
+    skip_permission: bool,
 }
 
 #[derive(Deserialize)]
@@ -291,6 +345,30 @@ struct SessionData {
     large_output: Toggle,
     streaming: bool,
     provider: Option<ProviderData>,
+    agent_directories: Option<Vec<PathBuf>>,
+    hook_directories: Option<Vec<PathBuf>>,
+    instruction_directories: Option<Vec<PathBuf>>,
+    additional_directories: Option<Vec<PathBuf>>,
+    included_builtin_skills: Option<Vec<String>>,
+    skip_custom_instructions: Option<bool>,
+    enable_on_demand_instruction_discovery: Option<bool>,
+    refresh_custom_instructions: Option<bool>,
+    organization_custom_instructions: Option<String>,
+    enable_managed_settings: Option<bool>,
+    enforce_managed_model_defaults: Option<bool>,
+    managed_settings: Option<ManagedData>,
+    capi: Option<CapiData>,
+    reasoning_summary: Option<String>,
+    image_generation: Option<Toggle>,
+    tool_search: Option<ToolSearchData>,
+    ask_user_variant: Option<String>,
+    excluded_builtin_agents: Option<Vec<String>>,
+    name: Option<String>,
+    interactive_user: Option<bool>,
+    diagnostics: Option<DiagnosticsData>,
+    enable_session_store: Option<bool>,
+    enable_file_change_tracking: Option<bool>,
+    include_sub_agent_streaming_events: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -307,6 +385,15 @@ pub(crate) struct Configuration {
     post_tool_hook: bool,
     session: SessionData,
     tools: Vec<ToolData>,
+    #[serde(default)]
+    hooks: Vec<String>,
+    #[serde(default)]
+    handlers: Vec<String>,
+    #[serde(default)]
+    skill_provider: bool,
+    allowed_models: Option<Vec<String>>,
+    log_level: Option<String>,
+    pub(crate) response_schema: Option<Value>,
 }
 
 #[derive(Clone, Copy, Deserialize)]
@@ -390,6 +477,19 @@ impl Configuration {
         if self.post_tool_hook && !host::POST_TOOL_IMPLEMENTED {
             issues.push("HOST TODO: implement the post-tool inspection/redaction hook in src/host.rs".into());
         }
+        for hook in &self.hooks {
+            if !host::implemented_hooks().contains(&hook.as_str()) {
+                issues.push(format!("HOST TODO: implement and register the {hook} hook in src/host.rs"));
+            }
+        }
+        for handler in &self.handlers {
+            if !host::implemented_handlers().contains(&handler.as_str()) {
+                issues.push(format!("HOST TODO: implement and register the {handler} handler in src/host.rs"));
+            }
+        }
+        if self.skill_provider && !host::SKILL_PROVIDER_IMPLEMENTED {
+            issues.push("HOST TODO: implement and register the skill provider in src/host.rs".into());
+        }
         if matches!(self.storage, Storage::Virtual) && !host::SESSION_FS_IMPLEMENTED {
             issues.push("HOST TODO: implement the POSIX SessionFs provider in src/session_fs.rs".into());
         }
@@ -402,6 +502,18 @@ impl Configuration {
         if !matches!(self.client.runtime, Runtime::External) {
             options.use_logged_in_user = Some(self.session.provider.is_none() && matches!(self.identity, Identity::Developer));
             options.session_idle_timeout_seconds = Some(self.client.idle_timeout_seconds);
+            // The SDK passes --log-level to runtimes it starts; an existing server owns its own.
+            if let Some(level) = &self.log_level {
+                options.log_level = Some(match level.as_str() {
+                    "none" => LogLevel::None,
+                    "error" => LogLevel::Error,
+                    "warning" => LogLevel::Warning,
+                    "info" => LogLevel::Info,
+                    "debug" => LogLevel::Debug,
+                    "all" => LogLevel::All,
+                    other => bail!("Unknown client log level: {other}"),
+                });
+            }
             // __S2S_RUNTIME_ENV_START__
             if self.session.provider.is_none() && matches!(self.identity, Identity::S2sInstallation) {
                 let token = required_env("COPILOT_GITHUB_TOKEN")?;
@@ -442,6 +554,90 @@ impl Configuration {
             }
         }
         Ok(options)
+    }
+
+    fn extended_session(&self, config: &mut SessionConfig) -> Result<()> {
+        let data = &self.session;
+        config.name = data.name.clone();
+        if let Some(summary) = &data.reasoning_summary {
+            config.reasoning_summary = Some(match summary.as_str() {
+                "none" => ReasoningSummary::None,
+                "concise" => ReasoningSummary::Concise,
+                "detailed" => ReasoningSummary::Detailed,
+                other => bail!("Unknown reasoning summary: {other}"),
+            });
+        }
+        if let Some(capi) = &data.capi {
+            let tier = match capi.auto_tier.as_str() {
+                "efficiency" => AutoTier::Efficiency,
+                "balance" => AutoTier::Balance,
+                "intelligence" => AutoTier::Intelligence,
+                "fast" => AutoTier::Fast,
+                other => bail!("Unknown Auto routing tier: {other}"),
+            };
+            config.capi = Some(CapiSessionOptions::new().with_auto_tier(tier));
+        }
+        if let Some(variant) = &data.ask_user_variant {
+            config.ask_user_variant = Some(match variant.as_str() {
+                "legacy" => AskUserVariant::Legacy,
+                "elicitation" => AskUserVariant::Elicitation,
+                other => bail!("Unknown ask_user variant: {other}"),
+            });
+        }
+        config.excluded_builtin_agents = data.excluded_builtin_agents.clone();
+        config.included_builtin_skills = data.included_builtin_skills.clone();
+        config.agent_directories = data.agent_directories.clone();
+        config.hook_directories = data.hook_directories.clone();
+        config.instruction_directories = data.instruction_directories.clone();
+        config.additional_directories = data.additional_directories.clone();
+        config.skip_custom_instructions = data.skip_custom_instructions;
+        config.enable_on_demand_instruction_discovery = data.enable_on_demand_instruction_discovery;
+        config.refresh_custom_instructions = data.refresh_custom_instructions;
+        config.organization_custom_instructions = data.organization_custom_instructions.clone();
+        config.enable_managed_settings = data.enable_managed_settings;
+        config.enforce_managed_model_defaults = data.enforce_managed_model_defaults;
+        if let Some(managed) = &data.managed_settings {
+            let rules = &managed.permissions;
+            let mut permissions = ManagedSettingsPermissions::default();
+            permissions.disable_bypass_permissions_mode = rules.disable_bypass_permissions_mode.clone();
+            permissions.disable_assisted_permissions_mode = rules.disable_assisted_permissions_mode;
+            permissions.deny = rules.deny.clone();
+            permissions.ask = rules.ask.clone();
+            permissions.allow = rules.allow.clone();
+            permissions.limit_to = rules.limit_to.clone();
+            config.managed_settings = Some(ManagedSettings::default().with_permissions(permissions));
+        }
+        if let Some(image) = &data.image_generation {
+            config.image_generation = Some(ImageGenerationConfig::new().with_enabled(image.enabled));
+        }
+        if let Some(search) = &data.tool_search {
+            let mut value = ToolSearchConfig::new();
+            value.enabled = search.enabled;
+            value.defer_threshold = search.defer_threshold;
+            config.tool_search = Some(value);
+        }
+        config.interactive_user = data.interactive_user;
+        if let Some(diagnostics) = &data.diagnostics {
+            let mut mcp = McpDiagnosticSourceConfiguration::default();
+            mcp.level = match diagnostics.sources.mcp.level.as_str() {
+                "off" => DiagnosticLogLevel::Off,
+                "error" => DiagnosticLogLevel::Error,
+                "warning" => DiagnosticLogLevel::Warning,
+                "info" => DiagnosticLogLevel::Info,
+                "debug" => DiagnosticLogLevel::Debug,
+                "trace" => DiagnosticLogLevel::Trace,
+                other => bail!("Unknown diagnostic level: {other}"),
+            };
+            let mut sources = DiagnosticSourcesConfiguration::default();
+            sources.mcp = Some(mcp);
+            let mut value = DiagnosticsConfiguration::default();
+            value.sources = sources;
+            config.diagnostics = Some(value);
+        }
+        config.enable_session_store = data.enable_session_store;
+        config.enable_file_change_tracking = data.enable_file_change_tracking;
+        config.include_sub_agent_streaming_events = data.include_sub_agent_streaming_events;
+        Ok(())
     }
 
     pub(crate) fn session_config(&self, host: &Host) -> Result<SessionConfig> {
@@ -489,6 +685,10 @@ impl Configuration {
         let mut output = LargeToolOutputConfig::default();
         output.enabled = Some(data.large_output.enabled);
         config.large_output = Some(output);
+        self.extended_session(&mut config)?;
+        if let Some(models) = &self.allowed_models {
+            config = config.with_allowed_models(models.clone());
+        }
 
         let mut servers = IndexMap::new();
         for (name, server) in &data.mcp_servers {
@@ -503,10 +703,12 @@ impl Configuration {
         for agent in &data.custom_agents {
             let mut value = CustomAgentConfig::default();
             value.name = agent.name.clone();
+            value.display_name = agent.display_name.clone();
             value.description = Some(agent.description.clone());
             value.prompt = agent.prompt.clone();
             value.model = agent.model.clone();
             value.tools = Some(agent.tools.clone());
+            value.hooks = agent.hooks.clone();
             agents.push(value);
         }
         config.custom_agents = Some(agents);
@@ -518,12 +720,20 @@ impl Configuration {
         }
         let mut tools = Vec::new();
         for tool in &self.tools {
-            tools.push(Tool::new(tool.name.clone())
+            let mut value = Tool::new(tool.name.clone())
                 .with_description(tool.description.clone())
                 .with_parameters(serde_json::to_value(&tool.parameters)?)
                 .with_overrides_built_in_tool(tool.overrides_built_in_tool)
-                .with_is_terminal(tool.is_terminal)
-                .with_handler(Arc::new(HostTool::new(tool.name.clone(), host.clone()))));
+                .with_skip_permission(tool.skip_permission)
+                .with_is_terminal(tool.is_terminal);
+            if let Some(defer) = &tool.defer {
+                value = value.with_defer(match defer.as_str() {
+                    "auto" => DeferMode::Auto,
+                    "never" => DeferMode::Never,
+                    other => bail!("Unknown tool defer mode: {other}"),
+                });
+            }
+            tools.push(value.with_handler(Arc::new(HostTool::new(tool.name.clone(), host.clone()))));
         }
         config.tools = Some(tools);
         config = config.with_user_input_handler(Arc::new(host.clone()));
@@ -532,9 +742,34 @@ impl Configuration {
             config = config.with_github_token_provider(Arc::new(GitHubEnvironmentProvider));
         }
         // __COPILOT_IDENTITY_BINDING_END__
-        if self.pre_tool_hook || self.post_tool_hook {
-            config = config.with_hooks(Arc::new(host.hooks(self.pre_tool_hook, self.post_tool_hook)));
+        if self.pre_tool_hook || self.post_tool_hook || !self.hooks.is_empty() {
+            config = config.with_hooks(Arc::new(host.hooks(self.pre_tool_hook, self.post_tool_hook, &self.hooks)));
         }
+        // <opt:handler-elicitation>
+        if self.handlers.iter().any(|handler| handler == "elicitation") {
+            config = config.with_elicitation_handler(Arc::new(host.clone()));
+        }
+        // </opt:handler-elicitation>
+        // <opt:handler-exitPlanMode>
+        if self.handlers.iter().any(|handler| handler == "exitPlanMode") {
+            config = config.with_exit_plan_mode_handler(Arc::new(host.clone()));
+        }
+        // </opt:handler-exitPlanMode>
+        // <opt:handler-autoModeSwitch>
+        if self.handlers.iter().any(|handler| handler == "autoModeSwitch") {
+            config = config.with_auto_mode_switch_handler(Arc::new(host.clone()));
+        }
+        // </opt:handler-autoModeSwitch>
+        // <opt:handler-mcpAuth>
+        if self.handlers.iter().any(|handler| handler == "mcpAuth") {
+            config = config.with_mcp_auth_handler(Arc::new(host.clone()));
+        }
+        // </opt:handler-mcpAuth>
+        // <opt:skill-provider>
+        if self.skill_provider {
+            config = config.with_skill_provider(Arc::new(host.skill_provider()));
+        }
+        // </opt:skill-provider>
         if matches!(self.storage, Storage::Virtual) {
             config = config.with_session_fs_provider(Arc::new(HostSessionFs));
         }
@@ -547,6 +782,10 @@ impl Configuration {
                 data.base_url.clone()
             };
             provider.wire_api = data.wire_api.clone();
+            provider.model_provider = data.model_provider.clone();
+            provider.wire_model = data.wire_model.clone();
+            provider.max_prompt_tokens = data.max_prompt_tokens;
+            provider.max_output_tokens = data.max_output_tokens;
             match self.credential {
                 Credential::ApiKey => provider.api_key = Some(required_env(&self.credential_env)?),
                 Credential::BearerCallback => {

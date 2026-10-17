@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import * as Tabs from "@radix-ui/react-tabs";
-import { Plus, Trash2, Wrench } from "lucide-react";
+import { Plus, Sparkles, Trash2, Wrench } from "lucide-react";
 import { BUILTIN_NAMES, createCustomTool } from "../domain/plan";
 import type { CustomTool } from "../domain/plan";
 import { toolCatalog } from "../content/builtin-tools";
@@ -11,7 +11,20 @@ import { McpEditor } from "./McpEditor";
 import { SettingHelp } from "./SettingHelp";
 import { toggleHelp, valueHelp } from "../content/setting-help";
 import { ToolCatalogBrowser, ToolCatalogReference } from "./ToolCatalogBrowser";
-import { Badge, Button, ChoiceField, EmptyState, Panel, TextAreaField, TextField, ToggleField } from "./ui";
+import {
+    Badge,
+    Button,
+    ChoiceField,
+    CountField,
+    EmptyState,
+    ExperimentalBadge,
+    Notice,
+    Panel,
+    SelectField,
+    TextAreaField,
+    TextField,
+    ToggleField,
+} from "./ui";
 import "../tool-catalog.css";
 
 export function ToolsEditor(props: EditorProps) {
@@ -75,6 +88,98 @@ export function ToolsEditor(props: EditorProps) {
                         <strong>{summary.mcpTools}</strong> MCP declarations
                     </span>
                 </div>
+            </Panel>
+            <Panel
+                title="Tool capabilities"
+                description="Session options that change how tools are loaded and how ask_user and images behave."
+                action={<Sparkles size={19} aria-hidden="true" />}
+            >
+                <div className="hb-toggle-list">
+                    <ToggleField
+                        label="Image generation"
+                        badge={<ExperimentalBadge />}
+                        help={
+                            <SettingHelp
+                                help={toggleHelp.imageGeneration}
+                                enabled={plan.capabilities.imageGeneration}
+                            />
+                        }
+                        description="Opt in to an authorized Copilot image model. Not available with bring-your-own providers; not persisted across runtime restarts."
+                        checked={plan.capabilities.imageGeneration}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.capabilities.imageGeneration = checked;
+                            })
+                        }
+                    />
+                </div>
+                {plan.capabilities.imageGeneration && plan.model.provider !== "copilot" && (
+                    <Notice title="Not available with a custom provider" tone="accent">
+                        Image generation needs the GitHub Copilot inference route. The opt-in is kept in the
+                        plan but has no effect while Models &amp; identity uses bring-your-own inference.
+                    </Notice>
+                )}
+                <div className="hb-field-grid">
+                    <SelectField
+                        label="Tool search"
+                        help={
+                            <SettingHelp help={valueHelp.toolSearch} value={plan.capabilities.toolSearch} />
+                        }
+                        value={plan.capabilities.toolSearch}
+                        options={[
+                            { value: "default", label: "Runtime default" },
+                            { value: "enabled", label: "Enabled" },
+                            { value: "disabled", label: "Disabled (preload every tool)" },
+                        ]}
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.capabilities.toolSearch = value;
+                            })
+                        }
+                        hint="Defers MCP and external tools behind tool_search_tool when there are many."
+                    />
+                    <CountField
+                        label="Deferral threshold"
+                        help={
+                            <SettingHelp
+                                help={valueHelp.toolSearchThreshold}
+                                value={plan.capabilities.toolSearchDeferThreshold || "Built-in (30)"}
+                            />
+                        }
+                        value={plan.capabilities.toolSearchDeferThreshold}
+                        max={10_000}
+                        placeholder="Built-in (30)"
+                        onValueChange={(value) =>
+                            edit((draft) => {
+                                draft.capabilities.toolSearchDeferThreshold = value;
+                            })
+                        }
+                        error={issueFor(issues, "capabilities.toolSearchDeferThreshold")}
+                        hint="Total tool count before deferral starts. Blank or 0 keeps the built-in threshold."
+                    />
+                </div>
+                <SelectField
+                    label="ask_user shape"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.askUserVariant}
+                            value={plan.capabilities.askUserVariant}
+                        />
+                    }
+                    value={plan.capabilities.askUserVariant}
+                    options={[
+                        { value: "default", label: "SDK default (legacy)" },
+                        { value: "legacy", label: "Legacy questions" },
+                        { value: "elicitation", label: "Elicitation forms" },
+                    ]}
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.capabilities.askUserVariant = value;
+                        })
+                    }
+                    error={issueFor(issues, "capabilities.askUserVariant")}
+                    hint="Elicitation forms need the elicitation request handler under Policy & state."
+                />
             </Panel>
             <Tabs.Root defaultValue="built-in" className="hb-tools-tabs">
                 <Tabs.List className="hb-tabs-list" aria-label="Tool configuration areas">
@@ -227,6 +332,33 @@ function CustomToolRow({ tool, index, edit, issues }: EditorProps & { tool: Cust
                             target.terminal = checked;
                         })
                     }
+                />
+                <ToggleField
+                    label="Skip permission prompt"
+                    help={<SettingHelp help={toggleHelp.skipPermission} enabled={tool.skipPermission} />}
+                    description="Run without asking the permission handler. Use only for operations your handler already authorizes."
+                    checked={tool.skipPermission}
+                    onCheckedChange={(checked) =>
+                        editTool((target) => {
+                            target.skipPermission = checked;
+                        })
+                    }
+                />
+                <SelectField
+                    label="Tool deferral"
+                    help={<SettingHelp help={valueHelp.toolDefer} value={tool.defer} />}
+                    value={tool.defer}
+                    options={[
+                        { value: "default", label: "SDK default (auto)" },
+                        { value: "auto", label: "Auto: may load through tool search" },
+                        { value: "never", label: "Never: always preload" },
+                    ]}
+                    onValueChange={(value) =>
+                        editTool((target) => {
+                            target.defer = value;
+                        })
+                    }
+                    error={issueFor(issues, `customTools.${index}.defer`)}
                 />
             </details>
         </article>

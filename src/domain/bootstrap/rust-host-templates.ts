@@ -1,4 +1,105 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+import type { HostHandler, LifecycleHook } from "../plan";
+
+const RUST_HOOKS: Record<LifecycleHook, { method: string; type: string }> = {
+    preMcpToolCall: { method: "on_pre_mcp_tool_call", type: "PreMcpToolCall" },
+    userPromptSubmitted: { method: "on_user_prompt_submitted", type: "UserPromptSubmitted" },
+    userPromptTransformed: { method: "on_user_prompt_transformed", type: "UserPromptTransformed" },
+    sessionStart: { method: "on_session_start", type: "SessionStart" },
+    sessionEnd: { method: "on_session_end", type: "SessionEnd" },
+    errorOccurred: { method: "on_error_occurred", type: "ErrorOccurred" },
+    agentStop: { method: "on_agent_stop", type: "AgentStop" },
+    subagentStart: { method: "on_subagent_start", type: "SubagentStart" },
+    subagentStop: { method: "on_subagent_stop", type: "SubagentStop" },
+};
+
+function rustHookOverrides(): string {
+    return Object.entries(RUST_HOOKS)
+        .map(([name, hook]) => {
+            const output = `github_copilot_sdk::hooks::${hook.type}Output`;
+            // A selected prompt hook blocks the prompt; other hooks have no refusal output.
+            const result =
+                name === "userPromptSubmitted"
+                    ? `let mut output = ${output}::default();
+        output.decision = Some("block".into());
+        output.reason = Some("Unimplemented host prompt policy".into());
+        Some(output)`
+                    : "None";
+            return `    // <opt:hook-${name}>
+
+    async fn ${hook.method}(&self, _input: github_copilot_sdk::hooks::${hook.type}Input, _context: HookContext) -> Option<${output}> {
+        if !self.selected("${name}") { return None; }
+        self.host.fail("HOST TODO: implement the selected ${name} hook".into());
+        ${result}
+    }
+    // </opt:hook-${name}>
+`;
+        })
+        .join("");
+}
+
+const RUST_HANDLERS: Record<HostHandler, { signature: string; result: string }> = {
+    elicitation: {
+        signature: `impl github_copilot_sdk::handler::ElicitationHandler for Host {
+    async fn handle(
+        &self,
+        _session_id: SessionId,
+        _request_id: RequestId,
+        _request: github_copilot_sdk::ElicitationRequest,
+    ) -> github_copilot_sdk::ElicitationResult {`,
+        result: `github_copilot_sdk::ElicitationResult { action: "cancel".into(), content: None }`,
+    },
+    exitPlanMode: {
+        signature: `impl github_copilot_sdk::handler::ExitPlanModeHandler for Host {
+    async fn handle(
+        &self,
+        _session_id: SessionId,
+        _data: github_copilot_sdk::ExitPlanModeData,
+    ) -> github_copilot_sdk::handler::ExitPlanModeResult {`,
+        result: `github_copilot_sdk::handler::ExitPlanModeResult {
+            approved: false,
+            selected_action: None,
+            feedback: Some("Unimplemented host plan approval".into()),
+        }`,
+    },
+    autoModeSwitch: {
+        signature: `impl github_copilot_sdk::handler::AutoModeSwitchHandler for Host {
+    async fn handle(
+        &self,
+        _session_id: SessionId,
+        _error_code: Option<String>,
+        _retry_after_seconds: Option<f64>,
+    ) -> github_copilot_sdk::handler::AutoModeSwitchResponse {`,
+        result: "github_copilot_sdk::handler::AutoModeSwitchResponse::No",
+    },
+    mcpAuth: {
+        signature: `impl github_copilot_sdk::handler::McpAuthHandler for Host {
+    async fn handle(
+        &self,
+        _session_id: SessionId,
+        _request_id: RequestId,
+        _request: github_copilot_sdk::handler::McpAuthRequest,
+    ) -> github_copilot_sdk::handler::McpAuthResult {`,
+        result: "github_copilot_sdk::handler::McpAuthResult::Cancelled",
+    },
+};
+
+function rustHandlerImpls(): string {
+    return Object.entries(RUST_HANDLERS)
+        .map(
+            ([name, handler]) => `// <opt:handler-${name}>
+
+#[async_trait]
+${handler.signature}
+        self.fail("HOST TODO: implement the selected ${name} handler".into());
+        ${handler.result}
+    }
+}
+// </opt:handler-${name}>
+`,
+        )
+        .join("");
+}
 
 export const RUST_HOST = String.raw`// Copyright (c) Microsoft Corporation. All rights reserved.
 use std::io::{self, BufRead, Write};
@@ -19,13 +120,12 @@ use github_copilot_sdk::hooks::{
 };
 use github_copilot_sdk::tool::ToolHandler;
 use github_copilot_sdk::{
-    BearerTokenError, BearerTokenProvider, PermissionRequestData, ProviderTokenArgs, RequestId,
-    SessionId, ToolInvocation, ToolResult,
+    BearerTokenError, BearerTokenProvider, Error as SdkError, ErrorKind, PermissionRequestData,
+    ProviderTokenArgs, RequestId, SessionId, ToolInvocation, ToolResult,
 };
 // __GITHUB_TOKEN_PROVIDER_START__
 use github_copilot_sdk::{
-    Error as SdkError, ErrorKind, GitHubToken, GitHubTokenProvider, GitHubTokenProviderArgs,
-    GitHubTokenProviderResult,
+    GitHubToken, GitHubTokenProvider, GitHubTokenProviderArgs, GitHubTokenProviderResult,
 };
 // __GITHUB_TOKEN_PROVIDER_END__
 use tokio::sync::{oneshot, watch};
@@ -35,6 +135,9 @@ pub(crate) fn implemented_tools() -> &'static [&'static str] { &[] }
 pub(crate) const PERMISSION_POLICY_IMPLEMENTED: bool = false;
 pub(crate) const PRE_TOOL_IMPLEMENTED: bool = false;
 pub(crate) const POST_TOOL_IMPLEMENTED: bool = false;
+pub(crate) fn implemented_hooks() -> &'static [&'static str] { &[] }
+pub(crate) fn implemented_handlers() -> &'static [&'static str] { &[] }
+pub(crate) const SKILL_PROVIDER_IMPLEMENTED: bool = false;
 pub(crate) const SESSION_FS_IMPLEMENTED: bool = false;
 pub(crate) const PROVIDER_ENDPOINT: &str = "";
 
@@ -171,9 +274,22 @@ impl Host {
         }
     }
 
-    pub(crate) fn hooks(&self, pre: bool, post: bool) -> HostHooks {
-        HostHooks { host: self.clone(), pre, post }
+    pub(crate) fn hooks(&self, pre: bool, post: bool, _lifecycle: &[String]) -> HostHooks {
+        HostHooks {
+            host: self.clone(),
+            pre,
+            post,
+            // <opt:lifecycle-hooks>
+            lifecycle: _lifecycle.to_vec(),
+            // </opt:lifecycle-hooks>
+        }
     }
+    // <opt:skill-provider>
+
+    pub(crate) fn skill_provider(&self) -> HostSkillProvider {
+        HostSkillProvider { host: self.clone() }
+    }
+    // </opt:skill-provider>
 }
 
 fn read_console(input: &mut impl BufRead, request: &ConsoleRequest) -> io::Result<UserInputResponse> {
@@ -268,7 +384,18 @@ pub(crate) struct HostHooks {
     host: Host,
     pre: bool,
     post: bool,
+    // <opt:lifecycle-hooks>
+    lifecycle: Vec<String>,
+    // </opt:lifecycle-hooks>
 }
+// <opt:lifecycle-hooks>
+
+impl HostHooks {
+    fn selected(&self, hook: &str) -> bool {
+        self.lifecycle.iter().any(|name| name == hook)
+    }
+}
+// </opt:lifecycle-hooks>
 
 #[async_trait]
 impl SessionHooks for HostHooks {
@@ -287,7 +414,28 @@ impl SessionHooks for HostHooks {
         self.host.fail("HOST TODO: implement the selected post-tool inspection/redaction".into());
         None
     }
+${rustHookOverrides()}}
+${rustHandlerImpls()}// <opt:skill-provider>
+
+pub(crate) struct HostSkillProvider {
+    host: Host,
 }
+
+#[async_trait]
+impl github_copilot_sdk::SkillProvider for HostSkillProvider {
+    async fn list_skills(&self) -> std::result::Result<Vec<github_copilot_sdk::SkillProviderDescriptor>, SdkError> {
+        let message = "HOST TODO: list the host's skills".to_owned();
+        self.host.fail(message.clone());
+        Err(SdkError::with_message(ErrorKind::InvalidConfig, message))
+    }
+
+    async fn read_skill(&self, name: &str) -> std::result::Result<Option<String>, SdkError> {
+        let message = format!("HOST TODO: read skill {name}");
+        self.host.fail(message.clone());
+        Err(SdkError::with_message(ErrorKind::InvalidConfig, message))
+    }
+}
+// </opt:skill-provider>
 `;
 
 export const RUST_SESSION_FS = String.raw`// Copyright (c) Microsoft Corporation. All rights reserved.

@@ -87,6 +87,15 @@ const SECTIONS: Section[] = [
             { label: "Skills", value: (plan) => plan.context.skills },
             { label: "File-based hooks", value: (plan) => plan.context.fileHooks },
             { label: "Host git context", value: (plan) => plan.context.hostGit },
+            {
+                label: "Custom instruction files",
+                value: (plan) =>
+                    plan.context.customInstructions === "default"
+                        ? "Baseline default"
+                        : plan.context.customInstructions === "load"
+                          ? "Load"
+                          : "Skip",
+            },
         ],
     },
     {
@@ -118,6 +127,13 @@ const SECTIONS: Section[] = [
             {
                 label: "Pre/post tool hooks",
                 value: (plan) => plan.policy.preToolHook || plan.policy.postToolHook,
+            },
+            {
+                label: "Lifecycle hooks / handlers",
+                value: (plan) =>
+                    plan.policy.hooks.length + plan.policy.handlers.length
+                        ? `${plan.policy.hooks.length} / ${plan.policy.handlers.length}`
+                        : "None",
             },
             { label: "Streaming events", value: (plan) => plan.events.streaming },
         ],

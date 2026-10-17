@@ -93,10 +93,10 @@ export const runtimeCapabilities: RuntimeCapability[] = [
             "Which skills are available and what authority their suggested actions actually have.",
         ],
         boundary:
-            "Instructions are not executable authority. Directory loading is SDK-configurable; an internal skill-provider transport does not imply a high-level callback in every SDK.",
-        controls: ["skillDirectories", "disabledSkills"],
+            "Instructions are not executable authority. Directory loading is SDK-configurable, and an experimental session skill provider can serve skills from host storage; neither grants the actions a skill suggests.",
+        controls: ["skillDirectories", "skillProvider", "includedBuiltinSkills", "disabledSkills"],
         related: ["plugins", "context", "tools"],
-        sources: ["sdk-pack-inputs", "runtime-skills", "runtime-skill-contract", "sdk-callbacks"],
+        sources: ["sdk-pack-inputs", "runtime-skills", "runtime-skill-contract", "sdk-skill-provider"],
         view: "context",
         action: "Configure context & packs",
     },
@@ -117,7 +117,7 @@ export const runtimeCapabilities: RuntimeCapability[] = [
         ],
         boundary:
             "Available does not mean authorized. Built-ins have model, platform, and capability gates; overrides are explicit and do not inherit the old tool's authority.",
-        controls: ["tools", "availableTools", "excludedTools", "overridesBuiltInTool"],
+        controls: ["tools", "availableTools", "excludedTools", "overridesBuiltInTool", "toolSearch"],
         related: ["mcp", "policy", "loop"],
         sources: ["runtime-tools", "sdk-tools", "override-planning", "override-permissions"],
         view: "tools",
@@ -163,7 +163,7 @@ export const runtimeCapabilities: RuntimeCapability[] = [
         ],
         boundary:
             "A scoped tool list is not a sandbox. Delegation requires the relevant tools and gates; experimental fleet bindings are not uniform across SDKs.",
-        controls: ["customAgents", "agent", "defaultAgent.excludedTools"],
+        controls: ["customAgents", "agent", "defaultAgent.excludedTools", "excludedBuiltinAgents"],
         related: ["tools", "inference", "policy"],
         sources: ["sdk-agents", "sdk-fleet"],
         view: "agents",
@@ -186,7 +186,7 @@ export const runtimeCapabilities: RuntimeCapability[] = [
         ],
         boundary:
             "A common interface is not identical model behavior. Tool use, images, structured output, and credential modes depend on provider and model support.",
-        controls: ["model", "provider", "reasoningEffort"],
+        controls: ["model", "provider", "reasoningEffort", "allowedModels"],
         related: ["auth", "context", "loop"],
         sources: ["sdk-providers", "runtime-output", "sdk-model-change"],
         view: "models",
@@ -232,7 +232,7 @@ export const runtimeCapabilities: RuntimeCapability[] = [
         ],
         boundary:
             "Hooks are not OS isolation. Omitting a permission handler does not mean blanket approval or guaranteed automatic denial; handle pending requests explicitly.",
-        controls: ["onPermissionRequest", "hooks.onPreToolUse", "hooks.onPostToolUse"],
+        controls: ["onPermissionRequest", "hooks.onPreToolUse", "hooks.onPostToolUse", "managedSettings"],
         related: ["tools", "auth", "agents"],
         sources: ["sdk-permissions", "sdk-hooks", "override-permissions"],
         view: "policy",
@@ -278,7 +278,7 @@ export const runtimeCapabilities: RuntimeCapability[] = [
         ],
         boundary:
             "Disconnecting is not deleting durable state. Storage adapters and event features vary by SDK; a separate runtime process is not a tenant sandbox.",
-        controls: ["sessionId", "streaming", "session.on", "resumeSession"],
+        controls: ["sessionId", "name", "streaming", "session.on", "resumeSession"],
         related: ["context", "loop", "policy"],
         sources: ["sdk-lifecycle", "sdk-stream-options", "sdk-resume-bindings", "sdk-storage"],
         view: "policy",

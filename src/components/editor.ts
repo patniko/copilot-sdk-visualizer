@@ -63,10 +63,23 @@ export function viewForPath(path: string): ViewId {
     if (first === "prompt") return "prompt";
     if (first === "tools" || first === "customTools" || first === "mcpServers" || first === "inventory")
         return "tools";
+    if (first === "capabilities") return "tools";
     if (first === "context") return "context";
-    if (first === "agents" || first === "selectedAgent" || first === "rootExcludedTools") return "agents";
+    if (
+        first === "agents" ||
+        first === "selectedAgent" ||
+        first === "rootExcludedTools" ||
+        first === "excludedBuiltinAgents"
+    )
+        return "agents";
     if (first === "model" || first === "identity") return "models";
-    if (first === "session" || first === "policy" || first === "events" || first === "evaluation")
+    if (
+        first === "session" ||
+        first === "policy" ||
+        first === "events" ||
+        first === "output" ||
+        first === "evaluation"
+    )
         return "policy";
     return "overview";
 }

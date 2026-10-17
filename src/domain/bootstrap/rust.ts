@@ -7,12 +7,15 @@ import {
     javaRustConfiguration,
     javaRustRequirements,
     javaRustServerFiles,
+    javaRustOptionalBlocks,
     javaRustSources,
+    renderOptionalBlocks,
 } from "./java-rust-shared";
 import { RUST_CONFIG, RUST_HOST, RUST_MAIN, RUST_SESSION_FS } from "./rust-templates";
 import type { BootstrapBlocker, LanguageAdapter } from "./types";
 
-function renderRustSource(source: string, plan: HarnessPlan): string {
+function renderRustSource(template: string, plan: HarnessPlan): string {
+    const source = renderOptionalBlocks(template, javaRustOptionalBlocks(plan));
     const s2s = plan.model.provider === "copilot" && plan.identity === "s2s-installation";
     if (!s2s)
         return source
@@ -89,7 +92,13 @@ export const rustAdapter: LanguageAdapter = {
         const manual =
             plan.target.runtime === "external" ||
             (plan.target.runtime === "managed" && Boolean(plan.target.cliPath.trim()));
-        const features = plan.target.runtime === "inprocess" ? ', features = ["bundled-in-process"]' : "";
+        // Without the `runtime` feature Client::start returns InvalidConfig for every transport.
+        const features =
+            plan.target.runtime === "inprocess"
+                ? ', features = ["bundled-in-process"]'
+                : manual
+                  ? ', features = ["runtime"]'
+                  : "";
         const requirements = javaRustRequirements(plan, "src/host.rs");
         requirements.push({
             id: "rust-source-toolchain",
@@ -177,6 +186,16 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "signa
             notes: [
                 "The Rust SDK source manifest is 0.0.0-dev; this project pins the inspected Git revision instead of inventing an exact published crate version. Rust 1.92 is too old. No Java installation or global toolchain changes are performed by the visualizer.",
                 "A strict host-owned DTO reads bootstrap-config.json, then src/config.rs explicitly assigns every selected field to SDK builders/default-constructed types. SessionConfig itself is not deserializable and many SDK structs are non-exhaustive.",
+                ...(manual
+                    ? [
+                          'The SDK dependency uses default-features = false with features = ["runtime"]: without the runtime feature, Client::start rejects every transport (including Transport::External) as InvalidConfig, and bundled-cli would embed a runtime this connection does not use.',
+                      ]
+                    : []),
+                ...(plan.events.logLevel !== "default" && plan.target.runtime === "external"
+                    ? [
+                          "The client log level is a launch option for runtimes the SDK starts; it is not sent to an existing server. Configure the server's --log-level in start-runtime.sh on the runtime host.",
+                      ]
+                    : []),
                 plan.policy.permissionMode === "host"
                     ? "The source JSON is embedded with include_str!; rebuild after editing it. Host permission handling, custom tools, hooks, and SessionFs fail preflight until their real integrations are implemented."
                     : "The source JSON is embedded with include_str!; rebuild after editing it. SessionConfig::approve_all_permissions() approves ordinary requests once; managed policy, content exclusion, downstream authorization, tool validity, and sandbox enablement remain authoritative, while enabled sandbox bypass can also be approved.",

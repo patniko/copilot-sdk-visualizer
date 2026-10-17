@@ -28,6 +28,7 @@ async function savedPlan(page: Page): Promise<HarnessPlan> {
 
 async function navigate(page: Page, name: RegExp) {
     await page.getByRole("navigation", { name: "Harness workflow" }).getByRole("button", { name }).click();
+    await page.locator(".hb-loading").waitFor({ state: "detached" });
 }
 
 async function exercise(name: string, action: (page: Page) => Promise<void>, saved?: string) {
@@ -236,6 +237,7 @@ it("keeps advanced runtime details out of the demo UI", async () => {
 
         await navigate(page, /^Learn \/ reference\b/);
         await page.getByRole("tab", { name: /Map to SDK docs/ }).click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         expect(await page.getByText("Advanced runtime surfaces", { exact: true }).count()).toBe(0);
 
         await page.evaluate(() => {
@@ -260,7 +262,7 @@ it("selects Copilot catalog models and preserves the choice through undo, reload
                 await model
                     .locator("option")
                     .evaluateAll((options) => options.map((option) => option.getAttribute("value"))),
-            ).toEqual(["", ...copilotModelCatalog.modelIds]);
+            ).toEqual(["", "auto", ...copilotModelCatalog.modelIds]);
             expect(await model.inputValue()).toBe("");
             await model.selectOption("gpt-6-astra");
             await expect.poll(async () => (await savedPlan(page)).model.id).toBe("gpt-6-astra");

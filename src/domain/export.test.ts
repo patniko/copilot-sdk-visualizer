@@ -31,6 +31,58 @@ function inspectConfiguration(code: string) {
 }
 
 describe("plan and SDK exports", () => {
+    it("emits v3 options only when they depart from SDK defaults", () => {
+        const base = createPreset("copilot");
+        const fields = inspectConfiguration(generateSdkCode(base));
+        for (const key of [
+            "allowedModels",
+            "capi",
+            "managedSettings",
+            "diagnostics",
+            "imageGeneration",
+            "skillProvider",
+            "name",
+            "includeSubAgentStreamingEvents",
+        ])
+            expect(fields.session.has(key), key).toBe(false);
+
+        const plan = createPreset("copilot");
+        plan.model.id = "auto";
+        plan.model.autoTier = "intelligence";
+        plan.model.allowedModels = ["claude-sonnet-5.5"];
+        plan.policy.hooks = ["subagentStart"];
+        plan.policy.handlers = ["mcpAuth"];
+        plan.policy.managed.limitTo = ["Domain(*.example.com)"];
+        plan.context.skillProvider = true;
+        plan.session.name = "nightly";
+        plan.session.diagnostics = "info";
+        plan.events.subAgentStreaming = false;
+        plan.events.logLevel = "debug";
+        plan.output.responseSchema = '{ "type": "object" }';
+        const code = generateSdkCode(plan);
+        const extended = inspectConfiguration(code);
+        expect(extended.session.get("capi")).toBe('{ "autoTier": "intelligence" }');
+        expect(extended.session.get("allowedModels")).toBe('["claude-sonnet-5.5"]');
+        expect(extended.session.get("managedSettings")).toContain('"limitTo": ["Domain(*.example.com)"]');
+        expect(extended.session.get("diagnostics")).toBe('{ "sources": { "mcp": { "level": "info" } } }');
+        expect(extended.session.get("skillProvider")).toContain("host.callbacks.skillProvider");
+        expect(extended.session.get("onMcpAuthRequest")).toContain("host.callbacks.onMcpAuthRequest");
+        expect(extended.session.get("hooks")).toContain("onSubagentStart");
+        expect(extended.session.get("name")).toBe('"nightly"');
+        expect(extended.session.get("includeSubAgentStreamingEvents")).toBe("false");
+        expect(extended.client.get("logLevel")).toBe('"debug"');
+        expect(code).toContain("export const responseSchema");
+        expect(code).toContain("export async function resumeHarness(host: HostBindings, sessionId: string)");
+        expect(code).toMatch(/client\.resumeSession\(sessionId, \{[\s\S]*allowTranscriptRecovery: true/);
+        const resumeBlock = code.slice(code.indexOf("client.resumeSession"));
+        expect(resumeBlock).not.toContain('name: "nightly"');
+
+        const instructions = generateCopilotCliInstructions(plan);
+        expect(instructions).toContain("lifecycle hooks: subagentStart");
+        expect(instructions).toContain("Host request handlers: onMcpAuthRequest");
+        expect(instructions).toContain("session.model.setAllowedModels");
+        expect(instructions).toContain("Structured output");
+    });
     it.each(["empty", "minimal", "copilot"] as const)(
         "emits parseable TypeScript for %s without running a runtime",
         (preset) => {

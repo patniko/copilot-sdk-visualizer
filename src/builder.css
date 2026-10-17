@@ -723,6 +723,63 @@
     color: var(--cp-accent);
 }
 
+.hb-badge-experimental {
+    border-color: color-mix(in srgb, var(--cp-warning) 45%, transparent);
+    background: color-mix(in srgb, var(--cp-warning) 10%, transparent);
+    color: var(--cp-warning);
+    font-weight: 600;
+}
+
+.hb-check-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+    clear: both;
+}
+
+.hb-check-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--cp-border);
+    border-radius: 9px;
+    background: var(--cp-surface);
+    cursor: pointer;
+}
+
+.hb-check-option:has(input:checked) {
+    border-color: var(--cp-accent);
+    background: var(--cp-accent-soft);
+}
+
+.hb-check-option input {
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: var(--cp-accent);
+}
+
+.hb-check-option-body {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.hb-check-option-body code {
+    font-size: 11px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.hb-subsection-title {
+    margin: 18px 0 4px;
+    color: var(--cp-text);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .hb-profile-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -5,6 +5,7 @@ import { createPreset } from "../presets";
 import { buildBootstrapProject } from "./index";
 import { createBootstrapArchive } from "./archive";
 import { parsePlan } from "../plan";
+import { COPILOT_CLI_VERSION, RUNTIME_SOURCE_REVISION } from "./revisions";
 
 describe("complete TypeScript bootstrap project", () => {
     it.each(["managed", "external", "inprocess"] as const)(
@@ -76,5 +77,51 @@ describe("complete TypeScript bootstrap project", () => {
         ).toMatchObject({
             kind: "review",
         });
+    });
+
+    it("builds the SDK from the runtime repository at the pinned CLI release", () => {
+        const result = buildBootstrapProject(createPreset("minimal"));
+        if (!result.ok) throw new Error("Expected supported TypeScript.");
+        const files = new Map(result.project.files.map((file) => [file.path, file.content]));
+        const setup = files.get("setup-sdk.sh") ?? "";
+        expect(setup).toContain("https://github.com/github/copilot-agent-runtime.git");
+        expect(setup).toContain(`SDK_REVISION=${RUNTIME_SOURCE_REVISION}`);
+        expect(setup).toContain("sparse-checkout set --no-cone '/src/sdk/nodejs/'");
+        expect(setup).toContain("'/third_party/build-tools/tsx-4.22.4/'");
+        expect(setup).toContain(`node scripts/set-cli-version.js ${COPILOT_CLI_VERSION}`);
+        expect(setup).toContain(
+            "checkout --quiet -- src/sdk/nodejs/package.json src/sdk/nodejs/src/cliVersion.ts",
+        );
+        expect(setup.indexOf("set-cli-version")).toBeLessThan(setup.indexOf("run build"));
+        expect(JSON.parse(files.get("package.json") ?? "{}").dependencies["@github/copilot-sdk"]).toBe(
+            "file:.sdk-source/copilot-agent-runtime/src/sdk/nodejs",
+        );
+    });
+
+    it("requires selected lifecycle hooks, handlers, and skill provider in host code", () => {
+        const plan = createPreset("copilot");
+        plan.policy.hooks = ["subagentStop", "userPromptSubmitted"];
+        plan.policy.handlers = ["elicitation"];
+        plan.context.skillProvider = true;
+        plan.output.responseSchema = '{ "type": "object" }';
+        const result = buildBootstrapProject(plan);
+        if (!result.ok) throw new Error("Expected supported TypeScript.");
+        const files = new Map(result.project.files.map((file) => [file.path, file.content]));
+        const integration = JSON.parse(files.get("integration.json") ?? "{}");
+        expect(integration.hooks).toEqual(["onSubagentStop", "onUserPromptSubmitted"]);
+        expect(integration.handlers).toEqual(["onElicitationRequest"]);
+        expect(integration.skillProvider).toBe(true);
+        const host = files.get("src/host.ts") ?? "";
+        expect(host).toContain("extensions.lifecycleHooks.${name}");
+        expect(host).toContain("extensions.handlers.${name}");
+        expect(host).toContain("extensions.skillProvider (real SkillProvider)");
+        expect(files.get("src/main.ts")).toContain("sendAndWait({ prompt, responseSchema }");
+        expect(files.get("HOST_INTEGRATION.md")).toContain("`onSubagentStop`");
+
+        const plain = buildBootstrapProject(createPreset("copilot"));
+        if (!plain.ok) throw new Error("Expected supported TypeScript.");
+        const main = plain.project.files.find((file) => file.path === "src/main.ts")?.content ?? "";
+        expect(main).toContain("sendAndWait({ prompt }");
+        expect(main).not.toContain("responseSchema");
     });
 });

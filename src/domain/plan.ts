@@ -7,6 +7,44 @@ export type { BuiltinName, BuiltinSpec } from "../content/builtin-tools";
 import type { BuiltinName } from "../content/builtin-tools";
 
 export const PRESET_IDS = ["empty", "minimal", "copilot"] as const;
+export const PLAN_SCHEMA_VERSION = 3;
+/** SDK callback hooks beyond the pre/post tool-use pair. */
+export const LIFECYCLE_HOOKS = [
+    "preMcpToolCall",
+    "userPromptSubmitted",
+    "userPromptTransformed",
+    "sessionStart",
+    "sessionEnd",
+    "errorOccurred",
+    "agentStop",
+    "subagentStart",
+    "subagentStop",
+] as const;
+export type LifecycleHook = (typeof LIFECYCLE_HOOKS)[number];
+/** Optional host request handlers beyond permission and user input. */
+export const HOST_HANDLERS = ["elicitation", "exitPlanMode", "autoModeSwitch", "mcpAuth"] as const;
+export type HostHandler = (typeof HOST_HANDLERS)[number];
+export const MODEL_PROVIDER_PRODUCTS = [
+    "openai",
+    "anthropic",
+    "azure_openai",
+    "ollama",
+    "lm_studio",
+    "foundry_local",
+    "llama_cpp",
+] as const;
+export const AUTO_TIERS = ["default", "efficiency", "balance", "intelligence", "fast"] as const;
+export const REASONING_SUMMARIES = ["default", "none", "concise", "detailed"] as const;
+export const DIAGNOSTIC_LEVELS = ["off", "error", "warning", "info", "debug", "trace"] as const;
+export const LOG_LEVELS = ["default", "none", "error", "warning", "info", "debug", "all"] as const;
+/** Built-in tools present before plan schema v3 that the runtime has since removed or renamed. */
+export const RETIRED_TOOL_NAMES: Readonly<Record<string, string | null>> = {
+    run_factory: "run_dynamic_workflow",
+    factories_manage: "dynamic_workflows_manage",
+    create_pull_request: null,
+    reply_to_comment: null,
+    report_progress: null,
+};
 export const SECTION_NAMES = [
     "preamble",
     "identity",
@@ -71,6 +109,8 @@ export const CustomToolSchema = z
         description: z.string().min(1).max(600),
         parameters: boundedText,
         terminal: z.boolean(),
+        defer: z.enum(["default", "auto", "never"]),
+        skipPermission: z.boolean(),
     })
     .strict();
 export type CustomTool = z.infer<typeof CustomToolSchema>;
@@ -92,13 +132,42 @@ export const AgentSchema = z
     .object({
         id,
         name: identifier,
+        displayName: z
+            .string()
+            .max(80)
+            .regex(/^[^\r\n]*$/, "Keep the display name on one line."),
         description: z.string().max(600),
         prompt: z.string().min(1).max(8000),
         model: z.string().max(120),
         tools: z.array(identifier).max(512),
+        hooks: boundedText,
     })
     .strict();
 export type Agent = z.infer<typeof AgentSchema>;
+
+/** Parses agent-scoped declarative hooks: `{ "<event>": [ { ...action } ] }`. Empty text means none. */
+export function agentHooksError(text: string): string | undefined {
+    if (!text.trim()) return undefined;
+    try {
+        const parsed: unknown = JSON.parse(text);
+        if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+            return 'Use a JSON object keyed by hook event, for example { "preToolUse": [ { ... } ] }.';
+        for (const [event, actions] of Object.entries(parsed)) {
+            if (
+                !Array.isArray(actions) ||
+                actions.some((a) => typeof a !== "object" || a === null || Array.isArray(a))
+            )
+                return `Hook event "${event}" must map to an array of action objects.`;
+        }
+    } catch (error) {
+        return `Invalid JSON: ${error instanceof Error ? error.message : String(error)}`;
+    }
+    return undefined;
+}
+
+export function parseAgentHooks(text: string): Record<string, Record<string, unknown>[]> | undefined {
+    return text.trim() ? (JSON.parse(text) as Record<string, Record<string, unknown>[]>) : undefined;
+}
 
 export function schemaError(text: string): string | undefined {
     try {
@@ -157,9 +226,18 @@ function endpointError(value: string): string | undefined {
     return undefined;
 }
 
+const directories = z.array(z.string().min(1).max(1000)).max(20);
+const permissionRules = z.array(z.string().min(1).max(500)).max(100);
+const modelId = z
+    .string()
+    .min(1)
+    .max(120)
+    .regex(/^[A-Za-z0-9][A-Za-z0-9._:/-]*$/, "Use an exact model ID.");
+const tokenLimit = z.number().int().min(0).max(100_000_000);
+
 export const HarnessPlanSchema = z
     .object({
-        schemaVersion: z.literal(2),
+        schemaVersion: z.literal(PLAN_SCHEMA_VERSION),
         toolCatalogRevision: z.string().min(1),
         target: BootstrapTargetSchema,
         name: z
@@ -194,6 +272,7 @@ export const HarnessPlanSchema = z
         agents: z.array(AgentSchema).max(12),
         selectedAgent: z.string().max(64),
         rootExcludedTools: z.array(identifier).max(512),
+        excludedBuiltinAgents: z.array(identifier).max(50),
         context: z
             .object({
                 workspace: z.string().max(1000),
@@ -201,8 +280,18 @@ export const HarnessPlanSchema = z
                 skills: z.boolean(),
                 fileHooks: z.boolean(),
                 hostGit: z.boolean(),
-                skillDirectories: z.array(z.string().min(1).max(1000)).max(20),
-                pluginDirectories: z.array(z.string().min(1).max(1000)).max(20),
+                skillDirectories: directories,
+                pluginDirectories: directories,
+                agentDirectories: directories,
+                hookDirectories: directories,
+                instructionDirectories: directories,
+                additionalDirectories: directories,
+                skillProvider: z.boolean(),
+                includedBuiltinSkills: z.array(identifier).max(50),
+                customInstructions: z.enum(["default", "load", "skip"]),
+                onDemandInstructions: z.boolean(),
+                refreshCustomInstructions: z.boolean(),
+                organizationInstructions: boundedText,
             })
             .strict(),
         policy: z
@@ -210,6 +299,20 @@ export const HarnessPlanSchema = z
                 permissionMode: z.enum(["host", "allow-all"]),
                 preToolHook: z.boolean(),
                 postToolHook: z.boolean(),
+                hooks: z.array(z.enum(LIFECYCLE_HOOKS)).max(LIFECYCLE_HOOKS.length),
+                handlers: z.array(z.enum(HOST_HANDLERS)).max(HOST_HANDLERS.length),
+                managed: z
+                    .object({
+                        load: z.boolean(),
+                        enforceModelDefaults: z.boolean(),
+                        deny: permissionRules,
+                        ask: permissionRules,
+                        allow: permissionRules,
+                        limitTo: permissionRules,
+                        disableBypassPermissionsMode: z.enum(["", "disable", "allow-auto-only"]),
+                        disableAssistedPermissionsMode: z.boolean(),
+                    })
+                    .strict(),
             })
             .strict(),
         model: z
@@ -224,6 +327,21 @@ export const HarnessPlanSchema = z
                     .regex(/^[A-Z_][A-Z0-9_]*$/, "Use an environment variable name, not a secret."),
                 reasoningEffort: z.enum(["default", "low", "medium", "high", "xhigh"]),
                 contextTier: z.enum(["default", "long_context"]),
+                autoTier: z.enum(AUTO_TIERS),
+                reasoningSummary: z.enum(REASONING_SUMMARIES),
+                allowedModels: z.array(modelId).max(64),
+                modelProvider: z.enum(["", ...MODEL_PROVIDER_PRODUCTS]),
+                wireModel: z.string().max(120),
+                maxPromptTokens: tokenLimit,
+                maxOutputTokens: tokenLimit,
+            })
+            .strict(),
+        capabilities: z
+            .object({
+                imageGeneration: z.boolean(),
+                toolSearch: z.enum(["default", "enabled", "disabled"]),
+                toolSearchDeferThreshold: z.number().int().min(0).max(10_000),
+                askUserVariant: z.enum(["default", "legacy", "elicitation"]),
             })
             .strict(),
         identity: IdentityModeSchema,
@@ -234,9 +352,24 @@ export const HarnessPlanSchema = z
                 idleTimeoutSeconds: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
                 infinite: z.boolean(),
                 largeOutput: z.boolean(),
+                name: z.string().max(100),
+                interactiveUser: z.boolean(),
+                diagnostics: z.enum(DIAGNOSTIC_LEVELS),
+                sessionStore: z.boolean(),
+                fileChangeTracking: z.boolean(),
+                allowTranscriptRecovery: z.boolean(),
+                continuePendingWork: z.boolean(),
             })
             .strict(),
-        events: z.object({ streaming: z.boolean(), observer: z.boolean() }).strict(),
+        events: z
+            .object({
+                streaming: z.boolean(),
+                observer: z.boolean(),
+                subAgentStreaming: z.boolean(),
+                logLevel: z.enum(LOG_LEVELS),
+            })
+            .strict(),
+        output: z.object({ responseSchema: boundedText }).strict(),
         evaluation: boundedText,
     })
     .strict()
@@ -323,6 +456,57 @@ export const HarnessPlanSchema = z
             const error = endpointError(plan.model.endpoint);
             if (error) issue(["model", "endpoint"], error);
         }
+        plan.agents.forEach((agent, index) => {
+            const error = agentHooksError(agent.hooks);
+            if (error) issue(["agents", index, "hooks"], error);
+        });
+        if (new Set(plan.policy.hooks).size !== plan.policy.hooks.length)
+            issue(["policy", "hooks"], "Select each hook once.");
+        if (new Set(plan.policy.handlers).size !== plan.policy.handlers.length)
+            issue(["policy", "handlers"], "Select each handler once.");
+        if (
+            plan.capabilities.askUserVariant === "elicitation" &&
+            !plan.policy.handlers.includes("elicitation")
+        )
+            issue(
+                ["capabilities", "askUserVariant"],
+                "The elicitation ask_user shape needs an elicitation request handler.",
+            );
+        if (plan.context.skillProvider && !plan.context.skills)
+            issue(
+                ["context", "skillProvider"],
+                "Enable skills: with skills disabled the provider stays bound but receives no calls.",
+            );
+        const sessionName = plan.session.name;
+        if (
+            sessionName &&
+            (sessionName.trim() !== sessionName ||
+                [...sessionName].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127) ||
+                sessionName.includes('"'))
+        )
+            issue(
+                ["session", "name"],
+                "Use no leading or trailing whitespace, control characters, or double quotes.",
+            );
+        if (new Set(plan.model.allowedModels).size !== plan.model.allowedModels.length)
+            issue(["model", "allowedModels"], "List each model ID once.");
+        if (
+            plan.model.allowedModels.length &&
+            plan.model.id.trim() &&
+            plan.model.id.trim() !== "auto" &&
+            !plan.model.allowedModels.includes(plan.model.id.trim())
+        )
+            issue(["model", "allowedModels"], "Include the selected session model in the allowlist.");
+        if (plan.model.provider === "copilot") {
+            if (plan.model.modelProvider)
+                issue(["model", "modelProvider"], "The serving product applies only to a custom provider.");
+            if (plan.model.wireModel.trim() || plan.model.maxPromptTokens || plan.model.maxOutputTokens)
+                issue(["model", "wireModel"], "Wire model and token limits apply only to a custom provider.");
+        }
+        if (plan.output.responseSchema.trim()) {
+            const error = schemaError(plan.output.responseSchema);
+            if (error) issue(["output", "responseSchema"], error);
+        }
         if (new TextEncoder().encode(JSON.stringify(plan, null, 2)).byteLength > MAX_PLAN_BYTES) {
             issue([], "The plan exceeds the 1 MB builder limit.");
         }
@@ -399,6 +583,7 @@ export function parsePlan(text: string): HarnessPlan {
             tools: { ...defaults, ...migrated.tools },
         };
     }
+    migrated = migrateToV3(migrated);
     const result = HarnessPlanSchema.safeParse(migrated);
     if (!result.success) {
         throw new Error(
@@ -418,6 +603,8 @@ export function createCustomTool(id: string, name = "lookup_record"): CustomTool
         description: "Look up a record authorized for the current user.",
         parameters: objectSchema("recordId"),
         terminal: false,
+        defer: "default",
+        skipPermission: false,
     };
 }
 
@@ -434,10 +621,134 @@ export function createAgent(id: string, name = "reviewer"): Agent {
     return {
         id,
         name,
+        displayName: "",
         description: "Review the task against the supplied criteria.",
         prompt: "Review the supplied material. Explain findings and do not take external actions.",
         model: "",
         tools: [],
+        hooks: "",
+    };
+}
+
+/** Defaults for fields introduced by plan schema v3. Each one leaves the SDK option unset. */
+export function v3Defaults() {
+    return {
+        excludedBuiltinAgents: [] as string[],
+        context: {
+            agentDirectories: [] as string[],
+            hookDirectories: [] as string[],
+            instructionDirectories: [] as string[],
+            additionalDirectories: [] as string[],
+            skillProvider: false,
+            includedBuiltinSkills: [] as string[],
+            customInstructions: "default" as const,
+            onDemandInstructions: false,
+            refreshCustomInstructions: false,
+            organizationInstructions: "",
+        },
+        policy: {
+            hooks: [] as LifecycleHook[],
+            handlers: [] as HostHandler[],
+            managed: {
+                load: false,
+                enforceModelDefaults: false,
+                deny: [] as string[],
+                ask: [] as string[],
+                allow: [] as string[],
+                limitTo: [] as string[],
+                disableBypassPermissionsMode: "" as const,
+                disableAssistedPermissionsMode: false,
+            },
+        },
+        model: {
+            autoTier: "default" as const,
+            reasoningSummary: "default" as const,
+            allowedModels: [] as string[],
+            modelProvider: "" as const,
+            wireModel: "",
+            maxPromptTokens: 0,
+            maxOutputTokens: 0,
+        },
+        capabilities: {
+            imageGeneration: false,
+            toolSearch: "default" as const,
+            toolSearchDeferThreshold: 0,
+            askUserVariant: "default" as const,
+        },
+        session: {
+            name: "",
+            interactiveUser: false,
+            diagnostics: "off" as const,
+            sessionStore: false,
+            fileChangeTracking: false,
+            allowTranscriptRecovery: true,
+            continuePendingWork: false,
+        },
+        events: { subAgentStreaming: true, logLevel: "default" as const },
+        output: { responseSchema: "" },
+    };
+}
+
+function record(value: unknown): Record<string, unknown> | undefined {
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : undefined;
+}
+
+function migrateToV3(input: unknown): unknown {
+    const plan = record(input);
+    if (!plan || plan.schemaVersion !== 2) return input;
+    const defaults = v3Defaults();
+    const merge = (key: keyof ReturnType<typeof v3Defaults>) => ({
+        ...(defaults[key] as object),
+        ...(record(plan[key]) ?? {}),
+    });
+    const tools = record(plan.tools);
+    let migratedTools: Record<string, unknown> | undefined;
+    if (tools) {
+        const inherited = plan.inventory === "coding-defaults";
+        migratedTools = Object.fromEntries(
+            BUILTIN_NAMES.map((name) => [name, defaultToolSettings(name, inherited ? "keep" : "remove")]),
+        );
+        for (const [name, setting] of Object.entries(tools)) {
+            if (name in RETIRED_TOOL_NAMES) {
+                const replacement = RETIRED_TOOL_NAMES[name];
+                if (replacement && !(replacement in tools)) migratedTools[replacement] = setting;
+            } else migratedTools[name] = setting;
+        }
+    }
+    const rename = (names: unknown) =>
+        Array.isArray(names)
+            ? names.flatMap((name) =>
+                  typeof name === "string" && name in RETIRED_TOOL_NAMES
+                      ? RETIRED_TOOL_NAMES[name]
+                          ? [RETIRED_TOOL_NAMES[name]]
+                          : []
+                      : [name],
+              )
+            : names;
+    return {
+        ...plan,
+        schemaVersion: PLAN_SCHEMA_VERSION,
+        ...(migratedTools ? { tools: migratedTools, toolCatalogRevision: TOOL_CATALOG_REVISION } : {}),
+        excludedBuiltinAgents: plan.excludedBuiltinAgents ?? defaults.excludedBuiltinAgents,
+        rootExcludedTools: rename(plan.rootExcludedTools),
+        customTools: Array.isArray(plan.customTools)
+            ? plan.customTools.map((tool) => ({ defer: "default", skipPermission: false, ...record(tool) }))
+            : plan.customTools,
+        agents: Array.isArray(plan.agents)
+            ? plan.agents.map((agent) => {
+                  const value = record(agent);
+                  return { displayName: "", hooks: "", ...value, tools: rename(value?.tools) };
+              })
+            : plan.agents,
+        context: merge("context"),
+        policy: merge("policy"),
+        model: merge("model"),
+        capabilities: merge("capabilities"),
+        session: merge("session"),
+        events: merge("events"),
+        output: merge("output"),
     };
 }
 

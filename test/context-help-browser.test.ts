@@ -24,6 +24,7 @@ it("explains every context switch without toggling it, and restores keyboard foc
             .getByRole("navigation", { name: "Harness workflow" })
             .getByRole("button", { name: /^Context & packs\b/ })
             .click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         await expect
             .poll(() =>
                 page.locator("#editor-heading").evaluate((element) => document.activeElement === element),

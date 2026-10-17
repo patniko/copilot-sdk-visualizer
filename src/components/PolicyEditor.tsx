@@ -1,12 +1,53 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 import { lazy, Suspense, useState } from "react";
-import { Activity, ChevronRight, Database, ShieldCheck, Webhook } from "lucide-react";
+import { Activity, ChevronRight, Database, Lock, ShieldCheck, Webhook } from "lucide-react";
 import { issueFor } from "./editor";
 import type { EditorProps } from "./editor";
-import { Badge, ChoiceField, Notice, Panel, TextAreaField, TextField, ToggleField } from "./ui";
+import {
+    Badge,
+    CheckboxListField,
+    ChoiceField,
+    ExperimentalBadge,
+    LineListField,
+    Notice,
+    Panel,
+    SelectField,
+    TextAreaField,
+    TextField,
+    ToggleField,
+} from "./ui";
 import { SettingHelp } from "./SettingHelp";
 import { contextToggleHelp } from "../content/context-help";
 import { toggleHelp, valueHelp } from "../content/setting-help";
+import { DIAGNOSTIC_LEVELS, HOST_HANDLERS, LIFECYCLE_HOOKS, LOG_LEVELS } from "../domain/plan";
+import type { HarnessPlan, HostHandler, LifecycleHook } from "../domain/plan";
+
+const HOOK_DESCRIPTIONS: Record<LifecycleHook, string> = {
+    preMcpToolCall: "Before an MCP tool call is sent to its server.",
+    userPromptSubmitted: "When a prompt is submitted; can rewrite it or block it.",
+    userPromptTransformed: "After the runtime transforms a prompt, before it is stored.",
+    sessionStart: "When the session starts; add context or set up state.",
+    sessionEnd: "When the session ends; release resources.",
+    errorOccurred: "When an error occurs; report or decide how to recover.",
+    agentStop: "When the top-level agent stops; can block with a reason to continue.",
+    subagentStart: "Before a sub-agent's first turn; prepend context.",
+    subagentStop: "After a sub-agent turn; block with a reason or rewrite its response.",
+};
+
+const HANDLER_DESCRIPTIONS: Record<HostHandler, string> = {
+    elicitation: "Answer form-based questions; needed for the elicitation ask_user shape.",
+    exitPlanMode: "Approve or reject the agent's plan before it acts.",
+    autoModeSwitch: "Decide whether the agent may switch into an automatic mode.",
+    mcpAuth: "Supply OAuth token data when an MCP server needs sign-in.",
+};
+
+const MANAGED_RULES = [
+    { key: "deny", label: "Always deny", placeholder: "Shell(git push *)" },
+    { key: "ask", label: "Always ask", placeholder: "Write(**)" },
+    { key: "allow", label: "Allow without prompting", placeholder: "Read(**)" },
+] as const;
+
+type ManagedPolicy = HarnessPlan["policy"]["managed"];
 
 const FileHookEventList = lazy(() =>
     import("./FileHookEventList").then((module) => ({ default: module.FileHookEventList })),
@@ -105,9 +146,58 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                         }
                     />
                 </div>
+                <CheckboxListField
+                    label="SDK lifecycle hooks"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.lifecycleHooks}
+                            value={`${plan.policy.hooks.length} selected`}
+                        />
+                    }
+                    values={plan.policy.hooks}
+                    options={LIFECYCLE_HOOKS.map((hook) => ({
+                        value: hook,
+                        label: hook,
+                        description: HOOK_DESCRIPTIONS[hook],
+                        badge:
+                            hook === "userPromptSubmitted" || hook === "subagentStop"
+                                ? "Can block"
+                                : undefined,
+                    }))}
+                    onValuesChange={(values) =>
+                        edit((draft) => {
+                            draft.policy.hooks = values;
+                        })
+                    }
+                    error={issueFor(issues, "policy.hooks")}
+                    hint="Each selection becomes a required host callback. userPromptSubmitted can refuse a prompt; subagentStop can keep a sub-agent working with a reason or rewrite its response."
+                />
+                <CheckboxListField
+                    label="Host request handlers"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.hostHandlers}
+                            value={`${plan.policy.handlers.length} selected`}
+                        />
+                    }
+                    values={plan.policy.handlers}
+                    options={HOST_HANDLERS.map((handler) => ({
+                        value: handler,
+                        label: handler,
+                        description: HANDLER_DESCRIPTIONS[handler],
+                    }))}
+                    onValuesChange={(values) =>
+                        edit((draft) => {
+                            draft.policy.handlers = values;
+                        })
+                    }
+                    error={issueFor(issues, "policy.handlers")}
+                    hint="Each selection becomes a required host handler; your application owns the UI and decisions."
+                />
             </Panel>
+            <ManagedPolicyPanel {...{ plan, edit, issues }} />
             <Panel
-                title="Lifecycle hooks"
+                title="File-based lifecycle hooks"
                 description="Let trusted hook files run commands at runtime lifecycle events."
                 action={<Webhook size={19} aria-hidden="true" />}
             >
@@ -241,6 +331,123 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                         With large-output handling disabled, bound result sizes in your host tools.
                     </p>
                 )}
+                <TextField
+                    label="Session name"
+                    help={<SettingHelp help={valueHelp.sessionName} value={plan.session.name || "Unnamed"} />}
+                    value={plan.session.name}
+                    maxLength={100}
+                    placeholder="Optional, e.g. Ticket 4821"
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.session.name = value;
+                        })
+                    }
+                    error={issueFor(issues, "session.name")}
+                    hint="Applied at creation only. A name persists the session immediately so it can be listed and resumed."
+                />
+                <SelectField
+                    label="MCP diagnostics"
+                    help={<SettingHelp help={valueHelp.diagnostics} value={plan.session.diagnostics} />}
+                    value={plan.session.diagnostics}
+                    options={DIAGNOSTIC_LEVELS.map((level) => ({
+                        value: level,
+                        label: level === "off" ? "Off" : level.charAt(0).toUpperCase() + level.slice(1),
+                    }))}
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.session.diagnostics = value;
+                        })
+                    }
+                    error={issueFor(issues, "session.diagnostics")}
+                />
+                {(plan.session.diagnostics === "debug" || plan.session.diagnostics === "trace") && (
+                    <Notice title="Verbose diagnostics capture sensitive payloads" tone="accent">
+                        Debug and trace entries can contain MCP payloads, tool arguments, paths, and server
+                        stderr. Do not upload them as telemetry or export them without deliberate host action.
+                    </Notice>
+                )}
+                <div className="hb-toggle-list">
+                    <ToggleField
+                        label="Interactive user"
+                        help={
+                            <SettingHelp
+                                help={toggleHelp.interactiveUser}
+                                enabled={plan.session.interactiveUser}
+                            />
+                        }
+                        description="Declare that a person types this session's messages rather than an automated pipeline."
+                        checked={plan.session.interactiveUser}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.session.interactiveUser = checked;
+                            })
+                        }
+                    />
+                    <ToggleField
+                        label="Cross-session store"
+                        help={
+                            <SettingHelp help={toggleHelp.sessionStore} enabled={plan.session.sessionStore} />
+                        }
+                        description="Write session content to the shared store so later sessions can search it."
+                        checked={plan.session.sessionStore}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.session.sessionStore = checked;
+                            })
+                        }
+                    />
+                    <ToggleField
+                        label="File change tracking"
+                        help={
+                            <SettingHelp
+                                help={toggleHelp.fileChangeTracking}
+                                enabled={plan.session.fileChangeTracking}
+                            />
+                        }
+                        description="Capture file changes for rewind and a cumulative session diff."
+                        checked={plan.session.fileChangeTracking}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.session.fileChangeTracking = checked;
+                            })
+                        }
+                    />
+                </div>
+                <h4 className="hb-subsection-title">Applies when resuming</h4>
+                <div className="hb-toggle-list">
+                    <ToggleField
+                        label="Transcript recovery"
+                        help={
+                            <SettingHelp
+                                help={toggleHelp.allowTranscriptRecovery}
+                                enabled={plan.session.allowTranscriptRecovery}
+                            />
+                        }
+                        description="Applies when resuming: repair a damaged transcript instead of failing."
+                        checked={plan.session.allowTranscriptRecovery}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.session.allowTranscriptRecovery = checked;
+                            })
+                        }
+                    />
+                    <ToggleField
+                        label="Continue pending work"
+                        help={
+                            <SettingHelp
+                                help={toggleHelp.continuePendingWork}
+                                enabled={plan.session.continuePendingWork}
+                            />
+                        }
+                        description="Applies when resuming: continue tool calls and permission prompts that were pending."
+                        checked={plan.session.continuePendingWork}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.session.continuePendingWork = checked;
+                            })
+                        }
+                    />
+                </div>
             </Panel>
             <Panel
                 title="Observation and evaluation"
@@ -270,7 +477,58 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                             })
                         }
                     />
+                    <ToggleField
+                        label="Sub-agent streaming"
+                        help={
+                            <SettingHelp
+                                help={toggleHelp.subAgentStreaming}
+                                enabled={plan.events.subAgentStreaming}
+                            />
+                        }
+                        description="Forward streaming deltas from sub-agents. Off keeps only their lifecycle and final events."
+                        checked={plan.events.subAgentStreaming}
+                        onCheckedChange={(checked) =>
+                            edit((draft) => {
+                                draft.events.subAgentStreaming = checked;
+                            })
+                        }
+                    />
                 </div>
+                <SelectField
+                    label="Runtime log level"
+                    help={<SettingHelp help={valueHelp.logLevel} value={plan.events.logLevel} />}
+                    value={plan.events.logLevel}
+                    options={LOG_LEVELS.map((level) => ({
+                        value: level,
+                        label:
+                            level === "default"
+                                ? "Runtime default"
+                                : level.charAt(0).toUpperCase() + level.slice(1),
+                    }))}
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.events.logLevel = value;
+                        })
+                    }
+                    hint="A client option for the runtime the SDK starts; an existing runtime service keeps its own logging."
+                />
+                <TextAreaField
+                    label="Structured response schema (JSON)"
+                    help={<SettingHelp help={valueHelp.responseSchema} />}
+                    value={plan.output.responseSchema}
+                    rows={6}
+                    maxLength={12000}
+                    monospace
+                    spellCheck={false}
+                    placeholder='{ "type": "object", "properties": { … } }'
+                    onValueChange={(value) =>
+                        edit((draft) => {
+                            draft.output.responseSchema = value;
+                        })
+                    }
+                    error={issueFor(issues, "output.responseSchema")}
+                    hint='Optional. A JSON object schema with top-level "type": "object", sent with each run prompt. Blank means free-text answers.'
+                />
                 <TextAreaField
                     label="Workload evaluation criteria"
                     help={<SettingHelp help={valueHelp.evaluation} />}
@@ -292,5 +550,144 @@ export function PolicyEditor({ plan, edit, issues }: EditorProps) {
                 </p>
             </Panel>
         </div>
+    );
+}
+
+function ManagedPolicyPanel({ plan, edit, issues }: Pick<EditorProps, "plan" | "edit" | "issues">) {
+    const managed = plan.policy.managed;
+    const editManaged = (recipe: (target: ManagedPolicy) => void) =>
+        edit((draft) => {
+            recipe(draft.policy.managed);
+        });
+    return (
+        <Panel
+            title="Managed policy"
+            description="Enterprise rules the session cannot relax. Host-injected rules are re-supplied on every resume."
+            action={<Lock size={19} aria-hidden="true" />}
+        >
+            <div className="hb-toggle-list">
+                <ToggleField
+                    label="Load managed settings"
+                    help={<SettingHelp help={toggleHelp.managedLoad} enabled={managed.load} />}
+                    description="Fetch account, organization, and device policy at startup. Needs a GitHub token; fails closed without one."
+                    checked={managed.load}
+                    onCheckedChange={(checked) =>
+                        editManaged((target) => {
+                            target.load = checked;
+                        })
+                    }
+                />
+                <ToggleField
+                    label="Enforce managed model defaults"
+                    help={
+                        <SettingHelp
+                            help={toggleHelp.enforceModelDefaults}
+                            enabled={managed.enforceModelDefaults}
+                        />
+                    }
+                    description="Apply locked managed model values and reject conflicting model changes."
+                    checked={managed.enforceModelDefaults}
+                    onCheckedChange={(checked) =>
+                        editManaged((target) => {
+                            target.enforceModelDefaults = checked;
+                        })
+                    }
+                />
+            </div>
+            {managed.load && plan.model.provider !== "copilot" && (
+                <Notice title="Managed settings need GitHub identity">
+                    The runtime fetches managed policy with the session&apos;s GitHub token. A bring-your-own
+                    provider route still needs that token, or session creation is rejected.
+                </Notice>
+            )}
+            <h4 className="hb-subsection-title">Host-injected permission rules</h4>
+            <div className="hb-field-grid">
+                {MANAGED_RULES.map(({ key, label, placeholder }) => (
+                    <LineListField
+                        key={key}
+                        label={label}
+                        help={
+                            <SettingHelp
+                                help={valueHelp.managedRules}
+                                label={`Managed rules: ${label}`}
+                                value={`${managed[key].length} rules`}
+                            />
+                        }
+                        values={managed[key]}
+                        onValuesChange={(values) =>
+                            editManaged((target) => {
+                                target[key] = values;
+                            })
+                        }
+                        rows={3}
+                        monospace
+                        spellCheck={false}
+                        placeholder={placeholder}
+                        hint="One rule per line."
+                        error={issueFor(issues, `policy.managed.${key}`)}
+                    />
+                ))}
+                <LineListField
+                    label="Limit network hosts to"
+                    help={
+                        <SettingHelp
+                            help={valueHelp.managedLimitTo}
+                            value={`${managed.limitTo.length} hosts`}
+                        />
+                    }
+                    values={managed.limitTo}
+                    onValuesChange={(values) =>
+                        editManaged((target) => {
+                            target.limitTo = values;
+                        })
+                    }
+                    rows={3}
+                    monospace
+                    spellCheck={false}
+                    placeholder="Domain(api.example.com)"
+                    hint="Domain(host), Domain(IP), or Domain(*.example.com); no schemes, ports, or paths. Once set, unlisted hosts are denied."
+                    error={issueFor(issues, "policy.managed.limitTo")}
+                />
+            </div>
+            <SelectField
+                label="Bypass-permissions policy"
+                help={
+                    <SettingHelp
+                        help={valueHelp.bypassMode}
+                        value={managed.disableBypassPermissionsMode || "No restriction"}
+                    />
+                }
+                value={managed.disableBypassPermissionsMode}
+                options={[
+                    { value: "", label: "No restriction" },
+                    { value: "disable", label: "Disable bypass mode" },
+                    { value: "allow-auto-only", label: "Allow automatic bypass only" },
+                ]}
+                onValueChange={(value) =>
+                    editManaged((target) => {
+                        target.disableBypassPermissionsMode = value;
+                    })
+                }
+            />
+            <div className="hb-toggle-list">
+                <ToggleField
+                    label="Disable Assisted permissions"
+                    badge={<ExperimentalBadge />}
+                    help={
+                        <SettingHelp
+                            help={toggleHelp.disableAssisted}
+                            enabled={managed.disableAssistedPermissionsMode}
+                        />
+                    }
+                    description="Block the experimental Assisted permissions mode for this session."
+                    checked={managed.disableAssistedPermissionsMode}
+                    onCheckedChange={(checked) =>
+                        editManaged((target) => {
+                            target.disableAssistedPermissionsMode = checked;
+                        })
+                    }
+                />
+            </div>
+        </Panel>
     );
 }

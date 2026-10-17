@@ -30,8 +30,11 @@ export const PRIMARY_TOOL_NAMES = [
 ] as const satisfies readonly BuiltinName[];
 
 export const ADVANCED_TOOL_NAMES = [
+    "dynamic_workflows_manage",
+    "image_generation",
     "lexical_code_search",
     "lsp",
+    "run_dynamic_workflow",
     "semantic_code_search",
     "session_store_sql",
     "skill",

@@ -1,5 +1,5 @@
 {
-    "revision": "efebfd34dfa68830b11f49302fd88d12950df2e4",
+    "revision": "7d20899fc4c8b13a405aa621066e75a9e78e04cd",
     "context": {
         "copyright": "Copyright (c) Microsoft Corporation. All rights reserved.",
         "repository": "github/copilot-agent-runtime",
@@ -7,7 +7,7 @@
         "nativeAddonInvoked": false,
         "sessionsCreated": false,
         "networkRequests": false,
-        "sourceFileCount": 52,
+        "sourceFileCount": 56,
         "referenceProfile": {
             "label": "Illustrative online, local, top-level coding baseline; not a universal product default",
             "platform": "macOS/Linux (Windows descriptors are included separately)",
@@ -50,7 +50,7 @@
                 ],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -67,7 +67,7 @@
                 ],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -75,7 +75,7 @@
                 "targets": ["bash", "read_bash", "stop_bash", "list_bash"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -83,7 +83,7 @@
                 "targets": ["powershell", "read_powershell", "stop_powershell", "list_powershell"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -91,7 +91,7 @@
                 "targets": ["view"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -99,7 +99,7 @@
                 "targets": ["view"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -107,7 +107,7 @@
                 "targets": ["apply_patch", "str_replace_editor", "create", "edit"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -115,7 +115,7 @@
                 "targets": ["apply_patch", "str_replace_editor", "create", "edit"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -123,7 +123,7 @@
                 "targets": ["apply_patch", "str_replace_editor", "create", "edit"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -131,15 +131,15 @@
                 "targets": ["apply_patch", "str_replace_editor", "create", "edit"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "search",
-                "targets": ["search"],
+                "targets": ["grep", "rg", "search", "glob"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -147,15 +147,55 @@
                 "targets": ["grep", "rg", "search"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "glob",
-                "targets": ["search"],
+                "targets": ["glob", "search"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "web",
+                "targets": ["web_search", "github-mcp-server-web_search", "web_fetch"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "websearch",
+                "targets": ["web_search", "github-mcp-server-web_search"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "webfetch",
+                "targets": ["web_fetch"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "todo",
+                "targets": ["update_todo"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "todowrite",
+                "targets": ["update_todo"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -163,7 +203,7 @@
                 "targets": ["task"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -171,7 +211,7 @@
                 "targets": ["task"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -179,7 +219,7 @@
                 "targets": ["task"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -196,7 +236,7 @@
                 ],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -213,7 +253,7 @@
                 ],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -230,7 +270,7 @@
                 ],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -238,7 +278,7 @@
                 "targets": ["str_replace_editor", "edit"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -246,7 +286,7 @@
                 "targets": ["str_replace_editor", "edit"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -254,7 +294,7 @@
                 "targets": ["str_replace_editor", "create"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -262,7 +302,7 @@
                 "targets": ["str_replace_editor", "create"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -270,55 +310,55 @@
                 "targets": ["str_replace_editor", "create"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "search-codebase",
-                "targets": ["search"],
+                "targets": ["grep", "rg", "search", "glob"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "codebase",
-                "targets": ["search"],
+                "targets": ["grep", "rg", "search", "glob"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "search-filesearch",
-                "targets": ["search"],
+                "targets": ["glob", "search"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "filesearch",
-                "targets": ["search"],
+                "targets": ["glob", "search"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "search-textsearch",
-                "targets": ["search"],
+                "targets": ["grep", "rg", "search"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
                 "name": "textsearch",
-                "targets": ["search"],
+                "targets": ["grep", "rg", "search"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -326,7 +366,7 @@
                 "targets": ["view"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -334,7 +374,31 @@
                 "targets": ["view"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "web-fetch",
+                "targets": ["web_fetch"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "todos",
+                "targets": ["update_todo"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
+                ]
+            },
+            {
+                "name": "runsubagent",
+                "targets": ["task"],
+                "kind": "selection-alias-not-a-separate-descriptor",
+                "sources": [
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             },
             {
@@ -342,7 +406,7 @@
                 "targets": ["web_search"],
                 "kind": "selection-alias-not-a-separate-descriptor",
                 "sources": [
-                    "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L107-L164"
+                    "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L143-L215"
                 ]
             }
         ],
@@ -367,24 +431,24 @@
             "The source-bound capture reader evaluates only static Rust expressions. It fails on new descriptor names lacking policy or unresolved descriptions rather than silently curating a smaller catalog."
         ],
         "sources": [
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L238-L275",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L500-L550",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L335-L355",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1090-L1138",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1175-L1275",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1230-L1518",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/feature_hooks.rs#L623-L650",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/native/runtime/src/lib.rs#L90-L110",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/shared_api/server.rs#L2207-L2240",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/session_settings_tools.rs#L410-L451",
-            "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L105-L169"
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L247-L284",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L535-L583",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L417-L438",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1611-L1661",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1695-L1835",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1328-L1612",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/feature_hooks.rs#L855-L893",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/native/runtime/src/lib.rs#L127-L155",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/shared_api/server.rs#L3582-L3630",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/session_settings_tools.rs#L395-L439",
+            "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L140-L220"
         ]
     },
     "tools": [
         {
             "name": "apply_patch",
-            "label": "Apply Patch",
+            "label": "Applying patch",
             "description": "Use the `apply_patch` tool to edit files. This is a FREEFORM tool, so do not wrap the patch in JSON.",
             "group": "Workspace",
             "workspace": true,
@@ -394,11 +458,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Model-dependent editing/search alternative, not an additional always-on editor. Apply-patch style selects rg and apply_patch; replace style selects str_replace_editor and omits standalone view/create/edit.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L650-L662",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/apply_patch.rs#L13-L13",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/apply_patch.rs#L14-L14",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L219",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L684-L696",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/apply_patch.rs#L13-L13",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/apply_patch.rs#L14-L14",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L298",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -413,16 +477,16 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires ask-user capability plus a structured ask-user surface or user-input listener. The ask_user_2 implementation changes the schema under the same canonical ask_user name.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L682-L698",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/ask_user.rs#L11-L11",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/ask_user.rs#L13-L20",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/ask_user.rs#L12-L12",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1361-L1365",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1378-L1382",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/ask_user_2.rs#L17-L17",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/ask_user_2.rs#L19-L26",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L716-L732",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/ask_user.rs#L11-L11",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/ask_user.rs#L13-L20",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/ask_user.rs#L12-L12",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1466-L1470",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1483-L1487",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/ask_user_2.rs#L17-L17",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/ask_user_2.rs#L19-L26",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -437,10 +501,10 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1070-L1085",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1068-L1086",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1156-L1171",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1154-L1172",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -455,12 +519,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires a trusted discovery skill in the model-invocable catalog. Reserved: external tools are explicitly forbidden from defining or overriding catalog_search.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/catalog_search.rs#L358-L370",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/catalog_search.rs#L21-L21",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/catalog_search.rs#L22-L22",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/session_serializers.rs#L4480-L4503"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/catalog_search.rs#L393-L405",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/catalog_search.rs#L21-L21",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/catalog_search.rs#L22-L22",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/session_serializers.rs#L4674-L4700"
             ]
         },
         {
@@ -475,16 +539,16 @@
             "defaultStatus": "internal",
             "defaultReason": "Requires dynamic-context availability and a literal agent-definition request; not a wildcard-enabled coding tool.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L750-L762",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/context_board.rs#L15-L15",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/context_board.rs#L16-L22",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L784-L796",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/context_board.rs#L15-L15",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/context_board.rs#L16-L22",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "create",
-            "label": "Create",
+            "label": "Creating file",
             "description": "Tool for creating new files. * Creates a new file with the specified content at the given path * Cannot be used if the specified path already exists * Parent directories must exist before creating the file * Path *MUST* be absolute",
             "group": "Workspace",
             "workspace": true,
@@ -494,35 +558,36 @@
             "defaultStatus": "baseline-enabled",
             "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L718-L730",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/file_edit.rs#L21-L21",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/file_edit.rs#L23-L29",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L752-L764",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/file_edit.rs#L21-L21",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/file_edit.rs#L23-L29",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
-            "name": "create_pull_request",
-            "label": "Create Pull Request",
-            "description": "Create a pull request for the current branch. Call this tool when the task is complete and the changes are ready for review. If a pull request already exists for the branch, this tool will return successfully and indicate that. Only call this tool when the user explicitly asks for a pull request to be created.",
+            "name": "dynamic_workflows_manage",
+            "label": "Managing workflows",
+            "description": "Manage registered agent workflows (formerly factories): discover definitions, inspect runs and resumable work, and, when enabled, author session-scoped JavaScript workflows.",
             "group": "Workspace",
             "workspace": true,
-            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for create_pull_request; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for dynamic_workflows_manage; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
             "inputKind": "json-object",
             "overrideable": false,
-            "defaultStatus": "internal",
-            "defaultReason": "PR-agent-specific tool; requires an explicit by-name request, never the ordinary '*' coding wildcard. Its native workflow can inspect or publish repository work. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "defaultStatus": "conditional",
+            "defaultReason": "Experimental. Requires dynamic-workflow availability, including session capabilities/feature and quota policy. Workflows (formerly factories) can launch agents; authoring can write session-scoped JavaScript on the host. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/create_pull_request.rs#L79-L91",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/create_pull_request.rs#L18-L18",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/create_pull_request.rs#L19-L19",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/dynamic_workflows_manage.rs#L175-L195",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/dynamic_workflows_manage.rs#L16-L16",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/dynamic_workflows_manage.rs#L34-L34",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/dynamic_workflows_manage.rs#L16-L22",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "edit",
-            "label": "Edit",
+            "label": "Editing file",
             "description": "Tool for making string replacements in files. * Replaces exactly one occurrence of `old_str` with `new_str` in the specified file * When called multiple times in a single response, edits are independently made in the order calls are specified * The `old_str` parameter must match EXACTLY one or more consecutive lines from the original file * If `old_str` is not unique in the file, replacement will not be performed * Make sure to include enough context in `old_str` to make it unique * Path *MUST* be absolute",
             "group": "Workspace",
             "workspace": true,
@@ -532,11 +597,11 @@
             "defaultStatus": "baseline-enabled",
             "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L940-L952",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/file_edit.rs#L32-L32",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/file_edit.rs#L33-L41",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L976-L988",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/file_edit.rs#L32-L32",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/file_edit.rs#L33-L41",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -551,12 +616,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires online mode, the execution-subagent feature/experiment, and session/model availability. Delegates host command execution; not a universal default. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/execution_subagent.rs#L21-L35",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/execution_subagent.rs#L10-L10",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/execution_subagent.rs#L12-L12",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1491-L1495",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L982-L1035",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/execution_subagent.rs#L22-L36",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/execution_subagent.rs#L10-L10",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/execution_subagent.rs#L13-L13",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1600-L1604",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1431-L1528",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -571,12 +636,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires active plan mode, plan-mode capability, and a responder; cache-stability treatment can retain the descriptor outside plan mode without invoking approval.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L766-L778",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/exit_plan_mode.rs#L67-L67",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/exit_plan_mode.rs#L69-L74",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/exit_plan_mode.rs#L68-L68",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L800-L812",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/exit_plan_mode.rs#L67-L67",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/exit_plan_mode.rs#L69-L74",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/exit_plan_mode.rs#L68-L68",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -591,9 +656,9 @@
             "defaultStatus": "conditional",
             "defaultReason": "Fixed runtime extension-management tools require an active extension service with management tools enabled. They can read/write extension files or restart host subprocesses; dynamically contributed extension tools are outside this static catalog. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/extensions/tools.rs#L108-L142",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/extensions/tools.rs#L90-L174",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/extensions/tools.rs#L108-L142",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/extensions/tools.rs#L90-L174",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -608,29 +673,9 @@
             "defaultStatus": "conditional",
             "defaultReason": "Fixed runtime extension-management tools require an active extension service with management tools enabled. They can read/write extension files or restart host subprocesses; dynamically contributed extension tools are outside this static catalog. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/extensions/tools.rs#L102-L107",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/extensions/tools.rs#L90-L174",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
-            ]
-        },
-        {
-            "name": "factories_manage",
-            "label": "Managing factories",
-            "description": "Manage registered agent factories: discover definitions, inspect runs and resumable work, and, when enabled, author session-scoped JavaScript factories.",
-            "group": "Workspace",
-            "workspace": true,
-            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for factories_manage; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
-            "inputKind": "json-object",
-            "overrideable": false,
-            "defaultStatus": "conditional",
-            "defaultReason": "Requires factory availability, including session capabilities/feature and quota policy. Factories can launch agents; authoring can write session-scoped JavaScript on the host. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
-            "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/factories_manage.rs#L194-L214",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/factories_manage.rs#L16-L16",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/factories_manage.rs#L54-L54",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/factories_manage.rs#L16-L23",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/extensions/tools.rs#L102-L107",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/extensions/tools.rs#L90-L174",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -645,10 +690,10 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires cli-documentation capability; it is not automatically present in every runtime host.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L616-L630",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L20-L20",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L650-L664",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L21-L21",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -663,11 +708,11 @@
             "defaultStatus": "internal",
             "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1478-L1482",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L39-L39",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L58-L58",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1120-L1138",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1587-L1591",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L39-L39",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L58-L58",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1644-L1661",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -682,17 +727,17 @@
             "defaultStatus": "internal",
             "defaultReason": "Internal descriptor variant for generic client tool search, gated by GENERIC_CLIENT_TOOL_SEARCH. It is not another always-on public search function; model-facing search is normalized separately.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L988-L1000",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L49-L49",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L50-L55",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L41-L41",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L971-L1000",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1024-L1036",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L58-L58",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L59-L64",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L50-L50",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1007-L1036",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "glob",
-            "label": "Glob",
+            "label": "Finding files",
             "description": "Find files quickly by glob pattern.",
             "group": "Workspace",
             "workspace": true,
@@ -702,17 +747,18 @@
             "defaultStatus": "baseline-enabled",
             "defaultReason": "Literal baseline gate: glob is included before the session's later tool/agent filters.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L634-L646",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/glob_search.rs#L13-L13",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/glob_search.rs#L14-L14",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1337-L1341",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L668-L680",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/glob_search.rs#L13-L13",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/glob_search.rs#L15-L15",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/glob_search.rs#L14-L14",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1440-L1444",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "grep",
-            "label": "Grep",
+            "label": "Searching files",
             "description": "Search file contents quickly and precisely with ripgrep.",
             "group": "Workspace",
             "workspace": true,
@@ -722,11 +768,12 @@
             "defaultStatus": "baseline-enabled",
             "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L666-L678",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/grep.rs#L14-L14",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/grep.rs#L16-L16",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L700-L712",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/grep.rs#L14-L14",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/grep.rs#L17-L17",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/grep.rs#L16-L16",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -741,11 +788,30 @@
             "defaultStatus": "internal",
             "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1473-L1477",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L38-L38",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L56-L56",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1120-L1138",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1582-L1586",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L38-L38",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L56-L56",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1644-L1661",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
+            ]
+        },
+        {
+            "name": "image_generation",
+            "label": "Generating image",
+            "description": "Generates or edits one PNG. Only invoke this tool when the user explicitly asks you to create or edit an image. Include input_images only when the user asks to edit an image or use it as a reference for a new image, otherwise omit them. Identify each input by its image_id or file path; never include unrelated attachments.",
+            "group": "Session",
+            "workspace": false,
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for image_generation; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "inputKind": "json-object",
+            "overrideable": false,
+            "defaultStatus": "conditional",
+            "defaultReason": "Experimental. Requires online mode, an authorized Copilot image model, and the session's imageGeneration opt-in (disabled by default). Not available with BYOK providers; tool filters and permissions still apply. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "sources": [
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/image_generation.rs#L269-L281",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/image_generation.rs#L25-L25",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/image_generation.rs#L30-L30",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -760,17 +826,17 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires canvas-renderer capability and applicable registered canvases/actions. Workspace flag is conservative: provider callbacks are opaque and can perform host effects; it is not a claim that every canvas needs files. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L110-L122",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L16-L16",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L20-L20",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L112-L124",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L18-L18",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L22-L22",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "lexical_code_search",
-            "label": "Lexical Code Search",
-            "description": "Search GitHub.com's lexical code index across repositories visible to the current GitHub.com credentials. Use it for exact text, identifiers, symbols, regular expressions, and cross-repository searches, including repositories not cloned locally. Searches cover indexed default branches and return ranked, not exhaustive, results.",
+            "label": "GitHub Code Search",
+            "description": "Search remote indexed code on GitHub. Returns ranked file/line matches. Use local tools for checkout-specific code and direct reads for known files. Empty results do not prove absence: inspect warnings, fix syntax, or relax one guessed constraint without dropping required scope. Refine irrelevant results instead of retrying unchanged; read relevant files and validate behavior.",
             "group": "Workspace",
             "workspace": true,
             "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for lexical_code_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
@@ -779,30 +845,32 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires the corresponding Blackbird settings/experiment and online eligibility. Repository/authentication context is resolved at execution; workspace flag conservatively marks repository-context dependence.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/blackbird_search.rs#L110-L122",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/blackbird_search.rs#L106-L106",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/blackbird_search.rs#L107-L107",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1194-L1221",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L198-L210",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L194-L194",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L195-L195",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L19-L19",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1705-L1772",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "list_agents",
             "label": "List Agents",
-            "description": "Lists visible background agents by status: running, idle, completed, failed, or cancelled. * Use only for requested overviews or when no usable agent_id is in recent context. For status or follow-up, use IDs from task, read_agent, or notifications directly with read_agent/write_agent, even while running or incomplete, or wait for notifications; do not call list_agents merely to rediscover IDs. * Idle agents accept write_agent follow-ups. '(one-shot)' MCP tasks support read_agent only; start a new task to send more input.",
+            "description": "List background and sibling agents with their status and relation labels. The native description appends shared agent-communication guidance per session.",
             "group": "Session",
             "workspace": false,
             "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for list_agents; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
             "inputKind": "json-object",
             "overrideable": true,
             "defaultStatus": "conditional",
-            "defaultReason": "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, factories, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
+            "defaultReason": "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, workflows, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L782-L794",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L31-L31",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L32-L37",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L816-L828",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L48-L48",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L49-L56",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/agent_tools.rs#L24-L72",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -817,10 +885,10 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1070-L1085",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1068-L1086",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1156-L1171",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1154-L1172",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -835,11 +903,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires canvas-renderer capability. Lists host-provided canvas metadata; it does not itself operate on project files. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L78-L90",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L14-L14",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L18-L18",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L80-L92",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L16-L16",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L20-L20",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -854,10 +922,10 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1086-L1100",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1087-L1101",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1172-L1186",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1173-L1187",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -872,12 +940,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires the shipped LSP leaf and available session LSP configurations. It can read project code and launch language-server processes.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/lsp/integration.rs#L40-L52",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/lsp.rs#L11-L11",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/lsp.rs#L26-L35",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1425-L1429",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1247-L1262",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/lsp/integration.rs#L40-L52",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/lsp.rs#L11-L11",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/lsp.rs#L26-L35",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1534-L1538",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1798-L1813",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -892,12 +960,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires manage-schedule enablement. Workspace flag is conservative: scheduled prompts may later run native file/shell-capable agent work.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L798-L810",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L42-L42",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L44-L52",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L43-L43",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L832-L844",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L61-L61",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L63-L71",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L62-L62",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -912,11 +980,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires canvas-renderer capability and applicable registered canvases/actions. Workspace flag is conservative: provider callbacks are opaque and can perform host effects; it is not a claim that every canvas needs files. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L94-L106",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L15-L15",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/canvas.rs#L19-L19",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L96-L108",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L17-L17",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/canvas.rs#L21-L21",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -931,10 +999,10 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1086-L1100",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1087-L1101",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1172-L1186",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1173-L1187",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -947,13 +1015,13 @@
             "inputKind": "json-object",
             "overrideable": true,
             "defaultStatus": "conditional",
-            "defaultReason": "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, factories, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
+            "defaultReason": "Requires agent-management availability, which can come from task agents, existing tasks, custom agents, LSP, workflows, sibling communication, or MCP tasks. Uses task/session state rather than project files.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L862-L874",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L18-L18",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/agent_tools.rs#L1-L80",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L896-L908",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L18-L18",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/agent_tools.rs#L1-L80",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -968,10 +1036,10 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1070-L1085",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1068-L1086",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1156-L1171",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1154-L1172",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -986,11 +1054,11 @@
             "defaultStatus": "internal",
             "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1468-L1472",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L37-L37",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L54-L54",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1120-L1138",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1577-L1581",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L37-L37",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L54-L54",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1644-L1661",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1005,11 +1073,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires sidekick agents. Reads session inbox state rather than project files.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L814-L826",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/inbox.rs#L18-L18",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/inbox.rs#L38-L42",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L848-L860",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/inbox.rs#L18-L18",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/inbox.rs#L38-L42",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1024,12 +1092,12 @@
             "defaultStatus": "internal",
             "defaultReason": "Requires an available memory service and a literal agent-definition request. Root-owned memory mutations are separate tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L846-L858",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/memory.rs#L20-L20",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/memory.rs#L21-L24",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/memory.rs#L215-L227",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L880-L892",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/memory.rs#L21-L21",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/memory.rs#L22-L25",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/memory.rs#L205-L217",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1044,29 +1112,10 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1086-L1100",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1087-L1101",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
-            ]
-        },
-        {
-            "name": "reply_to_comment",
-            "label": "Reply To Comment",
-            "description": "Reply to new comments. Use when you've completed a meaningful unit of work that specifically addresses the request, question, or feedback in the comment. * Use this tool no more than once per <comment_id>, and only after you have completed meaningful work that specifically addresses the text in the comment. * Ignore comments with no comment_id. Do not make up comment_ids. * Keep your reply simple, focused, and concise. Don't use headers or tables in the reply. * Include the short hash of the commit that addresses the comment in the reply.",
-            "group": "Workspace",
-            "workspace": true,
-            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for reply_to_comment; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
-            "inputKind": "json-object",
-            "overrideable": false,
-            "defaultStatus": "internal",
-            "defaultReason": "PR-agent-specific tool; requires an explicit by-name request, never the ordinary '*' coding wildcard. Its native workflow can inspect or publish repository work. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
-            "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/reply_to_comment.rs#L50-L62",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/reply_to_comment.rs#L13-L13",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/reply_to_comment.rs#L14-L23",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1172-L1186",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1173-L1187",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1081,30 +1130,11 @@
             "defaultStatus": "internal",
             "defaultReason": "Requires the linked tool-handlers leaf and a literal Dreaming-job request. Delivers a progress artifact, not a project-file operation. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tool_handlers/report_dreaming_artifact.rs#L43-L55",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tool_handlers/report_dreaming_artifact.rs#L13-L13",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tool_handlers/report_dreaming_artifact.rs#L14-L14",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1187-L1192",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
-            ]
-        },
-        {
-            "name": "report_progress",
-            "label": "Report Progress",
-            "description": "Report pull-request-agent progress and publish the corresponding repository changes; the descriptor varies with push-only configuration.",
-            "group": "Workspace",
-            "workspace": true,
-            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for report_progress; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
-            "inputKind": "json-object",
-            "overrideable": false,
-            "defaultStatus": "internal",
-            "defaultReason": "PR-agent-specific descriptor, materialized only by a literal request. Its push-only/pull-request behavior depends on repository settings. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
-            "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/report_progress.rs#L98-L114",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/report_progress.rs#L26-L26",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/report_progress.rs#L1-L100",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1175-L1185",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tool_handlers/report_dreaming_artifact.rs#L43-L55",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tool_handlers/report_dreaming_artifact.rs#L13-L13",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tool_handlers/report_dreaming_artifact.rs#L14-L14",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1698-L1703",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1119,29 +1149,29 @@
             "defaultStatus": "conditional",
             "defaultReason": "Model-dependent editing/search alternative, not an additional always-on editor. Apply-patch style selects rg and apply_patch; replace style selects str_replace_editor and omits standalone view/create/edit.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/grep.rs#L15-L15",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L301-L307",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L219",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/grep.rs#L15-L15",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L383-L388",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L298",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
-            "name": "run_factory",
-            "label": "Run factory",
-            "description": "Starts a registered factory by name, or resumes a prior run by ID, and returns immediately with a run ID while execution continues in the background. Use only when the user explicitly requests a factory at this scale, or when a skill or slash command specifically instructs you to use one. Do not infer factory use merely because a task could benefit from parallelism: a factory may spawn dozens of agents and consume substantial credits. The limits are optional overrides: on a new run, omit them unless the user specified a ceiling.",
+            "name": "run_dynamic_workflow",
+            "label": "Run workflow",
+            "description": "Starts a registered workflow by name, or resumes a prior run by ID, and returns immediately with a run ID while execution continues in the background. Use only when the user explicitly requests a workflow at this scale, or when a skill or slash command specifically instructs you to use one. Do not infer workflow use merely because a task could benefit from parallelism: a workflow may spawn dozens of agents and consume substantial credits. The limits are optional overrides: on a new run, omit them unless the user specified a ceiling.",
             "group": "Workspace",
             "workspace": true,
-            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for run_factory; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
+            "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for run_dynamic_workflow; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
             "inputKind": "json-object",
             "overrideable": false,
             "defaultStatus": "conditional",
-            "defaultReason": "Requires factory availability, including session capabilities/feature and quota policy. Factories can launch agents; authoring can write session-scoped JavaScript on the host. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "defaultReason": "Experimental. Requires dynamic-workflow availability, including session capabilities/feature and quota policy. Workflows (formerly factories) can launch agents; authoring can write session-scoped JavaScript on the host. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/run_factory.rs#L51-L63",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/run_factory.rs#L11-L11",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/run_factory.rs#L12-L12",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/run_dynamic_workflow.rs#L51-L63",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/run_dynamic_workflow.rs#L11-L11",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/run_dynamic_workflow.rs#L12-L12",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1156,18 +1186,18 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires online mode, allowed search-subagent filters, an eligible resolved model, and the appropriate request context. May search local project code and use a remote model. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_subagent.rs#L44-L56",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_subagent.rs#L26-L26",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_subagent.rs#L27-L27",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1505-L1509",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1263-L1275",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_subagent.rs#L44-L56",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_subagent.rs#L26-L26",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_subagent.rs#L27-L27",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1614-L1618",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1814-L1835",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "semantic_code_search",
-            "label": "Semantic Code Search",
-            "description": "Search one GitHub repository's indexed default branch using a natural-language description. Use for locating or understanding code, even with a known identifier. Defaults to the current repository; `repo` selects another. Workspace changes are excluded.",
+            "label": "GitHub Code Search",
+            "description": "Search one GitHub repository's indexed default branch with a natural-language query. An experiment can select a focused-query description and schema.",
             "group": "Workspace",
             "workspace": true,
             "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for semantic_code_search; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
@@ -1176,11 +1206,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires the corresponding Blackbird settings/experiment and online eligibility. Repository/authentication context is resolved at execution; workspace flag conservatively marks repository-context dependence.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/blackbird_search.rs#L190-L202",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/blackbird_search.rs#L186-L186",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/blackbird_search.rs#L187-L187",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1194-L1221",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L327-L339",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L302-L302",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L19-L19",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/blackbird_search.rs#L301-L343",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1705-L1772",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1195,11 +1226,11 @@
             "defaultStatus": "internal",
             "defaultReason": "Constrained search-agent tools materialized only for literal requests, not ordinary parent coding defaults. Preserve these names: their schemas/behavior differ from view/grep/glob and remote code-search tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1483-L1487",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L40-L40",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/search_agent_compat.rs#L60-L60",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1120-L1138",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1592-L1596",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L40-L40",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/search_agent_compat.rs#L60-L60",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1644-L1661",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1214,12 +1245,12 @@
             "defaultStatus": "internal",
             "defaultReason": "Literal agent-definition request only; the '*' coding request does not admit this non-standard sidekick tool.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L830-L842",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/inbox.rs#L19-L19",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/inbox.rs#L48-L54",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/inbox.rs#L45-L64",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L864-L876",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/inbox.rs#L19-L19",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/inbox.rs#L48-L54",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/inbox.rs#L45-L64",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1234,11 +1265,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires session-store capability and cloud-session-store enablement. Supported local/org/repo scopes and backend availability are conditional; not a project-file tool.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L908-L920",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/storage_tools.rs#L19-L19",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_store_sql.rs#L1-L90",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L944-L956",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/storage_tools.rs#L19-L19",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_store_sql.rs#L1-L105",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1253,12 +1284,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires a non-empty model-invocable skill catalog. Workspace flag is conservative: disk-backed skill discovery/loading can read local assets, while a host-provided skill may be text-only.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L924-L936",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L58-L58",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L960-L964",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L1140-L1171",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L960-L972",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L77-L77",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1039-L1043",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1670-L1690",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1273,11 +1304,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires a session database. It operates on session/history storage, not arbitrary project files; workspace:false does not mean storage-free.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L884-L896",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/storage_tools.rs#L18-L18",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/storage_tools.rs#L1-L100",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L918-L930",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/storage_tools.rs#L18-L18",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/storage_tools.rs#L1-L105",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1292,10 +1323,10 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Non-Windows shell family; selected on the macOS/Linux reference platform before later filters. The Windows family uses powershell/read_powershell/stop_powershell/list_powershell.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1070-L1085",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1068-L1086",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1156-L1171",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1154-L1172",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1310,16 +1341,16 @@
             "defaultStatus": "platform-specific",
             "defaultReason": "Windows shell family, not simultaneously a default on the non-Windows reference platform. Shell selection aliases expand only to currently available platform tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1086-L1100",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/shell_tools.rs#L947-L1128",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1087-L1101",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1172-L1186",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/shell_tools.rs#L1057-L1247",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1173-L1187",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "store_memory",
             "label": "Store Memory",
-            "description": "Store a fact about the codebase in memory, so that it can be used in future code generation or review tasks. The fact should be a clear and concise statement about the codebase conventions, structure, logic, or usage. It may be based on the code itself, or on information provided by the user.",
+            "description": "Store a fact in memory, so that it can be used in future code generation or review tasks. The fact should be a clear and concise statement about the codebase's conventions, structure, logic, or usage. It may be based on the code itself or on information provided by the user about the codebase.",
             "group": "Session",
             "workspace": false,
             "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for store_memory; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
@@ -1328,16 +1359,16 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires memory capability, an available memory service, and root-owned mutation eligibility; voting has its own enablement. Storage may be remote or local, but these are not arbitrary project-file APIs. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1299-L1312",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/memory.rs#L173-L173",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/memory.rs#L43-L43",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1290-L1328",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1401-L1414",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/memory.rs#L163-L163",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/memory.rs#L42-L42",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1391-L1430",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "str_replace_editor",
-            "label": "Str Replace Editor",
+            "label": "View/edit file",
             "description": "View and edit files with the combined string-replacement editor selected for replace-style models.",
             "group": "Workspace",
             "workspace": true,
@@ -1347,12 +1378,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Model-dependent editing/search alternative, not an additional always-on editor. Apply-patch style selects rg and apply_patch; replace style selects str_replace_editor and omits standalone view/create/edit.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L956-L968",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools_base/aliases.rs#L23-L23",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/file_edit.rs#L112-L114",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/file_edit.rs#L65-L125",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L219",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L992-L1004",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools_base/aliases.rs#L23-L23",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/file_edit.rs#L112-L114",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/file_edit.rs#L65-L125",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L298",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1367,10 +1398,9 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires at least one visible dispatchable agent after model, agent-policy, and depth filtering. Workspace flag is conservative: delegated agents may use project files or host shells.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/shared_api/server.rs#L2165-L2177",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1569-L1581",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L899-L941",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/task_tool.rs#L2450-L2462",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L1090-L1145",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1385,11 +1415,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Offered in autopilot, or when plan-mode cache-stability treatment arms it. Retained tools may be no-ops outside their active mode; ordinary interactive mode does not imply availability. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/task_complete.rs#L87-L99",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/task_complete.rs#L19-L19",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/task_complete.rs#L35-L43",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/task_complete.rs#L129-L141",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/task_complete.rs#L19-L19",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/task_complete.rs#L36-L44",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1404,12 +1434,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Specialized tool-search surface selected by model/provider, search settings, experiments, and deferred catalog availability. Explicit native overrides are supported through the specialized client_tool_search_override path; generic-client search is a distinct branch.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L972-L984",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L40-L40",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L42-L46",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L41-L41",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/session_external_tools.rs#L135-L171",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1008-L1020",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L49-L49",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L51-L55",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L50-L50",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/session_external_tools.rs#L212-L248",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1422,18 +1452,18 @@
             "inputKind": "json-object",
             "overrideable": false,
             "defaultStatus": "conditional",
-            "defaultReason": "Compiled descriptor, selected by the runtime request/factory and final agent-policy path. It is not a dedicated operation in the legacy tool_assembly_plan; do not infer a universal coding default from registry membership. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
+            "defaultReason": "Compiled descriptor, selected by the runtime request/workflow and final agent-policy path. The runtime treats it as a required top-level-agent tool alongside skill, sql, and task_complete. It is not a dedicated operation in the legacy tool_assembly_plan; do not infer a universal coding default from registry membership. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/update_todo.rs#L87-L99",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/update_todo.rs#L20-L20",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/update_todo.rs#L22-L28",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L238-L275",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/update_todo.rs#L35-L47",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/todo_checklist_base/mod.rs#L24-L24",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/update_todo.rs#L20-L26",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L247-L284",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "view",
-            "label": "View",
+            "label": "Viewing file",
             "description": "View files, images, or directories. * Images return base64 data and MIME type. * Text files return their content. * Directories list non-hidden entries up to 2 levels deep. * `path` must be absolute. * Files over 20KB are truncated; use `view_range` for sections.",
             "group": "Workspace",
             "workspace": true,
@@ -1443,17 +1473,17 @@
             "defaultStatus": "baseline-enabled",
             "defaultReason": "Enabled for the reference profile's split editing style. Other models select rg/apply_patch or the combined str_replace_editor instead; later allow/exclude and agent filters still apply.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L702-L714",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/view.rs#L15-L15",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/view.rs#L16-L23",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L736-L748",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/view.rs#L17-L17",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/view.rs#L18-L25",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "vote_memory",
             "label": "Vote Memory",
-            "description": "Vote on an existing memory by exact fact text to indicate whether you agree or disagree with it. Use \"upvote\" for useful verified memories and \"downvote\" for incorrect or outdated memories.",
+            "description": "Vote on an existing memory by passing its exact fact text; the tool requires an exact string match. Use direction \"upvote\" for memories you have verified as useful and correct. Use direction \"downvote\" for memories that are incorrect or outdated, or that the user has asked you to delete, remove, or forget.",
             "group": "Session",
             "workspace": false,
             "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for vote_memory; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
@@ -1462,11 +1492,11 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires memory capability, an available memory service, and root-owned mutation eligibility; voting has its own enablement. Storage may be remote or local, but these are not arbitrary project-file APIs. Not positively recognized by the native built-in override dispatcher; this snapshot does not promise an override for this fixed surface.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1317-L1321",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/memory.rs#L174-L174",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/memory.rs#L47-L47",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_catalog.rs#L1290-L1328",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1419-L1423",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/memory.rs#L164-L164",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/memory.rs#L49-L49",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/session_catalog.rs#L1391-L1430",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
@@ -1481,18 +1511,18 @@
             "defaultStatus": "baseline-enabled",
             "defaultReason": "Literal online gate: included when the session is not offline. Network access is not a project-file capability; permission and policy checks remain separate.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L734-L746",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/web_fetch.rs#L32-L32",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/web_fetch.rs#L34-L34",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/web_fetch.rs#L33-L33",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L768-L780",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/web_fetch.rs#L32-L32",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/web_fetch.rs#L34-L34",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/web_fetch.rs#L33-L33",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         },
         {
             "name": "write_agent",
             "label": "Write Agent",
-            "description": "Sends a message to one or more running or idle background agents, delivered as a new user turn in each agent's conversation. * Messages are delivered directly into the agent's conversation as a new user turn. * If the agent is idle (finished its last turn), it will wake up and process the message as its next turn. * If the agent is running, the message will be queued and delivered after the current turn completes.",
+            "description": "Send a follow-up message to a running or idle background agent by its exact agent ID. The native description appends shared agent-communication guidance per session.",
             "group": "Workspace",
             "workspace": true,
             "parameters": "{\n  \"$comment\": \"Illustrative CUSTOM OVERRIDE schema for write_agent; NOT the runtime's native tool signature. The host override must implement this input contract.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"input\": {\n      \"type\": \"string\",\n      \"description\": \"Input interpreted by your custom override implementation.\"\n    }\n  },\n  \"required\": [\n    \"input\"\n  ],\n  \"additionalProperties\": false\n}",
@@ -1501,11 +1531,12 @@
             "defaultStatus": "conditional",
             "defaultReason": "Requires agent-management availability. Workspace flag is conservative: sending a turn can wake an agent that then uses native file/shell tools.",
             "sources": [
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/registry.rs#L1004-L1016",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L20-L20",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/orchestration_tools.rs#L21-L28",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/session/tool_initialization.rs#L206-L298",
-                "https://github.com/github/copilot-agent-runtime/blob/efebfd34dfa68830b11f49302fd88d12950df2e4/src/runtime/src/tools/session_tool_invoker.rs#L2834-L2875"
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/registry.rs#L1040-L1052",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L20-L20",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/orchestration_tools.rs#L33-L45",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/tools/agent_tools.rs#L28-L90",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/session/tool_initialization.rs#L285-L380",
+                "https://github.com/github/copilot-agent-runtime/blob/7d20899fc4c8b13a405aa621066e75a9e78e04cd/src/runtime/src/turn_engine/tools/session_tool_invoker.rs#L3035-L3080"
             ]
         }
     ]

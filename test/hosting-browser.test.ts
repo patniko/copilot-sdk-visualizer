@@ -26,6 +26,7 @@ it("selects a hosting option and explains each architecture component without mo
         expect(labels.indexOf("Host & deploy")).toBe(labels.indexOf("Build & run") + 1);
 
         await nav.getByRole("button", { name: /^Host & deploy\b/ }).click();
+        await page.locator(".hb-loading").waitFor({ state: "detached" });
         await expect.poll(() => page.evaluate(() => window.location.hash)).toBe("#deploy");
 
         const options = page.getByRole("group", { name: "Hosting options" });

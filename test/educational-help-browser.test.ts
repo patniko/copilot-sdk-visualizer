@@ -3,10 +3,10 @@ import path from "node:path";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import type { Page } from "playwright";
 import { createPreset } from "../src/domain/presets";
-import { createAgent, createCustomTool, createMcpServer } from "../src/domain/plan";
+import { createAgent, createCustomTool, createMcpServer, parsePlan } from "../src/domain/plan";
 import { STORAGE_KEY } from "../src/domain/storage";
 import { contextToggleHelp } from "../src/content/context-help";
-import { toggleHelp } from "../src/content/setting-help";
+import { toggleHelp, valueHelp } from "../src/content/setting-help";
 import { startBrowserHarness } from "./browser-harness";
 import type { BrowserHarness } from "./browser-harness";
 
@@ -23,6 +23,7 @@ async function visit(page: Page, prefix: RegExp) {
         .getByRole("navigation", { name: "Harness workflow" })
         .getByRole("button", { name: prefix })
         .click();
+    await page.locator(".hb-loading").waitFor({ state: "detached" });
     // Navigation transfers focus on the next animation frame, before help can take it.
     await expect
         .poll(() => page.locator("#editor-heading").evaluate((element) => document.activeElement === element))
@@ -100,10 +101,19 @@ it("gives every Policy & state switch consistent on/off and host-boundary help",
             toggleHelp.preToolHook.title,
             toggleHelp.postToolHook.title,
             contextToggleHelp.fileHooks.title,
+            toggleHelp.managedLoad.title,
+            toggleHelp.enforceModelDefaults.title,
+            toggleHelp.disableAssisted.title,
             toggleHelp.infinite.title,
             toggleHelp.largeOutput.title,
+            toggleHelp.interactiveUser.title,
+            toggleHelp.sessionStore.title,
+            toggleHelp.fileChangeTracking.title,
+            toggleHelp.allowTranscriptRecovery.title,
+            toggleHelp.continuePendingWork.title,
             toggleHelp.streaming.title,
             toggleHelp.observer.title,
+            toggleHelp.subAgentStreaming.title,
         ];
         expect(await page.getByRole("switch").count()).toBe(titles.length);
         for (const title of titles) await inspectHelp(page, title, "When on");
@@ -197,5 +207,86 @@ it("uses the same help interaction for choices and inputs in every configuration
         }
         await visit(page, /^Policy & state\b/);
         await inspectHelp(page, "Session storage", "Local directory");
+    });
+});
+
+async function savedPlan(page: Page) {
+    const text = await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY);
+    if (!text) throw new Error("No saved plan.");
+    return parsePlan(text);
+}
+
+it("edits schema v3 options, marks experimental ones, and surfaces their validation", async () => {
+    await withApp("v3-options", async (page) => {
+        await visit(page, /^Policy & state\b/);
+        const hooks = page.getByRole("group", { name: "SDK lifecycle hooks", exact: true });
+        await hooks.getByRole("checkbox", { name: /^userPromptSubmitted\b/ }).check();
+        await expect.poll(async () => (await savedPlan(page)).policy.hooks).toEqual(["userPromptSubmitted"]);
+        await inspectHelp(page, valueHelp.lifecycleHooks.title, "Hooks that can block");
+
+        await page
+            .getByRole("textbox", { name: "Limit network hosts to", exact: true })
+            .fill("Domain(api.example.com)");
+        await expect
+            .poll(async () => (await savedPlan(page)).policy.managed.limitTo)
+            .toEqual(["Domain(api.example.com)"]);
+        expect(
+            await page
+                .locator(".hb-toggle-row")
+                .filter({ hasText: toggleHelp.disableAssisted.title })
+                .getByText("Experimental", { exact: true })
+                .isVisible(),
+        ).toBe(true);
+
+        const name = page.getByRole("textbox", { name: "Session name", exact: true });
+        await name.fill(" Ticket 4821");
+        const nameError = page.getByText(
+            "Use no leading or trailing whitespace, control characters, or double quotes.",
+            { exact: true },
+        );
+        await nameError.waitFor();
+        expect(await name.getAttribute("aria-invalid")).toBe("true");
+        await name.fill("Ticket 4821");
+        await nameError.waitFor({ state: "hidden" });
+        await expect.poll(async () => (await savedPlan(page)).session.name).toBe("Ticket 4821");
+
+        await visit(page, /^Models & identity\b/);
+        await page
+            .getByRole("textbox", { name: "Allowed models", exact: true })
+            .fill("gpt-5.5\nclaude-sonnet-5");
+        await expect
+            .poll(async () => (await savedPlan(page)).model.allowedModels)
+            .toEqual(["gpt-5.5", "claude-sonnet-5"]);
+
+        await visit(page, /^Tools\b/);
+        const imageRow = page.locator(".hb-toggle-row").filter({ hasText: toggleHelp.imageGeneration.title });
+        expect(await imageRow.getByText("Experimental", { exact: true }).isVisible()).toBe(true);
+        const image = page.getByRole("switch", { name: toggleHelp.imageGeneration.title, exact: true });
+        await image.focus();
+        await page.keyboard.press("Space");
+        await expect.poll(async () => (await savedPlan(page)).capabilities.imageGeneration).toBe(true);
+        await page.getByText("Not available with a custom provider", { exact: true }).waitFor();
+        await inspectHelp(page, toggleHelp.imageGeneration.title, "When on");
+
+        await visit(page, /^Agents\b/);
+        const agentHooks = page.getByRole("textbox", { name: "Agent-scoped hooks (JSON)", exact: true });
+        await agentHooks.fill('{ "preToolUse": 3 }');
+        const hookError = page.getByText('Hook event "preToolUse" must map to an array of action objects.', {
+            exact: true,
+        });
+        await hookError.waitFor();
+        expect(await agentHooks.getAttribute("aria-invalid")).toBe("true");
+        await agentHooks.fill('{ "preToolUse": [ { "type": "command" } ] }');
+        await hookError.waitFor({ state: "hidden" });
+        await expect
+            .poll(async () => (await savedPlan(page)).agents[0]?.hooks)
+            .toBe('{ "preToolUse": [ { "type": "command" } ] }');
+
+        await visit(page, /^Context & packs\b/);
+        const provider = page
+            .locator(".hb-toggle-row")
+            .filter({ hasText: "Serve skills from a host provider" });
+        expect(await provider.getByText("Experimental", { exact: true }).isVisible()).toBe(true);
+        expect(await page.getByText("Coming soon", { exact: true }).count()).toBe(0);
     });
 });
