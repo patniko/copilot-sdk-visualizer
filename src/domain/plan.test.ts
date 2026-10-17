@@ -322,6 +322,26 @@ describe("plan schema v3", () => {
         );
     });
 
+    it("renames v2 custom tools that collide with newly added built-ins, including references", () => {
+        const plan = createPreset("minimal");
+        plan.customTools = [
+            createCustomTool("image", "image_generation"),
+            createCustomTool("taken", "image_generation_custom"),
+            createCustomTool("legacy", "run_factory"),
+        ];
+        plan.agents = [{ ...createAgent("agent"), tools: ["image_generation", "run_factory"] }];
+        plan.rootExcludedTools = ["image_generation"];
+        const migrated = parsePlan(JSON.stringify(v2(plan)));
+        expect(migrated.customTools.map((tool) => tool.name)).toEqual([
+            "image_generation_custom2",
+            "image_generation_custom",
+            "run_factory",
+        ]);
+        expect(migrated.agents[0]?.tools).toEqual(["image_generation_custom2", "run_factory"]);
+        expect(migrated.rootExcludedTools).toEqual(["image_generation_custom2"]);
+        expect(migrated.tools.image_generation.action).toBe("remove");
+    });
+
     it("validates new cross-field rules", () => {
         const plan = createPreset("minimal");
         const paths = (value: HarnessPlan) => planIssues(value).map((issue) => issue.path);

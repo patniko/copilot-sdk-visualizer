@@ -717,15 +717,35 @@ function migrateToV3(input: unknown): unknown {
             } else migratedTools[name] = setting;
         }
     }
+    // Custom tools named after built-ins added since v2 (for example image_generation)
+    // were valid then but are reserved now; rename them so the draft still imports.
+    const customNames = Array.isArray(plan.customTools)
+        ? plan.customTools.flatMap((tool) => {
+              const name = record(tool)?.name;
+              return typeof name === "string" ? [name] : [];
+          })
+        : [];
+    const taken = new Set<string>([...BUILTIN_NAMES, "catalog_search", "tool_search_tool", ...customNames]);
+    const customRenames = new Map<string, string>();
+    for (const name of customNames) {
+        if (!(BUILTIN_NAMES as readonly string[]).includes(name) || customRenames.has(name)) continue;
+        let suffix = "_custom";
+        for (let index = 2; taken.has(`${name.slice(0, 64 - suffix.length)}${suffix}`); index++)
+            suffix = `_custom${index}`;
+        const replacement = `${name.slice(0, 64 - suffix.length)}${suffix}`;
+        taken.add(replacement);
+        customRenames.set(name, replacement);
+    }
     const rename = (names: unknown) =>
         Array.isArray(names)
-            ? names.flatMap((name) =>
-                  typeof name === "string" && name in RETIRED_TOOL_NAMES
-                      ? RETIRED_TOOL_NAMES[name]
-                          ? [RETIRED_TOOL_NAMES[name]]
-                          : []
-                      : [name],
-              )
+            ? names.flatMap((name) => {
+                  if (typeof name !== "string") return [name];
+                  const custom = customRenames.get(name);
+                  if (custom) return [custom];
+                  if (customNames.includes(name) || !(name in RETIRED_TOOL_NAMES)) return [name];
+                  const replacement = RETIRED_TOOL_NAMES[name];
+                  return replacement ? [replacement] : [];
+              })
             : names;
     return {
         ...plan,
@@ -734,7 +754,17 @@ function migrateToV3(input: unknown): unknown {
         excludedBuiltinAgents: plan.excludedBuiltinAgents ?? defaults.excludedBuiltinAgents,
         rootExcludedTools: rename(plan.rootExcludedTools),
         customTools: Array.isArray(plan.customTools)
-            ? plan.customTools.map((tool) => ({ defer: "default", skipPermission: false, ...record(tool) }))
+            ? plan.customTools.map((tool) => {
+                  const value = record(tool);
+                  const name = value?.name;
+                  const renamed = typeof name === "string" ? customRenames.get(name) : undefined;
+                  return {
+                      defer: "default",
+                      skipPermission: false,
+                      ...value,
+                      ...(renamed ? { name: renamed } : {}),
+                  };
+              })
             : plan.customTools,
         agents: Array.isArray(plan.agents)
             ? plan.agents.map((agent) => {
